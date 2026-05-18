@@ -167,6 +167,66 @@ export default function NotaServis() {
                 Kirim WA
               </button>
             )}
+            <a
+              href={`/nota/${id}/penerimaan`}
+              target="_blank"
+              style={{
+                padding: '10px 24px',
+                background: '#64748b',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                cursor: 'pointer',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                textDecoration: 'none'
+              }}
+            >
+              <i className="bi bi-file-earmark-text" />
+              Nota Terima
+            </a>
+            <a
+              href={`/nota/${id}/garansi`}
+              target="_blank"
+              style={{
+                padding: '10px 24px',
+                background: '#8b5cf6',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                cursor: 'pointer',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                textDecoration: 'none'
+              }}
+            >
+              <i className="bi bi-shield-check" />
+              Garansi
+            </a>
+            <a
+              href={`/nota/${id}/label`}
+              target="_blank"
+              style={{
+                padding: '10px 24px',
+                background: '#06b6d4',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                cursor: 'pointer',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                textDecoration: 'none'
+              }}
+            >
+              <i className="bi bi-upc" />
+              Label
+            </a>
             <button
               onClick={handlePrint}
               style={{
