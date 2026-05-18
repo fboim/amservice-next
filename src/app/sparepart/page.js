@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import AppLayout from '@/components/AppLayout'
 
 export default function Sparepart() {
   const router = useRouter()
@@ -39,14 +40,17 @@ export default function Sparepart() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a' }}>
-        <div className="spinner" style={{ width: 40, height: 40 }} />
-      </div>
+      <AppLayout>
+        <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="spinner" style={{ width: 40, height: 40 }} />
+        </div>
+      </AppLayout>
     )
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0f172a', padding: '1.5rem' }}>
+    <AppLayout>
+    <div style={{ minHeight: '100vh', padding: '0' }}>
       {/* Header */}
       <div className="pg-header">
         <div>
@@ -165,5 +169,6 @@ export default function Sparepart() {
         </Link>
       </div>
     </div>
+    </AppLayout>
   )
 }

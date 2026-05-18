@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import AppLayout from '@/components/AppLayout'
 
 function StatCard({ icon, label, value, color, bg }) {
   return (
@@ -102,53 +103,20 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div className="spinner" style={{ width: 40, height: 40, margin: '0 auto 1rem' }} />
-          <p style={{ color: '#64748b' }}>Memuat...</p>
+      <AppLayout>
+        <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div className="spinner" style={{ width: 40, height: 40, margin: '0 auto 1rem' }} />
+            <p style={{ color: '#64748b' }}>Memuat...</p>
+          </div>
         </div>
-      </div>
+      </AppLayout>
     )
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0f172a', padding: '1.5rem' }}>
-      {/* Header */}
-      <div style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem'
-      }}>
-        <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f1f5f9', margin: 0 }}>
-            Dashboard
-          </h1>
-          <p style={{ fontSize: '.875rem', color: '#64748b', margin: '4px 0 0' }}>
-            {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <Link href="/servis/tambah" style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            padding: '10px 20px', borderRadius: 999,
-            background: '#3b82f6', color: '#fff',
-            fontWeight: 600, fontSize: '.875rem', textDecoration: 'none',
-            boxShadow: '0 2px 10px rgba(59,130,246,.25)'
-          }}>
-            <i className="bi bi-plus-circle" />
-            Servis Baru
-          </Link>
-          <button onClick={handleLogout} style={{
-            padding: '10px 16px', borderRadius: 8,
-            background: '#334155', color: '#94a3b8',
-            border: 'none', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: 6
-          }}>
-            <i className="bi bi-box-arrow-right" />
-            Logout
-          </button>
-        </div>
-      </div>
-
+    <AppLayout>
+    <div style={{ minHeight: '100vh', padding: '0' }}>
       {/* Stats Cards */}
       <div style={{
         display: 'grid',
@@ -287,5 +255,6 @@ export default function Dashboard() {
         </Link>
       </div>
     </div>
+    </AppLayout>
   )
 }

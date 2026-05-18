@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import AppLayout from '@/components/AppLayout'
 
 export default function TambahServis() {
   const router = useRouter()
@@ -128,7 +129,8 @@ export default function TambahServis() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0f172a', padding: '1.5rem' }}>
+    <AppLayout>
+    <div style={{ minHeight: '100vh', padding: '0' }}>
       <div style={{ maxWidth: 800, margin: '0 auto' }}>
         {/* Header */}
         <div className="pg-header" style={{ marginBottom: '1.5rem' }}>
@@ -415,5 +417,6 @@ export default function TambahServis() {
         </form>
       </div>
     </div>
+    </AppLayout>
   )
 }

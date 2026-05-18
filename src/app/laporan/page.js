@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import AppLayout from '@/components/AppLayout'
 
 export default function Laporan() {
   const router = useRouter()
@@ -85,14 +86,17 @@ export default function Laporan() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a' }}>
-        <div className="spinner" style={{ width: 40, height: 40 }} />
-      </div>
+      <AppLayout>
+        <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="spinner" style={{ width: 40, height: 40 }} />
+        </div>
+      </AppLayout>
     )
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0f172a', padding: '1.5rem' }}>
+    <AppLayout>
+    <div style={{ minHeight: '100vh', padding: '0' }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         {/* Header */}
         <div className="pg-header">
@@ -354,5 +358,6 @@ export default function Laporan() {
         </div>
       </div>
     </div>
+    </AppLayout>
   )
 }
