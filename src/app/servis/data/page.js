@@ -51,7 +51,8 @@ export default function DataServis() {
   }
 
   const formatRupiah = (str) => {
-    const num = parseInt((str || '0').replace(/\D/g, ''))
+    if (!str) return 'Rp 0'
+    const num = parseInt(String(str).replace(/\D/g, ''))
     return 'Rp ' + num.toLocaleString('id-ID')
   }
 
