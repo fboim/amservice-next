@@ -12,6 +12,7 @@ export default function NotaServis() {
   const [loading, setLoading] = useState(true)
   const [servis, setServis] = useState(null)
   const [sparepart, setSparepart] = useState([])
+  const [downloading, setDownloading] = useState(false)
 
   useEffect(() => {
     fetchServis()
@@ -87,6 +88,61 @@ export default function NotaServis() {
       }
     } catch (err) {
       alert('Gagal mengirim: ' + err.message)
+    }
+  }
+
+  const loadHtml2Canvas = async () => {
+    if (window.html2canvas) return window.html2canvas
+    return new Promise((resolve) => {
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js'
+      script.onload = () => resolve(window.html2canvas)
+      document.head.appendChild(script)
+    })
+  }
+
+  const loadJsPDF = async () => {
+    if (window.jspdf) return window.jspdf
+    return new Promise((resolve) => {
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js'
+      script.onload = () => resolve(window.jspdf)
+      document.head.appendChild(script)
+    })
+  }
+
+  const handleDownloadPDF = async () => {
+    if (!servis || downloading) return
+    setDownloading(true)
+
+    try {
+      const html2canvas = await loadHtml2Canvas()
+      const { jsPDF } = await loadJsPDF()
+      const content = document.getElementById('nota-content')
+      const canvas = await html2canvas(content, { scale: 2, useCORS: true })
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF('p', 'mm', 'a4')
+      const pageWidth = pdf.internal.pageSize.getWidth()
+      const pageHeight = pdf.internal.pageSize.getHeight()
+      const imgWidth = canvas.width
+      const imgHeight = canvas.height
+      const ratio = pageWidth / imgWidth * 2
+      const scaledHeight = imgHeight * ratio
+      let heightLeft = scaledHeight
+      let position = 0
+      pdf.addImage(imgData, 'PNG', 0, position, pageWidth, scaledHeight)
+      heightLeft -= pageHeight
+      while (heightLeft > 0) {
+        position = heightLeft - scaledHeight
+        pdf.addPage()
+        pdf.addImage(imgData, 'PNG', 0, position, pageWidth, scaledHeight)
+        heightLeft -= pageHeight
+      }
+      pdf.save(`NOTA-${servis.no_servis}.pdf`)
+    } catch (err) {
+      alert('Gagal download PDF: ' + err.message)
+    } finally {
+      setDownloading(false)
     }
   }
 
@@ -227,6 +283,26 @@ export default function NotaServis() {
               <i className="bi bi-upc" />
               Label
             </a>
+            <button
+              onClick={handleDownloadPDF}
+              disabled={downloading}
+              style={{
+                padding: '10px 24px',
+                background: '#059669',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                cursor: downloading ? 'wait' : 'pointer',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                opacity: downloading ? 0.7 : 1
+              }}
+            >
+              <i className="bi bi-file-earmark-pdf" />
+              {downloading ? 'Memproses...' : 'Download PDF'}
+            </button>
             <button
               onClick={handlePrint}
               style={{

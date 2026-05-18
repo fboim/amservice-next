@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 
 export default function LabelServis() {
   const router = useRouter()
   const params = useParams()
   const id = params.id
+  const barcodeRef = useRef(null)
 
   const [loading, setLoading] = useState(true)
   const [servis, setServis] = useState(null)
@@ -37,11 +38,32 @@ export default function LabelServis() {
     })
   }
 
+  // Generate barcode using JsBarcode
   useEffect(() => {
-    if (!loading && servis) {
-      window.print()
+    if (!loading && servis && barcodeRef.current) {
+      loadJsBarcode().then(() => {
+        if (barcodeRef.current && servis.no_servis) {
+          JsBarcode(barcodeRef.current, servis.no_servis, {
+            format: 'CODE128',
+            width: 1.5,
+            height: 40,
+            displayValue: false,
+            margin: 0
+          })
+        }
+      })
     }
   }, [loading, servis])
+
+  const loadJsBarcode = async () => {
+    if (window.JsBarcode) return
+    return new Promise((resolve) => {
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js'
+      script.onload = resolve
+      document.head.appendChild(script)
+    })
+  }
 
   if (loading) {
     return (
@@ -58,7 +80,8 @@ export default function LabelServis() {
       <style>{`
         @media print {
           @page { size: 80mm 40mm; margin: 0; }
-          body { margin: 0; padding: 0; font-size: 10px; }
+          body { margin: 0; padding: 0; }
+          .no-print { display: none !important; }
         }
       `}</style>
 
@@ -97,15 +120,15 @@ export default function LabelServis() {
         </table>
 
         <div style={{ textAlign: 'center', marginTop: '8px' }}>
-          <svg id="barcode-{id}"></svg>
-        </div>
-
-        <div style={{ textAlign: 'center', marginTop: '4px', fontSize: '9px' }}>
-          {servis.no_servis}
+          <svg ref={barcodeRef}></svg>
         </div>
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: '20px' }}>
+      <div style={{ textAlign: 'center', marginTop: '20px' }} className="no-print">
+        <button onClick={() => window.print()} style={{ padding: '8px 16px' }}>
+          Cetak Label
+        </button>
+        {' '}
         <button onClick={() => window.close()} style={{ padding: '8px 16px' }}>
           Tutup
         </button>

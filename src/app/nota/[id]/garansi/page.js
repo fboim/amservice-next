@@ -47,11 +47,7 @@ export default function GaransiServis() {
     })
   }
 
-  useEffect(() => {
-    if (!loading && servis) {
-      window.print()
-    }
-  }, [loading, servis])
+  // Removed auto print - user can click print button
 
   if (loading) {
     return (
@@ -69,6 +65,7 @@ export default function GaransiServis() {
         @media print {
           @page { size: A5; margin: 10mm; }
           body { background: white; }
+          .no-print { display: none !important; }
         }
       `}</style>
 
@@ -161,7 +158,18 @@ export default function GaransiServis() {
           </ul>
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+        <div style={{ textAlign: 'center', marginTop: '20px' }} className="no-print">
+          <button onClick={() => window.print()} style={{
+            padding: '8px 24px',
+            background: '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            marginRight: '10px'
+          }}>
+            Cetak
+          </button>
           <button onClick={() => window.close()} style={{
             padding: '8px 24px',
             background: '#334155',

@@ -44,11 +44,7 @@ export default function NotaPenerimaan() {
     return 'Rp ' + num.toLocaleString('id-ID')
   }
 
-  useEffect(() => {
-    if (!loading && servis) {
-      window.print()
-    }
-  }, [loading, servis])
+  // Removed auto print - user can click print button
 
   if (loading) {
     return (
@@ -66,6 +62,7 @@ export default function NotaPenerimaan() {
         @media print {
           @page { size: 80mm auto; margin: 0; }
           body { font-size: 11px; }
+          .no-print { display: none !important; }
         }
       `}</style>
 
@@ -133,7 +130,18 @@ export default function NotaPenerimaan() {
         </div>
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: '20px' }}>
+      <div style={{ textAlign: 'center', marginTop: '20px' }} className="no-print">
+        <button onClick={() => window.print()} style={{
+          padding: '8px 24px',
+          background: '#3b82f6',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          marginRight: '10px'
+        }}>
+          Cetak
+        </button>
         <button onClick={() => window.close()} style={{
           padding: '8px 24px',
           background: '#334155',
