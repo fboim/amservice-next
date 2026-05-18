@@ -78,7 +78,8 @@ export default function Dashboard() {
   }
 
   const formatRupiah = (num) => {
-    return 'Rp ' + num.toLocaleString('id-ID', { minimumFractionDigits: 0 })
+    if (num === undefined || num === null) return 'Rp 0'
+    return 'Rp ' + Number(num).toLocaleString('id-ID', { minimumFractionDigits: 0 })
   }
 
   const getBadgeClass = (status) => {

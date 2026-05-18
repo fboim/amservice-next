@@ -6,12 +6,6 @@ const supabaseAdmin = createClient(
 )
 
 export async function GET(request) {
-  // Check auth header
-  const authHeader = request.headers.get('authorization')
-  if (!authHeader) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
   try {
     const today = new Date().toISOString().split('T')[0]
 
