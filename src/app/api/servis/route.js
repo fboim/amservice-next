@@ -7,6 +7,23 @@ const supabaseAdmin = createClient(
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url)
+  const id = searchParams.get('id')
+
+  // Get single servis by ID
+  if (id) {
+    const { data, error } = await supabaseAdmin
+      .from('servis')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (error) {
+      return Response.json({ error: error.message }, { status: 404 })
+    }
+    return Response.json({ servis: data })
+  }
+
+  // List servis with pagination
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '12')
   const search = searchParams.get('search') || ''
@@ -19,7 +36,6 @@ export async function GET(request) {
     .select('*', { count: 'exact' })
     .order('id', { ascending: false })
 
-  // Apply filters
   query = query.is('deleted_at', null)
 
   if (search) {
@@ -48,7 +64,6 @@ export async function POST(request) {
   try {
     const body = await request.json()
 
-    // Generate no_servis
     const bulanIni = new Date().toISOString().slice(2, 8).replace('-', '')
     const prefix = `AM-${bulanIni}-`
 
@@ -85,6 +100,55 @@ export async function POST(request) {
     return Response.json({ success: true, servis: data })
   } catch (error) {
     console.error('Create servis error:', error)
+    return Response.json({ error: error.message }, { status: 500 })
+  }
+}
+
+export async function PUT(request) {
+  try {
+    const body = await request.json()
+    const { id, ...updateData } = body
+
+    if (!id) {
+      return Response.json({ error: 'ID diperlukan' }, { status: 400 })
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('servis')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) throw error
+
+    return Response.json({ success: true, servis: data })
+  } catch (error) {
+    console.error('Update servis error:', error)
+    return Response.json({ error: error.message }, { status: 500 })
+  }
+}
+
+export async function DELETE(request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return Response.json({ error: 'ID diperlukan' }, { status: 400 })
+    }
+
+    // Soft delete
+    const { error } = await supabaseAdmin
+      .from('servis')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id)
+
+    if (error) throw error
+
+    return Response.json({ success: true })
+  } catch (error) {
+    console.error('Delete servis error:', error)
     return Response.json({ error: error.message }, { status: 500 })
   }
 }

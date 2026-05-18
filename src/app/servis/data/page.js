@@ -141,6 +141,13 @@ export default function DataServis() {
                     <td style={{ fontWeight: 600 }}>{formatRupiah(s.estimasi_biaya)}</td>
                     <td>
                       <div style={{ display: 'flex', gap: 6 }}>
+                        <Link href={`/nota/${s.id}`} style={{
+                          padding: '4px 8px', borderRadius: 5,
+                          background: 'transparent', border: '1px solid #10b981',
+                          color: '#10b981', fontSize: '.7rem', textDecoration: 'none'
+                        }}>
+                          <i className="bi bi-receipt" />
+                        </Link>
                         <Link href={`/servis/edit/${s.id}`} style={{
                           padding: '4px 8px', borderRadius: 5,
                           background: 'transparent', border: '1px solid #3b82f6',
