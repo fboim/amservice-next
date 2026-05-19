@@ -128,46 +128,12 @@ export default function Home() {
         </>
       )}
 
-      {/* Theme Toggle Button */}
-      <button
-        onClick={toggleTheme}
-        className="theme-toggle"
-        style={{
-          position: 'fixed',
-          top: 20,
-          right: 20,
-          zIndex: 100,
-          width: 44,
-          height: 44,
-          borderRadius: '50%',
-          background: darkMode ? 'rgba(255,255,255,.1)' : 'rgba(0,0,0,.1)',
-          border: darkMode ? '1px solid rgba(255,255,255,.1)' : '1px solid rgba(0,0,0,.1)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          transition: 'all 0.3s ease',
-          color: darkMode ? '#fbbf24' : '#1e293b',
-        }}
-      >
-        {darkMode ? (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-          </svg>
-        ) : (
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-          </svg>
-        )}
-      </button>
-
       {/* Floating WhatsApp Button */}
       <a
         href="https://wa.me/6285647227779?text=Halo%20AM%20Service%2C%20saya%20ingin%20konsultasi%20servis%20HP"
         target="_blank"
         rel="noopener noreferrer"
         className="wa-float-btn"
-        title="Konsultasi Fast Respon"
         style={{
           position: 'fixed',
           bottom: 24,
@@ -295,7 +261,7 @@ export default function Home() {
           <div className="cek-servis-inline-card">
             <div style={{
               display: 'flex', alignItems: 'center', gap: 12,
-              marginBottom: searchResult ? 0 : '1rem'
+              marginBottom: '1rem'
             }}>
               <div style={{
                 width: 40, height: 40, borderRadius: 10,
@@ -316,60 +282,28 @@ export default function Home() {
               </h3>
             </div>
 
-            {/* Search Form - Always visible */}
+            {/* Search Form */}
             <form onSubmit={handleCekServis} style={{
-              display: 'flex', gap: '0.5rem',
-              marginBottom: searchResult ? '1rem' : 0
+              display: 'flex', gap: '0.5rem', flexWrap: 'wrap'
             }}>
               <input
                 type="text"
-                placeholder="Ketik nomor nota..."
+                placeholder="Ketik nomor servis..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                style={{
-                  flex: 1,
-                  padding: '10px 14px',
-                  background: 'rgba(255,255,255,.05)',
-                  border: '1px solid rgba(255,255,255,.1)',
-                  borderRadius: 10,
-                  color: '#fff',
-                  fontSize: '.85rem',
-                  outline: 'none'
-                }}
+                className="cek-servis-input"
               />
               <button
                 type="submit"
-                style={{
-                  padding: '10px 16px',
-                  background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
-                  border: 'none',
-                  borderRadius: 10,
-                  color: '#fff',
-                  fontWeight: 600,
-                  fontSize: '.85rem',
-                  cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', gap: 6
-                }}
+                className="cek-servis-btn-primary"
+                disabled={searching}
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8"/>
-                  <path d="m21 21-4.35-4.35"/>
-                </svg>
-                Cari
+                {searching ? '...' : 'Cari'}
               </button>
               <button
                 type="button"
                 onClick={startScan}
-                style={{
-                  padding: '10px 14px',
-                  background: 'rgba(16,185,129,.15)',
-                  border: '1px solid rgba(16,185,129,.3)',
-                  borderRadius: 10,
-                  color: '#10b981',
-                  cursor: 'pointer',
-                  display: 'flex', alignItems: 'center',
-                  flexShrink: 0
-                }}
+                className="cek-servis-btn-qr"
                 title="Scan QR Code"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -383,16 +317,7 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={clearSearch}
-                  style={{
-                    padding: '10px 12px',
-                    background: 'rgba(239,68,68,.15)',
-                    border: '1px solid rgba(239,68,68,.3)',
-                    borderRadius: 10,
-                    color: '#ef4444',
-                    cursor: 'pointer',
-                    display: 'flex', alignItems: 'center',
-                    flexShrink: 0
-                  }}
+                  className="cek-servis-btn-clear"
                   title="Clear"
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -445,20 +370,32 @@ export default function Home() {
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: '.8rem' }}>
                       <div>
-                        <span style={{ color: '#64748b' }}>Nota</span>
-                        <p style={{ margin: '2px 0 0', color: '#fff', fontWeight: 600 }}>{searchResult.no_nota}</p>
+                        <span style={{ color: '#64748b' }}>No Servis</span>
+                        <p style={{ margin: '2px 0 0', color: '#fff', fontWeight: 600 }}>{searchResult.no_servis || '-'}</p>
                       </div>
                       <div>
-                        <span style={{ color: '#64748b' }}>Pelanggan</span>
+                        <span style={{ color: '#64748b' }}>Tanggal</span>
+                        <p style={{ margin: '2px 0 0', color: '#e2e8f0' }}>{searchResult.tanggal ? new Date(searchResult.tanggal).toLocaleDateString('id-ID') : '-'}</p>
+                      </div>
+                      <div>
+                        <span style={{ color: '#64748b' }}>Nama</span>
                         <p style={{ margin: '2px 0 0', color: '#e2e8f0' }}>{searchResult.nama_pelanggan || '-'}</p>
                       </div>
                       <div>
-                        <span style={{ color: '#64748b' }}>Tipe HP</span>
-                        <p style={{ margin: '2px 0 0', color: '#e2e8f0' }}>{searchResult.tipe_hp || '-'}</p>
+                        <span style={{ color: '#64748b' }}>No HP</span>
+                        <p style={{ margin: '2px 0 0', color: '#e2e8f0' }}>{searchResult.no_hp || '-'}</p>
                       </div>
                       <div>
-                        <span style={{ color: '#64748b' }}>Kerusakan</span>
-                        <p style={{ margin: '2px 0 0', color: '#e2e8f0' }}>{searchResult.kerusakan || '-'}</p>
+                        <span style={{ color: '#64748b' }}>Merk HP</span>
+                        <p style={{ margin: '2px 0 0', color: '#e2e8f0' }}>{searchResult.merk_hp || '-'}</p>
+                      </div>
+                      <div>
+                        <span style={{ color: '#64748b' }}>Estimasi</span>
+                        <p style={{ margin: '2px 0 0', color: '#e2e8f0' }}>{searchResult.estimasi_biaya ? `Rp ${Number(searchResult.estimasi_biaya).toLocaleString('id-ID')}` : '-'}</p>
+                      </div>
+                      <div style={{ gridColumn: '1 / -1' }}>
+                        <span style={{ color: '#64748b' }}>Keluhan</span>
+                        <p style={{ margin: '2px 0 0', color: '#e2e8f0' }}>{searchResult.keluhan || '-'}</p>
                       </div>
                     </div>
                   </div>
@@ -945,9 +882,82 @@ export default function Home() {
           transition: all 0.3s ease;
         }
 
-        .cek-servis-inline-card:focus-within {
-          border-color: rgba(59,130,246,.3);
+        .cek-servis-input {
+          flex: 1;
+          min-width: 0;
+          padding: 10px 14px;
+          background: rgba(255,255,255,.05);
+          border: 1px solid rgba(255,255,255,.1);
+          border-radius: 10px;
+          color: #fff;
+          font-size: .85rem;
+          outline: none;
+          transition: all 0.2s;
+        }
+
+        .cek-servis-input:focus {
+          border-color: rgba(59,130,246,.5);
           box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+        }
+
+        .cek-servis-btn-primary {
+          padding: 10px 16px;
+          background: linear-gradient(135deg, #3b82f6, #6366f1);
+          border: none;
+          border-radius: 10px;
+          color: #fff;
+          font-weight: 600;
+          font-size: .85rem;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          transition: all 0.2s;
+          flex-shrink: 0;
+        }
+
+        .cek-servis-btn-primary:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(59,130,246,.3);
+        }
+
+        .cek-servis-btn-primary:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
+        .cek-servis-btn-qr {
+          padding: 10px 14px;
+          background: rgba(16,185,129,.15);
+          border: 1px solid rgba(16,185,129,.3);
+          border-radius: 10px;
+          color: #10b981;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          flex-shrink: 0;
+          transition: all 0.2s;
+        }
+
+        .cek-servis-btn-qr:hover {
+          background: rgba(16,185,129,.25);
+        }
+
+        .cek-servis-btn-clear {
+          padding: 10px 12px;
+          background: rgba(239,68,68,.15);
+          border: 1px solid rgba(239,68,68,.3);
+          border-radius: 10px;
+          color: #ef4444;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          flex-shrink: 0;
+          transition: all 0.2s;
+        }
+
+        .cek-servis-btn-clear:hover {
+          background: rgba(239,68,68,.25);
         }
 
         /* Mobile Responsive */
@@ -958,7 +968,12 @@ export default function Home() {
           .cek-servis-inline-card form {
             flex-direction: column;
           }
-          .cek-servis-inline-card form button {
+          .cek-servis-input {
+            width: 100%;
+          }
+          .cek-servis-btn-primary,
+          .cek-servis-btn-qr,
+          .cek-servis-btn-clear {
             width: 100%;
             justify-content: center;
           }
