@@ -99,6 +99,18 @@ CREATE TABLE servis (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Pelanggan table
+CREATE TABLE pelanggan (
+    id SERIAL PRIMARY KEY,
+    nama_pelanggan VARCHAR(200) NOT NULL,
+    no_hp VARCHAR(20) UNIQUE NOT NULL,
+    alamat TEXT,
+    email VARCHAR(100),
+    catatan TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Sparepart table
 CREATE TABLE sparepart (
     id SERIAL PRIMARY KEY,
@@ -130,6 +142,7 @@ ALTER TABLE pengaturan ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all" ON servis FOR ALL USING (true);
 CREATE POLICY "Allow all" ON admin FOR ALL USING (true);
 CREATE POLICY "Allow all" ON sparepart FOR ALL USING (true);
+CREATE POLICY "Allow all" ON pelanggan FOR ALL USING (true);
 CREATE POLICY "Allow all" ON pengaturan FOR ALL USING (true);
 ```
 

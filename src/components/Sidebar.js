@@ -12,9 +12,10 @@ export default function Sidebar() {
     { href: '/dashboard', icon: 'bi-grid-1x2', label: 'Dashboard' },
     { href: '/servis/data', icon: 'bi-list-check', label: 'Data Servis' },
     { href: '/servis/tambah', icon: 'bi-plus-circle', label: 'Servis Baru' },
+    { href: '/pelanggan', icon: 'bi-people', label: 'Pelanggan' },
     { href: '/sparepart', icon: 'bi-box-seam', label: 'Sparepart' },
     { href: '/laporan', icon: 'bi-graph-up', label: 'Laporan' },
-    { href: '/user', icon: 'bi-people', label: 'Manajemen User' },
+    { href: '/user', icon: 'bi-shield', label: 'Manajemen User' },
     { href: '/pengaturan', icon: 'bi-gear', label: 'Pengaturan' },
   ]
 
