@@ -698,7 +698,7 @@ export default function Home() {
         {/* Footer */}
         <div style={{
           marginTop: 'auto',
-          paddingTop: '2.5rem',
+          paddingTop: '0.75rem',
           textAlign: 'center',
           animation: loaded ? 'fadeInUp 0.8s .55s ease-out both' : 'none',
           opacity: loaded ? 1 : 0
