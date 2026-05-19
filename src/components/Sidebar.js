@@ -20,7 +20,7 @@ const adminMenuItems = [
   { href: '/pengaturan', icon: 'bi-gear-fill', label: 'Pengaturan Toko' },
 ]
 
-export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }) {
+export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose, onMobileOpen }) {
   const pathname = usePathname()
   const [user, setUser] = useState(null)
   const [theme, setTheme] = useState('dark')
@@ -52,6 +52,13 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    if (mobileOpen && onMobileClose) {
+      onMobileClose()
+    }
+  }, [pathname])
 
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark'
@@ -97,12 +104,20 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
 
   const isAdmin = user?.role?.toLowerCase() === 'admin'
 
+  const toggleMobileSidebar = () => {
+    if (mobileOpen) {
+      onMobileClose?.()
+    } else {
+      onMobileOpen?.()
+    }
+  }
+
   return (
     <>
       {/* Mobile Topbar */}
       <div className="am-mobile-topbar">
         <button
-          onClick={onMobileClose}
+          onClick={toggleMobileSidebar}
           style={{
             position: 'relative',
             background: 'transparent',
@@ -118,7 +133,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
             height: '42px',
           }}
         >
-          <i className="bi bi-list" style={{ fontSize: '1.5rem', lineHeight: 1 }} />
+          <i className={`bi ${mobileOpen ? 'bi-x-lg' : 'bi-list'}`} style={{ fontSize: '1.5rem', lineHeight: 1 }} />
         </button>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, justifyContent: 'center' }}>

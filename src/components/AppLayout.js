@@ -71,6 +71,7 @@ export default function AppLayout({ children }) {
         onToggle={() => {}}
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
+        onMobileOpen={() => setMobileOpen(true)}
       />
 
       {/* Main Content Area - matches PHP .am-main class */}
