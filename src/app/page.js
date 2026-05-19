@@ -73,6 +73,14 @@ export default function Home() {
     setSearchInput('')
     setSearchResult(null)
     setShowCekServis(false)
+    setIsSearchingMode(true)
+  }
+
+  const [isSearchingMode, setIsSearchingMode] = useState(true)
+
+  const startScan = () => {
+    // For now, show instruction - actual QR scanning would need a library
+    alert('Fitur scan QR dalam pengembangan. Silakan ketik nomor nota manual.')
   }
 
   const fetchTestimonials = async () => {
@@ -282,9 +290,10 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Action Cards - Single Card */}
+        {/* Action Cards - Single Card - Centered */}
         <div style={{
-          width: '100%', maxWidth: 400,
+          width: '100%', maxWidth: 500,
+          display: 'flex', justifyContent: 'center',
           animation: loaded ? 'fadeInUp 0.8s .15s ease-out both' : 'none',
           opacity: loaded ? 1 : 0
         }}>
@@ -315,7 +324,7 @@ export default function Home() {
                 <p style={{
                   fontSize: '.78rem', color: '#64748b', margin: 0
                 }}>
-                  Masukkan nomor nota atau scan QR code
+                  Ketik nomor nota atau scan QR code
                 </p>
               </div>
             </div>
@@ -325,7 +334,7 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Cek Servis Modal */}
+        {/* Cek Servis Modal - Show Results Only */}
         {showCekServis && (
           <div style={{
             position: 'fixed', inset: 0, zIndex: 1000,
@@ -335,7 +344,7 @@ export default function Home() {
           }} onClick={resetCekServis}>
             <div style={{
               background: '#1e293b', borderRadius: 20,
-              padding: '2rem', width: '100%', maxWidth: 420
+              padding: '2rem', width: '100%', maxWidth: 440
             }} onClick={(e) => e.stopPropagation()}>
               <div style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -359,70 +368,133 @@ export default function Home() {
                 </button>
               </div>
 
+              {/* Search Form */}
               <form onSubmit={handleCekServis}>
                 <input
                   type="text"
                   className="am-input"
-                  placeholder="Masukkan nomor nota..."
+                  placeholder="Ketik nomor nota..."
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  style={{ marginBottom: '1rem' }}
+                  style={{ marginBottom: '0.75rem' }}
                 />
-                <button
-                  type="submit"
-                  className="am-btn am-btn-primary"
-                  style={{ width: '100%' }}
-                  disabled={searching}
-                >
-                  {searching ? 'Mencari...' : 'Cari'}
-                </button>
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <button
+                    type="submit"
+                    className="am-btn am-btn-primary"
+                    style={{ flex: 1 }}
+                    disabled={searching}
+                  >
+                    {searching ? '...' : 'Cari'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={startScan}
+                    className="am-btn"
+                    style={{
+                      background: 'rgba(16,185,129,.15)',
+                      color: '#10b981',
+                      border: '1px solid rgba(16,185,129,.3)'
+                    }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="3" width="7" height="7"/>
+                      <rect x="14" y="3" width="7" height="7"/>
+                      <rect x="14" y="14" width="7" height="7"/>
+                      <rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+                  </button>
+                </div>
               </form>
 
+              {/* Results Only */}
               {searchResult && (
                 <div style={{
-                  marginTop: '1.5rem', padding: '1rem',
+                  marginTop: '1.5rem',
                   background: searchResult.not_found || searchResult.error
                     ? 'rgba(239,68,68,.1)'
                     : 'rgba(16,185,129,.1)',
-                  borderRadius: 12, border: `1px solid ${searchResult.not_found || searchResult.error ? 'rgba(239,68,68,.3)' : 'rgba(16,185,129,.3)'}`
+                  borderRadius: 16, padding: '1.25rem',
+                  border: `1px solid ${searchResult.not_found || searchResult.error ? 'rgba(239,68,68,.3)' : 'rgba(16,185,129,.3)'}`
                 }}>
                   {searchResult.not_found ? (
-                    <p style={{ color: '#ef4444', margin: 0, textAlign: 'center' }}>
-                      Nota tidak ditemukan. Pastikan nomor nota benar.
-                    </p>
+                    <div style={{ textAlign: 'center' }}>
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="1.5" style={{ margin: '0 auto 1rem' }}>
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="15" y1="9" x2="9" y2="15"/>
+                        <line x1="9" y1="9" x2="15" y2="15"/>
+                      </svg>
+                      <p style={{ color: '#ef4444', margin: 0, fontSize: '.9rem' }}>
+                        Nota tidak ditemukan
+                      </p>
+                      <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: '.75rem' }}>
+                        Pastikan nomor nota benar
+                      </p>
+                    </div>
                   ) : searchResult.error ? (
-                    <p style={{ color: '#ef4444', margin: 0, textAlign: 'center' }}>
-                      Terjadi kesalahan. Coba lagi nanti.
-                    </p>
+                    <div style={{ textAlign: 'center' }}>
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="1.5" style={{ margin: '0 auto 1rem' }}>
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                      </svg>
+                      <p style={{ color: '#ef4444', margin: 0, fontSize: '.9rem' }}>
+                        Terjadi kesalahan
+                      </p>
+                    </div>
                   ) : (
                     <div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                        <span style={{ color: '#94a3b8', fontSize: '.8rem' }}>Nota</span>
-                        <span style={{ color: '#fff', fontWeight: 600 }}>{searchResult.no_nota}</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                        <span style={{ color: '#94a3b8', fontSize: '.8rem' }}>Pelanggan</span>
-                        <span style={{ color: '#fff' }}>{searchResult.nama_pelanggan || 'N/A'}</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                        <span style={{ color: '#94a3b8', fontSize: '.8rem' }}>Tipe</span>
-                        <span style={{ color: '#fff' }}>{searchResult.tipe_hp || 'N/A'}</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                        <span style={{ color: '#94a3b8', fontSize: '.8rem' }}>Kerusakan</span>
-                        <span style={{ color: '#fff' }}>{searchResult.kerusakan || 'N/A'}</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ color: '#94a3b8', fontSize: '.8rem' }}>Status</span>
-                        <span style={{
-                          padding: '4px 12px', borderRadius: 999,
-                          fontSize: '.75rem', fontWeight: 600,
+                      <div style={{
+                        textAlign: 'center', marginBottom: '1rem',
+                        paddingBottom: '1rem',
+                        borderBottom: '1px solid rgba(255,255,255,.1)'
+                      }}>
+                        <div style={{
+                          width: 64, height: 64, borderRadius: '50%',
                           background: searchResult.status === 'SELESAI'
-                            ? 'rgba(16,185,129,.2)' : 'rgba(245,158,11,.2)',
+                            ? 'rgba(16,185,129,.2)'
+                            : 'rgba(245,158,11,.2)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          margin: '0 auto 0.75rem'
+                        }}>
+                          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={searchResult.status === 'SELESAI' ? '#10b981' : '#f59e0b'} strokeWidth="2">
+                            {searchResult.status === 'SELESAI' ? (
+                              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-3"/>
+                            ) : (
+                              <>
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                              </>
+                            )}
+                          </svg>
+                        </div>
+                        <span style={{
+                          padding: '6px 16px', borderRadius: 999,
+                          fontSize: '.85rem', fontWeight: 700,
+                          background: searchResult.status === 'SELESAI'
+                            ? 'rgba(16,185,129,.2)'
+                            : 'rgba(245,158,11,.2)',
                           color: searchResult.status === 'SELESAI' ? '#10b981' : '#f59e0b'
                         }}>
                           {searchResult.status || 'DIPROSES'}
                         </span>
+                      </div>
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                        <span style={{ color: '#94a3b8', fontSize: '.8rem' }}>Nota</span>
+                        <span style={{ color: '#fff', fontWeight: 700, fontSize: '.9rem' }}>{searchResult.no_nota}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                        <span style={{ color: '#94a3b8', fontSize: '.8rem' }}>Pelanggan</span>
+                        <span style={{ color: '#e2e8f0' }}>{searchResult.nama_pelanggan || 'N/A'}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                        <span style={{ color: '#94a3b8', fontSize: '.8rem' }}>Tipe HP</span>
+                        <span style={{ color: '#e2e8f0' }}>{searchResult.tipe_hp || 'N/A'}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <span style={{ color: '#94a3b8', fontSize: '.8rem' }}>Kerusakan</span>
+                        <span style={{ color: '#e2e8f0', textAlign: 'right', maxWidth: '60%' }}>{searchResult.kerusakan || 'N/A'}</span>
                       </div>
                     </div>
                   )}
@@ -801,6 +873,9 @@ export default function Home() {
           padding: 1rem;
           text-align: center;
           transition: all 0.3s ease;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
         }
 
         .service-card:hover {
