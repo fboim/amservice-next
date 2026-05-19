@@ -357,31 +357,31 @@ export default function Home() {
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       marginBottom: '1rem', gap: 10
                     }}>
-                      <div style={{
-                        width: 48, height: 48, borderRadius: '50%',
-                        background: searchResult.status === 'SELESAI'
-                          ? 'rgba(16,185,129,.2)'
-                          : 'rgba(245,158,11,.2)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center'
-                      }}>
-                        {searchResult.status === 'SELESAI' ? (
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5">
-                            <polyline points="20 6 9 17 4 12"/>
-                          </svg>
-                        ) : (
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <polyline points="12 6 12 12 16 14"/>
-                          </svg>
-                        )}
-                      </div>
                       <span style={{
                         padding: '6px 16px', borderRadius: 999,
                         fontSize: '.85rem', fontWeight: 700,
-                        background: searchResult.status === 'SELESAI'
-                          ? 'rgba(16,185,129,.2)'
-                          : 'rgba(245,158,11,.2)',
-                        color: searchResult.status === 'SELESAI' ? '#10b981' : '#f59e0b'
+                        background: searchResult.status === 'TIDAK BISA'
+                          ? 'rgba(239,68,68,.2)'
+                          : searchResult.status === 'ANTRIAN'
+                          ? 'rgba(148,163,184,.2)'
+                          : searchResult.status === 'DIPROSES'
+                          ? 'rgba(245,158,11,.2)'
+                          : searchResult.status === 'SIAP DIAMBIL'
+                          ? 'rgba(59,130,246,.2)'
+                          : searchResult.status === 'SUDAH DIAMBIL'
+                          ? 'rgba(234,179,8,.2)'
+                          : 'rgba(148,163,184,.2)',
+                        color: searchResult.status === 'TIDAK BISA'
+                          ? '#ef4444'
+                          : searchResult.status === 'ANTRIAN'
+                          ? '#94a3b8'
+                          : searchResult.status === 'DIPROSES'
+                          ? '#f59e0b'
+                          : searchResult.status === 'SIAP DIAMBIL'
+                          ? '#3b82f6'
+                          : searchResult.status === 'SUDAH DIAMBIL'
+                          ? '#eab308'
+                          : '#94a3b8'
                       }}>
                         {searchResult.status || 'DIPROSES'}
                       </span>
