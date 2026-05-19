@@ -4,7 +4,6 @@ export const dynamic = 'force-dynamic'
 import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import AppLayout from '@/components/AppLayout'
 import { formatRupiah } from '@/lib/utils'
 
 function DataServisContent() {
@@ -125,19 +124,17 @@ function DataServisContent() {
 
   if (loading) {
     return (
-      <AppLayout>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-          <div style={{ textAlign: 'center', color: 'var(--am-text-muted)' }}>
-            <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
-            <p style={{ marginTop: '8px' }}>Memuat data servis...</p>
-          </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <div style={{ textAlign: 'center', color: 'var(--am-text-muted)' }}>
+          <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
+          <p style={{ marginTop: '8px' }}>Memuat data servis...</p>
         </div>
-      </AppLayout>
+      </div>
     )
   }
 
   return (
-    <AppLayout>
+    <>
       {/* Page Header */}
       <div className="pg-header">
         <div>
@@ -605,21 +602,19 @@ function DataServisContent() {
           });
         `
       }} />
-    </AppLayout>
+    </>
   )
 }
 
 export default function DataServis() {
   return (
     <Suspense fallback={
-      <AppLayout>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-          <div style={{ textAlign: 'center', color: 'var(--am-text-muted)' }}>
-            <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
-            <p style={{ marginTop: '8px' }}>Memuat...</p>
-          </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+        <div style={{ textAlign: 'center', color: 'var(--am-text-muted)' }}>
+          <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
+          <p style={{ marginTop: '8px' }}>Memuat...</p>
         </div>
-      </AppLayout>
+      </div>
     }>
       <DataServisContent />
     </Suspense>

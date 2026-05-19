@@ -1,5 +1,7 @@
-// Servis routes layout - provides consistent AppLayout wrapper
-// This ensures Sidebar persists across servis sub-routes
+'use client'
+
+import AppLayout from '@/components/AppLayout'
+
 export default function ServisLayout({ children }) {
-  return children
+  return <AppLayout>{children}</AppLayout>
 }
