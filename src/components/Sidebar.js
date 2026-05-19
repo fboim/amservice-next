@@ -14,6 +14,7 @@ export default function Sidebar() {
     { href: '/servis/tambah', icon: 'bi-plus-circle', label: 'Servis Baru' },
     { href: '/sparepart', icon: 'bi-box-seam', label: 'Sparepart' },
     { href: '/laporan', icon: 'bi-graph-up', label: 'Laporan' },
+    { href: '/user', icon: 'bi-people', label: 'Manajemen User' },
     { href: '/pengaturan', icon: 'bi-gear', label: 'Pengaturan' },
   ]
 
