@@ -370,10 +370,6 @@ export default function Home() {
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: '.8rem' }}>
                       <div>
-                        <span style={{ color: '#64748b' }}>No Servis</span>
-                        <p style={{ margin: '2px 0 0', color: '#fff', fontWeight: 600 }}>{searchResult.no_servis || '-'}</p>
-                      </div>
-                      <div>
                         <span style={{ color: '#64748b' }}>Tanggal</span>
                         <p style={{ margin: '2px 0 0', color: '#e2e8f0' }}>{searchResult.tanggal ? new Date(searchResult.tanggal).toLocaleDateString('id-ID') : '-'}</p>
                       </div>
