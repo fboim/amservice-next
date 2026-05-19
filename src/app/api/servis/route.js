@@ -8,6 +8,7 @@ const supabaseAdmin = createClient(
 export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
+  const noServis = searchParams.get('no_servis')
 
   // Get single servis by ID
   if (id) {
@@ -20,7 +21,24 @@ export async function GET(request) {
     if (error) {
       return Response.json({ error: error.message }, { status: 404 })
     }
-    return Response.json({ servis: data })
+    return Response.json(data)
+  }
+
+  // Search by no_servis for cek servis
+  if (noServis) {
+    const { data, error } = await supabaseAdmin
+      .from('servis')
+      .select('*')
+      .ilike('no_servis', `%${noServis}%`)
+      .is('deleted_at', null)
+      .limit(1)
+      .single()
+
+    if (error) {
+      // If not found, return empty (not an error)
+      return Response.json({ not_found: true })
+    }
+    return Response.json(data)
   }
 
   // List servis with pagination

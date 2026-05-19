@@ -53,11 +53,12 @@ export default function Home() {
     if (!searchInput.trim()) return
 
     setSearching(true)
+    setSearchResult(null)
     try {
-      const res = await fetch(`/api/servis?search=${encodeURIComponent(searchInput)}`)
+      const res = await fetch(`/api/servis?no_servis=${encodeURIComponent(searchInput)}`)
       const data = await res.json()
-      if (Array.isArray(data) && data.length > 0) {
-        setSearchResult(data[0])
+      if (data && (data.no_servis || data.not_found)) {
+        setSearchResult(data)
       } else {
         setSearchResult({ not_found: true })
       }
@@ -71,6 +72,11 @@ export default function Home() {
   const startScan = () => {
     // For now, show instruction - actual QR scanning would need a library
     alert('Fitur scan QR dalam pengembangan. Silakan ketik nomor nota manual.')
+  }
+
+  const clearSearch = () => {
+    setSearchInput('')
+    setSearchResult(null)
   }
 
   const fetchTestimonials = async () => {
@@ -361,7 +367,8 @@ export default function Home() {
                   borderRadius: 10,
                   color: '#10b981',
                   cursor: 'pointer',
-                  display: 'flex', alignItems: 'center'
+                  display: 'flex', alignItems: 'center',
+                  flexShrink: 0
                 }}
                 title="Scan QR Code"
               >
@@ -372,6 +379,27 @@ export default function Home() {
                   <rect x="3" y="14" width="7" height="7"/>
                 </svg>
               </button>
+              {searchInput && (
+                <button
+                  type="button"
+                  onClick={clearSearch}
+                  style={{
+                    padding: '10px 12px',
+                    background: 'rgba(239,68,68,.15)',
+                    border: '1px solid rgba(239,68,68,.3)',
+                    borderRadius: 10,
+                    color: '#ef4444',
+                    cursor: 'pointer',
+                    display: 'flex', alignItems: 'center',
+                    flexShrink: 0
+                  }}
+                  title="Clear"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              )}
             </form>
 
             {/* Results - Show only when has result */}
@@ -402,7 +430,7 @@ export default function Home() {
                   <div>
                     <div style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      marginBottom: '0.75rem'
+                      marginBottom: '0.75rem', gap: 8
                     }}>
                       <span style={{
                         padding: '4px 14px', borderRadius: 999,
@@ -920,6 +948,20 @@ export default function Home() {
         .cek-servis-inline-card:focus-within {
           border-color: rgba(59,130,246,.3);
           box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 480px) {
+          .cek-servis-inline-card {
+            padding: 1rem;
+          }
+          .cek-servis-inline-card form {
+            flex-direction: column;
+          }
+          .cek-servis-inline-card form button {
+            width: 100%;
+            justify-content: center;
+          }
         }
 
         /* Map container */
