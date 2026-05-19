@@ -13,6 +13,7 @@ export default function Sidebar() {
     { href: '/servis/data', icon: 'bi-list-check', label: 'Data Servis' },
     { href: '/servis/tambah', icon: 'bi-plus-circle', label: 'Servis Baru' },
     { href: '/pelanggan', icon: 'bi-people', label: 'Pelanggan' },
+    { href: '/trash', icon: 'bi-trash3', label: 'Riwayat' },
     { href: '/sparepart', icon: 'bi-box-seam', label: 'Sparepart' },
     { href: '/laporan', icon: 'bi-graph-up', label: 'Laporan' },
     { href: '/user', icon: 'bi-shield', label: 'Manajemen User' },
