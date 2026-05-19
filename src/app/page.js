@@ -26,7 +26,6 @@ const fallbackTestimonials = [
 export default function Home() {
   const [loaded, setLoaded] = useState(false)
   const [darkMode, setDarkMode] = useState(true)
-  const [showCekServis, setShowCekServis] = useState(false)
   const [testimonials, setTestimonials] = useState(fallbackTestimonials)
   const [searchInput, setSearchInput] = useState('')
   const [searchResult, setSearchResult] = useState(null)
@@ -68,15 +67,6 @@ export default function Home() {
       setSearching(false)
     }
   }
-
-  const resetCekServis = () => {
-    setSearchInput('')
-    setSearchResult(null)
-    setShowCekServis(false)
-    setIsSearchingMode(true)
-  }
-
-  const [isSearchingMode, setIsSearchingMode] = useState(true)
 
   const startScan = () => {
     // For now, show instruction - actual QR scanning would need a library
@@ -290,219 +280,165 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Action Cards - Single Card - Centered */}
+        {/* Cek Status Servis - Inline Card */}
         <div style={{
           width: '100%', maxWidth: 500,
-          display: 'flex', justifyContent: 'center',
           animation: loaded ? 'fadeInUp 0.8s .15s ease-out both' : 'none',
           opacity: loaded ? 1 : 0
         }}>
-          <button
-            onClick={() => setShowCekServis(true)}
-            className="cek-servis-card"
-          >
+          <div className="cek-servis-inline-card">
             <div style={{
-              display: 'flex', alignItems: 'center', gap: 16
+              display: 'flex', alignItems: 'center', gap: 12,
+              marginBottom: searchResult ? 0 : '1rem'
             }}>
               <div style={{
-                width: 48, height: 48, borderRadius: 14,
+                width: 40, height: 40, borderRadius: 10,
                 background: 'rgba(59,130,246,.15)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0
               }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8"/>
                   <path d="m21 21-4.35-4.35"/>
                 </svg>
               </div>
-              <div>
-                <h3 style={{
-                  fontSize: '.95rem', fontWeight: 700,
-                  color: '#e2e8f0', margin: '0 0 4px'
-                }}>
-                  Cek Status Servis
-                </h3>
-                <p style={{
-                  fontSize: '.78rem', color: '#64748b', margin: 0
-                }}>
-                  Ketik nomor nota atau scan QR code
-                </p>
-              </div>
-            </div>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </button>
-        </div>
-
-        {/* Cek Servis Modal - Show Results Only */}
-        {showCekServis && (
-          <div style={{
-            position: 'fixed', inset: 0, zIndex: 1000,
-            background: 'rgba(0,0,0,.8)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '1rem'
-          }} onClick={resetCekServis}>
-            <div style={{
-              background: '#1e293b', borderRadius: 20,
-              padding: '2rem', width: '100%', maxWidth: 440
-            }} onClick={(e) => e.stopPropagation()}>
-              <div style={{
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                marginBottom: '1.5rem'
+              <h3 style={{
+                fontSize: '.9rem', fontWeight: 700,
+                color: '#e2e8f0', margin: 0
               }}>
-                <h3 style={{ margin: 0, color: '#fff', fontSize: '1.1rem' }}>
-                  Cek Status Servis
-                </h3>
-                <button
-                  onClick={resetCekServis}
-                  style={{
-                    background: 'rgba(255,255,255,.1)', border: 'none',
-                    borderRadius: '50%', width: 32, height: 32,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer', color: '#94a3b8'
-                  }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                  </svg>
-                </button>
-              </div>
-
-              {/* Search Form */}
-              <form onSubmit={handleCekServis}>
-                <input
-                  type="text"
-                  className="am-input"
-                  placeholder="Ketik nomor nota..."
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  style={{ marginBottom: '0.75rem' }}
-                />
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                  <button
-                    type="submit"
-                    className="am-btn am-btn-primary"
-                    style={{ flex: 1 }}
-                    disabled={searching}
-                  >
-                    {searching ? '...' : 'Cari'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={startScan}
-                    className="am-btn"
-                    style={{
-                      background: 'rgba(16,185,129,.15)',
-                      color: '#10b981',
-                      border: '1px solid rgba(16,185,129,.3)'
-                    }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="3" y="3" width="7" height="7"/>
-                      <rect x="14" y="3" width="7" height="7"/>
-                      <rect x="14" y="14" width="7" height="7"/>
-                      <rect x="3" y="14" width="7" height="7"/>
-                    </svg>
-                  </button>
-                </div>
-              </form>
-
-              {/* Results Only */}
-              {searchResult && (
-                <div style={{
-                  marginTop: '1.5rem',
-                  background: searchResult.not_found || searchResult.error
-                    ? 'rgba(239,68,68,.1)'
-                    : 'rgba(16,185,129,.1)',
-                  borderRadius: 16, padding: '1.25rem',
-                  border: `1px solid ${searchResult.not_found || searchResult.error ? 'rgba(239,68,68,.3)' : 'rgba(16,185,129,.3)'}`
-                }}>
-                  {searchResult.not_found ? (
-                    <div style={{ textAlign: 'center' }}>
-                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="1.5" style={{ margin: '0 auto 1rem' }}>
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="15" y1="9" x2="9" y2="15"/>
-                        <line x1="9" y1="9" x2="15" y2="15"/>
-                      </svg>
-                      <p style={{ color: '#ef4444', margin: 0, fontSize: '.9rem' }}>
-                        Nota tidak ditemukan
-                      </p>
-                      <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: '.75rem' }}>
-                        Pastikan nomor nota benar
-                      </p>
-                    </div>
-                  ) : searchResult.error ? (
-                    <div style={{ textAlign: 'center' }}>
-                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="1.5" style={{ margin: '0 auto 1rem' }}>
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="8" x2="12" y2="12"/>
-                        <line x1="12" y1="16" x2="12.01" y2="16"/>
-                      </svg>
-                      <p style={{ color: '#ef4444', margin: 0, fontSize: '.9rem' }}>
-                        Terjadi kesalahan
-                      </p>
-                    </div>
-                  ) : (
-                    <div>
-                      <div style={{
-                        textAlign: 'center', marginBottom: '1rem',
-                        paddingBottom: '1rem',
-                        borderBottom: '1px solid rgba(255,255,255,.1)'
-                      }}>
-                        <div style={{
-                          width: 64, height: 64, borderRadius: '50%',
-                          background: searchResult.status === 'SELESAI'
-                            ? 'rgba(16,185,129,.2)'
-                            : 'rgba(245,158,11,.2)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          margin: '0 auto 0.75rem'
-                        }}>
-                          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={searchResult.status === 'SELESAI' ? '#10b981' : '#f59e0b'} strokeWidth="2">
-                            {searchResult.status === 'SELESAI' ? (
-                              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14M22 4L12 14.01l-3-3"/>
-                            ) : (
-                              <>
-                                <circle cx="12" cy="12" r="10"/>
-                                <polyline points="12 6 12 12 16 14"/>
-                              </>
-                            )}
-                          </svg>
-                        </div>
-                        <span style={{
-                          padding: '6px 16px', borderRadius: 999,
-                          fontSize: '.85rem', fontWeight: 700,
-                          background: searchResult.status === 'SELESAI'
-                            ? 'rgba(16,185,129,.2)'
-                            : 'rgba(245,158,11,.2)',
-                          color: searchResult.status === 'SELESAI' ? '#10b981' : '#f59e0b'
-                        }}>
-                          {searchResult.status || 'DIPROSES'}
-                        </span>
-                      </div>
-
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                        <span style={{ color: '#94a3b8', fontSize: '.8rem' }}>Nota</span>
-                        <span style={{ color: '#fff', fontWeight: 700, fontSize: '.9rem' }}>{searchResult.no_nota}</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                        <span style={{ color: '#94a3b8', fontSize: '.8rem' }}>Pelanggan</span>
-                        <span style={{ color: '#e2e8f0' }}>{searchResult.nama_pelanggan || 'N/A'}</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                        <span style={{ color: '#94a3b8', fontSize: '.8rem' }}>Tipe HP</span>
-                        <span style={{ color: '#e2e8f0' }}>{searchResult.tipe_hp || 'N/A'}</span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <span style={{ color: '#94a3b8', fontSize: '.8rem' }}>Kerusakan</span>
-                        <span style={{ color: '#e2e8f0', textAlign: 'right', maxWidth: '60%' }}>{searchResult.kerusakan || 'N/A'}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                Cek Status Servis
+              </h3>
             </div>
+
+            {/* Search Form - Always visible */}
+            <form onSubmit={handleCekServis} style={{
+              display: 'flex', gap: '0.5rem',
+              marginBottom: searchResult ? '1rem' : 0
+            }}>
+              <input
+                type="text"
+                placeholder="Ketik nomor nota..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                style={{
+                  flex: 1,
+                  padding: '10px 14px',
+                  background: 'rgba(255,255,255,.05)',
+                  border: '1px solid rgba(255,255,255,.1)',
+                  borderRadius: 10,
+                  color: '#fff',
+                  fontSize: '.85rem',
+                  outline: 'none'
+                }}
+              />
+              <button
+                type="submit"
+                style={{
+                  padding: '10px 16px',
+                  background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
+                  border: 'none',
+                  borderRadius: 10,
+                  color: '#fff',
+                  fontWeight: 600,
+                  fontSize: '.85rem',
+                  cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: 6
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="m21 21-4.35-4.35"/>
+                </svg>
+                Cari
+              </button>
+              <button
+                type="button"
+                onClick={startScan}
+                style={{
+                  padding: '10px 14px',
+                  background: 'rgba(16,185,129,.15)',
+                  border: '1px solid rgba(16,185,129,.3)',
+                  borderRadius: 10,
+                  color: '#10b981',
+                  cursor: 'pointer',
+                  display: 'flex', alignItems: 'center'
+                }}
+                title="Scan QR Code"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="7" height="7"/>
+                  <rect x="14" y="3" width="7" height="7"/>
+                  <rect x="14" y="14" width="7" height="7"/>
+                  <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+              </button>
+            </form>
+
+            {/* Results - Show only when has result */}
+            {searchResult && (
+              <div style={{
+                marginTop: '1rem',
+                padding: '1rem',
+                background: searchResult.not_found || searchResult.error
+                  ? 'rgba(239,68,68,.1)'
+                  : 'rgba(16,185,129,.1)',
+                borderRadius: 12,
+                border: `1px solid ${searchResult.not_found || searchResult.error ? 'rgba(239,68,68,.3)' : 'rgba(16,185,129,.3)'}`
+              }}>
+                {searchResult.not_found ? (
+                  <div style={{ textAlign: 'center' }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="1.5" style={{ margin: '0 auto 0.5rem' }}>
+                      <circle cx="12" cy="12" r="10"/>
+                      <line x1="15" y1="9" x2="9" y2="15"/>
+                      <line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                    <p style={{ color: '#ef4444', margin: 0, fontSize: '.85rem' }}>Nota tidak ditemukan</p>
+                  </div>
+                ) : searchResult.error ? (
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{ color: '#ef4444', margin: 0, fontSize: '.85rem' }}>Terjadi kesalahan</p>
+                  </div>
+                ) : (
+                  <div>
+                    <div style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      marginBottom: '0.75rem'
+                    }}>
+                      <span style={{
+                        padding: '4px 14px', borderRadius: 999,
+                        fontSize: '.78rem', fontWeight: 700,
+                        background: searchResult.status === 'SELESAI'
+                          ? 'rgba(16,185,129,.2)'
+                          : 'rgba(245,158,11,.2)',
+                        color: searchResult.status === 'SELESAI' ? '#10b981' : '#f59e0b'
+                      }}>
+                        {searchResult.status || 'DIPROSES'}
+                      </span>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: '.8rem' }}>
+                      <div>
+                        <span style={{ color: '#64748b' }}>Nota</span>
+                        <p style={{ margin: '2px 0 0', color: '#fff', fontWeight: 600 }}>{searchResult.no_nota}</p>
+                      </div>
+                      <div>
+                        <span style={{ color: '#64748b' }}>Pelanggan</span>
+                        <p style={{ margin: '2px 0 0', color: '#e2e8f0' }}>{searchResult.nama_pelanggan || '-'}</p>
+                      </div>
+                      <div>
+                        <span style={{ color: '#64748b' }}>Tipe HP</span>
+                        <p style={{ margin: '2px 0 0', color: '#e2e8f0' }}>{searchResult.tipe_hp || '-'}</p>
+                      </div>
+                      <div>
+                        <span style={{ color: '#64748b' }}>Kerusakan</span>
+                        <p style={{ margin: '2px 0 0', color: '#e2e8f0' }}>{searchResult.kerusakan || '-'}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        )}
+        </div>
 
         {/* Services Section */}
         <div style={{
@@ -972,23 +908,18 @@ export default function Home() {
           line-height: 1.5;
         }
 
-        /* Cek Servis Card */
-        .cek-servis-card {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 1.25rem 1.5rem;
+        /* Cek Servis Inline Card */
+        .cek-servis-inline-card {
           background: rgba(255,255,255,.04);
           border: 1px solid rgba(255,255,255,.08);
           border-radius: 16px;
-          text-decoration: none;
+          padding: 1.25rem;
           transition: all 0.3s ease;
         }
 
-        .cek-servis-card:hover {
-          background: rgba(59,130,246,.08);
-          border-color: rgba(59,130,246,.2);
-          transform: translateX(4px);
+        .cek-servis-inline-card:focus-within {
+          border-color: rgba(59,130,246,.3);
+          box-shadow: 0 0 0 3px rgba(59,130,246,.1);
         }
 
         /* Map container */
