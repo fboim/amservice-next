@@ -6,17 +6,31 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
 
-function StatCard({ icon, label, value, color, bgColor }) {
+function StatCard({ icon, label, value, color }) {
   return (
-    <div className="stat-card">
-      <div className="stat-icon" style={{ background: bgColor }}>
-        <i className={`bi ${icon}`} style={{ color }} />
+    <div className="scard">
+      <div className="scard-icon" style={{ background: `${color}15`, color }}>
+        <i className={`bi ${icon}`} />
       </div>
-      <div className="stat-info">
-        <span className="stat-label">{label}</span>
-        <span className="stat-value">{value}</span>
+      <div className="scard-info">
+        <span className="scard-label">{label}</span>
+        <span className="scard-value">{value}</span>
       </div>
-      <div className="stat-accent" style={{ background: color }} />
+    </div>
+  )
+}
+
+function RevenueCard({ label, value, icon, color, sub }) {
+  return (
+    <div className="rcard">
+      <div className="rcard-icon" style={{ background: `${color}15`, color }}>
+        <i className={`bi ${icon}`} />
+      </div>
+      <div className="rcard-info">
+        <span className="rcard-label">{label}</span>
+        <span className="rcard-value">{value}</span>
+        {sub && <span className="rcard-sub">{sub}</span>}
+      </div>
     </div>
   )
 }
@@ -25,9 +39,10 @@ export default function Dashboard() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState({
-    antrean: 0, proses: 0, siap: 0, selesai: 0, omzet_hari: 0
+    antrean: 0, proses: 0, siap: 0, selesai: 0, omzet_hari: 0, omzet_bulan: 0
   })
   const [servisTerbaru, setServisTerbaru] = useState([])
+  const [stokMenipis, setStokMenipis] = useState([])
   const [user, setUser] = useState(null)
 
   useEffect(() => {
@@ -52,9 +67,13 @@ export default function Dashboard() {
       const data = await res.json()
       setStats(data)
 
-      const servisRes = await fetch('/api/servis?limit=5')
+      const servisRes = await fetch('/api/servis?limit=8')
       const servisData = await servisRes.json()
       setServisTerbaru(servisData.servis || [])
+
+      const stokRes = await fetch('/api/sparepart?low=true')
+      const stokData = await stokRes.json()
+      setStokMenipis(stokData.sparepart || [])
     } catch (err) {
       console.error('Fetch error:', err)
     } finally {
@@ -69,21 +88,21 @@ export default function Dashboard() {
 
   const getBadgeClass = (status) => {
     const map = {
-      'Antrean': 'badge-antrean',
-      'Proses': 'badge-proses',
-      'Siap Diambil': 'badge-siap',
-      'Sudah Diambil': 'badge-selesai',
-      'Tidak Bisa': 'badge-gagal'
+      'Antrean': 'badge-queue',
+      'Proses': 'badge-proc',
+      'Siap Diambil': 'badge-ready',
+      'Sudah Diambil': 'badge-done',
+      'Tidak Bisa': 'badge-fail'
     }
-    return map[status] || 'badge-antrean'
+    return map[status] || 'badge-queue'
   }
 
   if (loading) {
     return (
       <AppLayout>
-        <div className="loading-state">
-          <div className="loading-spinner" />
-          <span>Memuat dashboard...</span>
+        <div className="loading-box">
+          <div className="spinner" />
+          <span>Memuat data...</span>
         </div>
       </AppLayout>
     )
@@ -92,77 +111,63 @@ export default function Dashboard() {
   return (
     <AppLayout>
       <div className="dashboard">
-        {/* Welcome Section */}
-        <div className="welcome-section">
-          <div className="welcome-content">
-            <h2>Selamat Datang, {user?.username || 'Admin'}</h2>
-            <p>Berikut ringkasan aktivitas servis hari ini</p>
+        {/* Header Row */}
+        <div className="dash-header">
+          <div>
+            <h2>Dashboard</h2>
+            <p>Selamat datang, {user?.username || 'Admin'}!</p>
           </div>
-          <div className="welcome-time">
-            <i className="bi bi-clock" />
-            {new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
-          </div>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="stats-grid">
-          <StatCard
-            icon="bi-clock-history"
-            label="Antrean"
-            value={stats.antrean}
-            color="#3b82f6"
-            bgColor="rgba(59,130,246,0.12)"
-          />
-          <StatCard
-            icon="bi-tools"
-            label="Dikerjakan"
-            value={stats.proses}
-            color="#f59e0b"
-            bgColor="rgba(245,158,11,0.12)"
-          />
-          <StatCard
-            icon="bi-bag-check"
-            label="Siap Diambil"
-            value={stats.siap}
-            color="#06b6d4"
-            bgColor="rgba(6,182,212,0.12)"
-          />
-          <StatCard
-            icon="bi-check-circle"
-            label="Selesai"
-            value={stats.selesai}
-            color="#10b981"
-            bgColor="rgba(16,185,129,0.12)"
-          />
-          <div className="stat-card stat-card-wide">
-            <div className="stat-icon" style={{ background: 'rgba(139,92,246,0.12)' }}>
-              <i className="bi bi-cash-stack" style={{ color: '#8b5cf6' }} />
-            </div>
-            <div className="stat-info">
-              <span className="stat-label">Omzet Hari Ini</span>
-              <span className="stat-value stat-value-money">{formatRupiah(stats.omzet_hari)}</span>
-            </div>
-            <div className="stat-accent" style={{ background: '#8b5cf6' }} />
+          <div className="dash-date">
+            <i className="bi bi-calendar3" />
+            {new Date().toLocaleDateString('id-ID', {
+              weekday: 'long', day: 'numeric', month: 'short', year: 'numeric'
+            })}
           </div>
         </div>
 
-        {/* Main Content */}
-        <div className="dashboard-content">
-          {/* Servis Terbaru */}
+        {/* Stats Row - 4 cards */}
+        <div className="dash-row-4">
+          <StatCard icon="bi-clock-history" label="Antrean" value={stats.antrean} color="#3b82f6" />
+          <StatCard icon="bi-tools" label="Dikerjakan" value={stats.proses} color="#f59e0b" />
+          <StatCard icon="bi-bag-check" label="Siap Diambil" value={stats.siap} color="#06b6d4" />
+          <StatCard icon="bi-check-circle" label="Selesai" value={stats.selesai} color="#10b981" />
+        </div>
+
+        {/* Revenue Row - 2 cards */}
+        <div className="dash-row-2">
+          <RevenueCard
+            icon="bi-cash-stack"
+            label="Omzet Hari Ini"
+            value={formatRupiah(stats.omzet_hari)}
+            color="#8b5cf6"
+            sub={`${stats.selesai || 0} servis`}
+          />
+          <RevenueCard
+            icon="bi-graph-up"
+            label="Omzet Bulan Ini"
+            value={formatRupiah(stats.omzet_bulan || 0)}
+            color="#ec4899"
+            sub={new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
+          />
+        </div>
+
+        {/* Main Content - Table + Sidebar */}
+        <div className="dash-row-tb">
+          {/* Servis Table */}
           <div className="section-card">
-            <div className="card-header">
-              <div className="card-title">
+            <div className="section-header">
+              <div className="section-title">
                 <i className="bi bi-list-ul" />
                 Servis Terbaru
               </div>
-              <Link href="/servis/data" className="card-link">
-                Lihat Semua <i className="bi bi-arrow-right" />
+              <Link href="/servis/data" className="section-link">
+                Lihat Semua <i className="bi bi-chevron-right" />
               </Link>
             </div>
-            <div className="card-body">
+            <div className="section-body">
               {servisTerbaru.length > 0 ? (
-                <div className="table-responsive">
-                  <table className="data-table">
+                <div className="table-wrap">
+                  <table className="am-table">
                     <thead>
                       <tr>
                         <th>No</th>
@@ -170,24 +175,31 @@ export default function Dashboard() {
                         <th>Pelanggan</th>
                         <th>Unit</th>
                         <th>Status</th>
+                        <th>Biaya</th>
                         <th>Aksi</th>
                       </tr>
                     </thead>
                     <tbody>
                       {servisTerbaru.map((s, i) => (
                         <tr key={s.id}>
-                          <td className="td-num">{i + 1}</td>
-                          <td className="td-servis">{s.no_servis}</td>
+                          <td className="txt-muted">{i + 1}</td>
+                          <td className="txt-code">{s.no_servis}</td>
                           <td>
-                            <div className="td-name">{s.nama_pelanggan}</div>
-                            <div className="td-phone">{s.no_hp || '-'}</div>
+                            <div className="fw-600">{s.nama_pelanggan}</div>
+                            <div className="txt-sm txt-muted">{s.no_hp || '-'}</div>
                           </td>
                           <td>{s.merk_hp} {s.tipe_hp}</td>
                           <td><span className={`badge ${getBadgeClass(s.status)}`}>{s.status}</span></td>
+                          <td className="fw-600">{s.estimasi_biaya ? `Rp ${Number(s.estimasi_biaya).toLocaleString('id-ID')}` : '-'}</td>
                           <td>
-                            <Link href={`/servis/data/${s.id}`} className="btn-action">
-                              <i className="bi bi-eye" />
-                            </Link>
+                            <div className="btn-group">
+                              <Link href={`/servis/data/${s.id}`} className="btn-act btn-act-blue" title="Detail">
+                                <i className="bi bi-eye" />
+                              </Link>
+                              <Link href={`/servis/edit/${s.id}`} className="btn-act btn-act-dark" title="Edit">
+                                <i className="bi bi-pencil" />
+                              </Link>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -195,7 +207,7 @@ export default function Dashboard() {
                   </table>
                 </div>
               ) : (
-                <div className="empty-state">
+                <div className="empty-box">
                   <i className="bi bi-inbox" />
                   <span>Belum ada data servis</span>
                 </div>
@@ -203,26 +215,52 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="quick-actions">
-            <Link href="/servis/data" className="action-card">
-              <div className="action-icon" style={{ background: 'rgba(59,130,246,0.12)' }}>
-                <i className="bi bi-list-check" style={{ color: '#3b82f6' }} />
+          {/* Sidebar - Stok Menipis */}
+          <div className="sidebar-card">
+            <div className="section-header">
+              <div className="section-title">
+                <i className="bi bi-exclamation-triangle" style={{ color: '#f59e0b' }} />
+                Stok Menipis
               </div>
-              <span>Data Servis</span>
-            </Link>
-            <Link href="/sparepart" className="action-card">
-              <div className="action-icon" style={{ background: 'rgba(16,185,129,0.12)' }}>
-                <i className="bi bi-box-seam" style={{ color: '#10b981' }} />
-              </div>
-              <span>Sparepart</span>
-            </Link>
-            <Link href="/laporan" className="action-card">
-              <div className="action-icon" style={{ background: 'rgba(139,92,246,0.12)' }}>
-                <i className="bi bi-graph-up" style={{ color: '#8b5cf6' }} />
-              </div>
-              <span>Laporan</span>
-            </Link>
+            </div>
+            <div className="section-body">
+              {stokMenipis.length > 0 ? (
+                <div className="stok-list">
+                  {stokMenipis.map((item) => (
+                    <div key={item.id} className="stok-item">
+                      <div className="stok-info">
+                        <span className="stok-nama">{item.nama}</span>
+                        <span className="stok-stok">{item.stok} unit</span>
+                      </div>
+                      <Link href="/sparepart" className="btn-act btn-act-dark btn-act-sm">
+                        <i className="bi bi-arrow-right" />
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-box empty-sm">
+                  <i className="bi bi-check-circle" style={{ color: '#10b981' }} />
+                  <span>Stok aman</span>
+                </div>
+              )}
+            </div>
+
+            {/* Quick Actions */}
+            <div className="quick-links">
+              <Link href="/servis/tambah" className="quick-btn">
+                <i className="bi bi-plus-circle" />
+                Servis Baru
+              </Link>
+              <Link href="/sparepart" className="quick-btn">
+                <i className="bi bi-box-seam" />
+                Sparepart
+              </Link>
+              <Link href="/laporan" className="quick-btn">
+                <i className="bi bi-graph-up" />
+                Laporan
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -231,78 +269,70 @@ export default function Dashboard() {
         .dashboard {
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
+          gap: 1.25rem;
         }
 
-        /* Welcome */
-        .welcome-section {
+        /* Header */
+        .dash-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          padding: 1.25rem 1.5rem;
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 16px;
+          flex-wrap: wrap;
+          gap: 1rem;
         }
 
-        .welcome-content h2 {
+        .dash-header h2 {
           margin: 0;
-          font-size: 1.1rem;
-          font-weight: 700;
-          color: #f1f5f9;
+          font-size: 1.25rem;
+          font-weight: 800;
+          color: var(--am-text);
         }
 
-        .welcome-content p {
+        .dash-header p {
           margin: 4px 0 0;
           font-size: .8rem;
-          color: #64748b;
+          color: var(--am-text-muted);
         }
 
-        .welcome-time {
+        .dash-date {
           display: flex;
           align-items: center;
           gap: .5rem;
-          padding: 8px 16px;
-          background: rgba(59,130,246,0.1);
-          border-radius: 999px;
-          font-size: .85rem;
-          font-weight: 600;
-          color: #60a5fa;
+          padding: 8px 14px;
+          background: var(--am-surface);
+          border: 1px solid var(--am-border);
+          border-radius: 8px;
+          font-size: .8rem;
+          color: var(--am-text-muted);
         }
 
-        /* Stats Grid */
-        .stats-grid {
+        /* Stats Row 4 */
+        .dash-row-4 {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 1rem;
         }
 
-        .stat-card {
-          background: rgba(15, 23, 42, 0.8);
-          border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 14px;
+        .scard {
+          background: var(--am-surface);
+          border: 1px solid var(--am-border);
+          border-radius: 12px;
           padding: 1.25rem;
           display: flex;
           align-items: center;
           gap: 1rem;
-          position: relative;
-          overflow: hidden;
-          transition: all 0.3s;
+          transition: all 0.2s;
         }
 
-        .stat-card:hover {
+        .scard:hover {
           transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+          box-shadow: 0 8px 25px rgba(0,0,0,0.2);
         }
 
-        .stat-card-wide {
-          grid-column: span 1;
-        }
-
-        .stat-icon {
+        .scard-icon {
           width: 48px;
           height: 48px;
-          border-radius: 12px;
+          border-radius: 10px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -310,236 +340,367 @@ export default function Dashboard() {
           flex-shrink: 0;
         }
 
-        .stat-info {
+        .scard-info {
           display: flex;
           flex-direction: column;
           gap: 2px;
         }
 
-        .stat-label {
+        .scard-label {
           font-size: .7rem;
-          font-weight: 700;
-          color: #64748b;
+          font-weight: 600;
+          color: var(--am-text-muted);
           text-transform: uppercase;
-          letter-spacing: .4px;
+          letter-spacing: .3px;
         }
 
-        .stat-value {
+        .scard-value {
           font-size: 1.5rem;
           font-weight: 800;
-          color: #f1f5f9;
+          color: var(--am-text);
           line-height: 1;
         }
 
-        .stat-value-money {
-          font-size: 1.25rem;
-        }
-
-        .stat-accent {
-          position: absolute;
-          left: 0;
-          top: 0;
-          bottom: 0;
-          width: 3px;
-        }
-
-        /* Content */
-        .dashboard-content {
+        /* Revenue Row 2 */
+        .dash-row-2 {
           display: grid;
-          grid-template-columns: 1fr auto;
-          gap: 1.5rem;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1rem;
         }
 
-        /* Section Card */
-        .section-card {
-          background: rgba(15, 23, 42, 0.8);
-          border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 16px;
-          overflow: hidden;
-        }
-
-        .card-header {
-          padding: 1rem 1.25rem;
-          border-bottom: 1px solid rgba(255,255,255,0.06);
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .card-title {
-          display: flex;
-          align-items: center;
-          gap: .5rem;
-          font-size: .9rem;
-          font-weight: 700;
-          color: #f1f5f9;
-        }
-
-        .card-title i {
-          color: #3b82f6;
-        }
-
-        .card-link {
-          display: flex;
-          align-items: center;
-          gap: .25rem;
-          font-size: .8rem;
-          color: #3b82f6;
-          text-decoration: none;
-          font-weight: 600;
-          transition: gap 0.2s;
-        }
-
-        .card-link:hover {
-          gap: .5rem;
-        }
-
-        .card-body {
-          padding: 0;
-        }
-
-        /* Table */
-        .table-responsive {
-          overflow-x: auto;
-        }
-
-        .data-table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-
-        .data-table th {
-          padding: 12px 16px;
-          text-align: left;
-          font-size: .7rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: .5px;
-          color: #64748b;
-          background: rgba(0,0,0,0.2);
-          border-bottom: 1px solid rgba(255,255,255,0.06);
-        }
-
-        .data-table td {
-          padding: 12px 16px;
-          border-bottom: 1px solid rgba(255,255,255,0.04);
-          font-size: .85rem;
-          color: #e2e8f0;
-        }
-
-        .data-table tr:hover td {
-          background: rgba(255,255,255,0.02);
-        }
-
-        .td-num {
-          color: #475569;
-          font-size: .75rem !important;
-        }
-
-        .td-servis {
-          font-family: monospace;
-          font-size: .8rem !important;
-          color: #64748b !important;
-        }
-
-        .td-name {
-          font-weight: 600;
-        }
-
-        .td-phone {
-          font-size: .7rem !important;
-          color: #64748b !important;
-          margin-top: 2px;
-        }
-
-        .btn-action {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 32px;
-          height: 32px;
-          background: rgba(59,130,246,0.12);
-          border-radius: 8px;
-          color: #3b82f6;
-          text-decoration: none;
-          transition: all 0.2s;
-        }
-
-        .btn-action:hover {
-          background: rgba(59,130,246,0.2);
-        }
-
-        /* Empty State */
-        .empty-state {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          padding: 3rem;
-          color: #475569;
-        }
-
-        .empty-state i {
-          font-size: 2.5rem;
-          margin-bottom: .5rem;
-          opacity: 0.3;
-        }
-
-        /* Quick Actions */
-        .quick-actions {
-          display: flex;
-          flex-direction: column;
-          gap: .75rem;
-          min-width: 160px;
-        }
-
-        .action-card {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: .5rem;
-          padding: 1.25rem;
-          background: rgba(15, 23, 42, 0.8);
-          border: 1px solid rgba(255,255,255,0.06);
+        .rcard {
+          background: var(--am-surface);
+          border: 1px solid var(--am-border);
           border-radius: 12px;
-          text-decoration: none;
-          color: #e2e8f0;
-          font-size: .8rem;
-          font-weight: 600;
+          padding: 1.25rem;
+          display: flex;
+          align-items: center;
+          gap: 1rem;
           transition: all 0.2s;
         }
 
-        .action-card:hover {
-          background: rgba(30,41,59,0.8);
+        .rcard:hover {
           transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(0,0,0,0.2);
         }
 
-        .action-icon {
-          width: 44px;
-          height: 44px;
+        .rcard-icon {
+          width: 48px;
+          height: 48px;
           border-radius: 10px;
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: 1.25rem;
+          flex-shrink: 0;
+        }
+
+        .rcard-info {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .rcard-label {
+          font-size: .7rem;
+          font-weight: 600;
+          color: var(--am-text-muted);
+          text-transform: uppercase;
+        }
+
+        .rcard-value {
+          font-size: 1.1rem;
+          font-weight: 800;
+          color: var(--am-text);
+          line-height: 1.2;
+        }
+
+        .rcard-sub {
+          font-size: .7rem;
+          color: var(--am-text-muted);
+        }
+
+        /* Main Content Row */
+        .dash-row-tb {
+          display: grid;
+          grid-template-columns: 1fr 280px;
+          gap: 1.25rem;
+        }
+
+        /* Section Card */
+        .section-card {
+          background: var(--am-surface);
+          border: 1px solid var(--am-border);
+          border-radius: 12px;
+          overflow: hidden;
+        }
+
+        .section-header {
+          padding: 1rem 1.25rem;
+          border-bottom: 1px solid var(--am-border);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+
+        .section-title {
+          display: flex;
+          align-items: center;
+          gap: .5rem;
+          font-size: .9rem;
+          font-weight: 700;
+          color: var(--am-text);
+        }
+
+        .section-title i {
+          color: var(--am-primary);
+        }
+
+        .section-link {
+          display: flex;
+          align-items: center;
+          gap: .25rem;
+          font-size: .8rem;
+          color: var(--am-primary);
+          text-decoration: none;
+          font-weight: 600;
+          transition: gap 0.2s;
+        }
+
+        .section-link:hover {
+          gap: .5rem;
+        }
+
+        .section-body {
+          padding: 0;
+        }
+
+        /* Table */
+        .table-wrap {
+          overflow-x: auto;
+        }
+
+        .am-table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+
+        .am-table th {
+          padding: 10px 14px;
+          text-align: left;
+          font-size: .7rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: .4px;
+          color: var(--am-text-muted);
+          background: var(--am-bg);
+          border-bottom: 1px solid var(--am-border);
+        }
+
+        .am-table td {
+          padding: 10px 14px;
+          border-bottom: 1px solid var(--am-border);
+          font-size: .85rem;
+          color: var(--am-text);
+        }
+
+        .am-table tr:hover td {
+          background: rgba(255,255,255,0.02);
+        }
+
+        .txt-muted { color: var(--am-text-muted); font-size: .75rem; }
+        .txt-code { font-family: monospace; font-size: .8rem !important; color: var(--am-text-muted) !important; }
+        .txt-sm { font-size: .7rem; }
+        .fw-600 { font-weight: 600; }
+
+        /* Badge */
+        .badge {
+          display: inline-flex;
+          padding: 4px 10px;
+          border-radius: 999px;
+          font-size: .7rem;
+          font-weight: 600;
+        }
+
+        .badge-queue { background: rgba(59,130,246,0.15); color: #3b82f6; }
+        .badge-proc { background: rgba(245,158,11,0.15); color: #f59e0b; }
+        .badge-ready { background: rgba(6,182,212,0.15); color: #06b6d4; }
+        .badge-done { background: rgba(16,185,129,0.15); color: #10b981; }
+        .badge-fail { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+        /* Button Group */
+        .btn-group {
+          display: flex;
+          gap: .5rem;
+        }
+
+        .btn-act {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 32px;
+          border-radius: 8px;
+          transition: all 0.2s;
+          text-decoration: none;
+        }
+
+        .btn-act-sm {
+          width: 28px;
+          height: 28px;
+          font-size: .75rem;
+        }
+
+        .btn-act-blue {
+          background: rgba(59,130,246,0.15);
+          color: #3b82f6;
+        }
+
+        .btn-act-blue:hover {
+          background: rgba(59,130,246,0.25);
+        }
+
+        .btn-act-dark {
+          background: var(--am-bg);
+          color: var(--am-text-muted);
+          border: 1px solid var(--am-border);
+        }
+
+        .btn-act-dark:hover {
+          background: var(--am-border);
+          color: var(--am-text);
+        }
+
+        .btn-act-red {
+          background: rgba(239,68,68,0.15);
+          color: #ef4444;
+        }
+
+        .btn-act-red:hover {
+          background: rgba(239,68,68,0.25);
+        }
+
+        /* Empty */
+        .empty-box {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 3rem;
+          color: var(--am-text-muted);
+          gap: .5rem;
+        }
+
+        .empty-box i {
+          font-size: 2rem;
+          opacity: 0.3;
+        }
+
+        .empty-sm {
+          padding: 2rem;
+        }
+
+        .empty-sm i {
+          font-size: 1.5rem;
+        }
+
+        /* Sidebar Card */
+        .sidebar-card {
+          background: var(--am-surface);
+          border: 1px solid var(--am-border);
+          border-radius: 12px;
+          display: flex;
+          flex-direction: column;
+        }
+
+        /* Stok List */
+        .stok-list {
+          padding: .75rem;
+          display: flex;
+          flex-direction: column;
+          gap: .5rem;
+        }
+
+        .stok-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: .75rem;
+          background: var(--am-bg);
+          border-radius: 8px;
+          border: 1px solid var(--am-border);
+        }
+
+        .stok-info {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .stok-nama {
+          font-size: .8rem;
+          font-weight: 600;
+          color: var(--am-text);
+        }
+
+        .stok-stok {
+          font-size: .7rem;
+          color: #f59e0b;
+          font-weight: 600;
+        }
+
+        /* Quick Links */
+        .quick-links {
+          padding: 1rem;
+          border-top: 1px solid var(--am-border);
+          display: flex;
+          flex-direction: column;
+          gap: .5rem;
+          margin-top: auto;
+        }
+
+        .quick-btn {
+          display: flex;
+          align-items: center;
+          gap: .75rem;
+          padding: .75rem 1rem;
+          background: var(--am-bg);
+          border: 1px solid var(--am-border);
+          border-radius: 8px;
+          color: var(--am-text);
+          text-decoration: none;
+          font-size: .85rem;
+          font-weight: 500;
+          transition: all 0.2s;
+        }
+
+        .quick-btn:hover {
+          background: var(--am-border);
+          border-color: var(--am-primary);
+          color: var(--am-primary);
+        }
+
+        .quick-btn i {
+          font-size: 1rem;
+          color: var(--am-primary);
         }
 
         /* Loading */
-        .loading-state {
+        .loading-box {
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           min-height: 60vh;
           gap: 1rem;
-          color: #64748b;
+          color: var(--am-text-muted);
         }
 
-        .loading-spinner {
+        .spinner {
           width: 40px;
           height: 40px;
-          border: 3px solid rgba(255,255,255,0.1);
-          border-top-color: #3b82f6;
+          border: 3px solid var(--am-border);
+          border-top-color: var(--am-primary);
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
         }
@@ -548,55 +709,35 @@ export default function Dashboard() {
           to { transform: rotate(360deg); }
         }
 
-        /* Badge */
-        .badge {
-          display: inline-flex;
-          align-items: center;
-          padding: 4px 10px;
-          border-radius: 999px;
-          font-size: .7rem;
-          font-weight: 600;
-        }
-
-        .badge-antrean { background: rgba(148,163,184,0.15); color: #94a3b8; }
-        .badge-proses { background: rgba(245,158,11,0.15); color: #f59e0b; }
-        .badge-siap { background: rgba(6,182,212,0.15); color: #06b6d4; }
-        .badge-selesai { background: rgba(16,185,129,0.15); color: #10b981; }
-        .badge-gagal { background: rgba(239,68,68,0.15); color: #ef4444; }
-
         /* Responsive */
         @media (max-width: 1200px) {
-          .stats-grid {
+          .dash-row-tb {
+            grid-template-columns: 1fr;
+          }
+
+          .sidebar-card {
+            order: -1;
+          }
+        }
+
+        @media (max-width: 900px) {
+          .dash-row-4 {
             grid-template-columns: repeat(2, 1fr);
           }
 
-          .dashboard-content {
+          .dash-row-2 {
             grid-template-columns: 1fr;
-          }
-
-          .quick-actions {
-            flex-direction: row;
-            min-width: auto;
-          }
-
-          .action-card {
-            flex: 1;
           }
         }
 
-        @media (max-width: 768px) {
-          .stats-grid {
+        @media (max-width: 600px) {
+          .dash-row-4 {
             grid-template-columns: 1fr;
           }
 
-          .welcome-section {
+          .dash-header {
             flex-direction: column;
             align-items: flex-start;
-            gap: 1rem;
-          }
-
-          .quick-actions {
-            flex-direction: column;
           }
         }
       `}</style>

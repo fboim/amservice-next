@@ -24,16 +24,16 @@ export default function Sidebar({ collapsed, onToggle }) {
   }
 
   return (
-    <aside className={`sidebar ${collapsed ? 'sidebar-collapsed' : ''}`}>
+    <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       {/* Logo */}
-      <div className="sidebar-header">
+      <div className="sidebar-logo-wrap">
         <div className="sidebar-logo">
           <img src="/logo_am.png" alt="AM Service" />
         </div>
         {!collapsed && (
           <div className="sidebar-brand">
-            <span className="sidebar-brand-name">AM SERVICE</span>
-            <span className="sidebar-brand-sub">Repair Center</span>
+            <span className="brand-name">AM SERVICE</span>
+            <span className="brand-sub">Repair Center</span>
           </div>
         )}
       </div>
@@ -43,14 +43,14 @@ export default function Sidebar({ collapsed, onToggle }) {
         <i className={`bi ${collapsed ? 'bi-chevron-right' : 'bi-chevron-left'}`} />
       </button>
 
-      {/* Menu */}
+      {/* Nav */}
       <nav className="sidebar-nav">
         <ul>
           {menuItems.map((item) => (
             <li key={item.href}>
               <Link
                 href={item.href}
-                className={`sidebar-link ${isActive(item.href) ? 'active' : ''}`}
+                className={`nav-link ${isActive(item.href) ? 'active' : ''}`}
               >
                 <i className={`bi ${item.icon}`} />
                 {!collapsed && <span>{item.label}</span>}
@@ -61,32 +61,34 @@ export default function Sidebar({ collapsed, onToggle }) {
       </nav>
 
       {/* Footer */}
-      <div className="sidebar-footer">
-        {!collapsed && <span>v1.0.0</span>}
-      </div>
+      {!collapsed && (
+        <div className="sidebar-footer">
+          <span>v1.0.0</span>
+        </div>
+      )}
 
       <style jsx>{`
         .sidebar {
           position: fixed;
           left: 0;
           top: 0;
-          width: 260px;
+          width: 250px;
           height: 100vh;
-          background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+          background: var(--am-surface);
+          border-right: 1px solid var(--am-border);
           display: flex;
           flex-direction: column;
           z-index: 100;
-          transition: width 0.3s ease;
-          border-right: 1px solid rgba(255,255,255,0.05);
+          transition: width 0.2s ease;
         }
 
-        .sidebar-collapsed {
-          width: 72px;
+        .sidebar.collapsed {
+          width: 64px;
         }
 
-        .sidebar-header {
+        .sidebar-logo-wrap {
           padding: 1.25rem;
-          border-bottom: 1px solid rgba(255,255,255,0.06);
+          border-bottom: 1px solid var(--am-border);
           display: flex;
           align-items: center;
           gap: 0.75rem;
@@ -97,18 +99,18 @@ export default function Sidebar({ collapsed, onToggle }) {
           width: 40px;
           height: 40px;
           border-radius: 10px;
-          padding: 2px;
-          background: linear-gradient(135deg, #3b82f6, #6366f1);
+          overflow: hidden;
           flex-shrink: 0;
+          background: linear-gradient(135deg, var(--am-primary), #6366f1);
+          padding: 2px;
         }
 
         .sidebar-logo img {
           width: 100%;
           height: 100%;
+          object-fit: contain;
           border-radius: 8px;
           background: #fff;
-          object-fit: contain;
-          padding: 4px;
         }
 
         .sidebar-brand {
@@ -116,16 +118,16 @@ export default function Sidebar({ collapsed, onToggle }) {
           flex-direction: column;
         }
 
-        .sidebar-brand-name {
-          font-size: 1rem;
+        .brand-name {
+          font-size: .95rem;
           font-weight: 800;
-          color: #fff;
-          letter-spacing: -0.02em;
+          color: var(--am-text);
+          letter-spacing: -0.01em;
         }
 
-        .sidebar-brand-sub {
-          font-size: .65rem;
-          color: #64748b;
+        .brand-sub {
+          font-size: .6rem;
+          color: var(--am-text-muted);
           text-transform: uppercase;
           letter-spacing: 0.1em;
         }
@@ -133,13 +135,13 @@ export default function Sidebar({ collapsed, onToggle }) {
         .sidebar-toggle {
           position: absolute;
           right: -12px;
-          top: 22px;
+          top: 24px;
           width: 24px;
           height: 24px;
           border-radius: 50%;
-          background: #334155;
-          border: 2px solid #475569;
-          color: #94a3b8;
+          background: var(--am-surface);
+          border: 2px solid var(--am-border);
+          color: var(--am-text-muted);
           cursor: pointer;
           display: flex;
           align-items: center;
@@ -150,9 +152,9 @@ export default function Sidebar({ collapsed, onToggle }) {
         }
 
         .sidebar-toggle:hover {
-          background: #3b82f6;
-          border-color: #3b82f6;
-          color: #fff;
+          background: var(--am-primary);
+          border-color: var(--am-primary);
+          color: white;
         }
 
         .sidebar-nav {
@@ -171,36 +173,36 @@ export default function Sidebar({ collapsed, onToggle }) {
           margin-bottom: 0.25rem;
         }
 
-        .sidebar-link {
+        .nav-link {
           display: flex;
           align-items: center;
           gap: 0.75rem;
-          padding: 0.75rem 1rem;
-          border-radius: 10px;
-          color: #94a3b8;
+          padding: 0.7rem 1rem;
+          border-radius: 8px;
+          color: var(--am-text-muted);
           text-decoration: none;
-          transition: all 0.2s;
+          transition: all 0.15s;
+          font-size: .875rem;
           font-weight: 500;
-          font-size: .9rem;
         }
 
-        .sidebar-collapsed .sidebar-link {
+        .sidebar.collapsed .nav-link {
           justify-content: center;
-          padding: 0.75rem;
+          padding: 0.7rem;
         }
 
-        .sidebar-link:hover {
-          background: rgba(255,255,255,0.05);
-          color: #fff;
+        .nav-link:hover {
+          background: var(--am-bg);
+          color: var(--am-text);
         }
 
-        .sidebar-link.active {
-          background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
-          color: #fff;
+        .nav-link.active {
+          background: linear-gradient(135deg, var(--am-primary), #6366f1);
+          color: white;
           font-weight: 600;
         }
 
-        .sidebar-link i {
+        .nav-link i {
           font-size: 1.1rem;
           width: 20px;
           text-align: center;
@@ -208,10 +210,10 @@ export default function Sidebar({ collapsed, onToggle }) {
 
         .sidebar-footer {
           padding: 1rem;
-          border-top: 1px solid rgba(255,255,255,0.06);
-          font-size: .7rem;
-          color: #475569;
+          border-top: 1px solid var(--am-border);
           text-align: center;
+          font-size: .7rem;
+          color: var(--am-text-muted);
         }
       `}</style>
     </aside>
