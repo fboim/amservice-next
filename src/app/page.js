@@ -355,11 +355,29 @@ export default function Home() {
                   <div>
                     <div style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      marginBottom: '0.75rem', gap: 8
+                      marginBottom: '1rem', gap: 10
                     }}>
+                      <div style={{
+                        width: 48, height: 48, borderRadius: '50%',
+                        background: searchResult.status === 'SELESAI'
+                          ? 'rgba(16,185,129,.2)'
+                          : 'rgba(245,158,11,.2)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center'
+                      }}>
+                        {searchResult.status === 'SELESAI' ? (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5">
+                            <polyline points="20 6 9 17 4 12"/>
+                          </svg>
+                        ) : (
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                          </svg>
+                        )}
+                      </div>
                       <span style={{
-                        padding: '4px 14px', borderRadius: 999,
-                        fontSize: '.78rem', fontWeight: 700,
+                        padding: '6px 16px', borderRadius: 999,
+                        fontSize: '.85rem', fontWeight: 700,
                         background: searchResult.status === 'SELESAI'
                           ? 'rgba(16,185,129,.2)'
                           : 'rgba(245,158,11,.2)',
@@ -368,30 +386,77 @@ export default function Home() {
                         {searchResult.status || 'DIPROSES'}
                       </span>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: '.8rem' }}>
-                      <div>
-                        <span style={{ color: '#64748b' }}>Tanggal</span>
-                        <p style={{ margin: '2px 0 0', color: '#e2e8f0' }}>{searchResult.tanggal ? new Date(searchResult.tanggal).toLocaleDateString('id-ID') : '-'}</p>
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(3, 1fr)',
+                      gap: 12,
+                      fontSize: '.8rem'
+                    }}>
+                      <div style={{
+                        background: 'rgba(255,255,255,.03)',
+                        padding: '10px 12px',
+                        borderRadius: 10,
+                        textAlign: 'center'
+                      }}>
+                        <span style={{ color: '#64748b', fontSize: '.7rem', display: 'block' }}>Tanggal</span>
+                        <p style={{ margin: '4px 0 0', color: '#fff', fontWeight: 600, fontSize: '.85rem' }}>
+                          {searchResult.tanggal ? new Date(searchResult.tanggal).toLocaleDateString('id-ID') : '-'}
+                        </p>
                       </div>
-                      <div>
-                        <span style={{ color: '#64748b' }}>Nama</span>
-                        <p style={{ margin: '2px 0 0', color: '#e2e8f0' }}>{searchResult.nama_pelanggan || '-'}</p>
+                      <div style={{
+                        background: 'rgba(255,255,255,.03)',
+                        padding: '10px 12px',
+                        borderRadius: 10,
+                        textAlign: 'center'
+                      }}>
+                        <span style={{ color: '#64748b', fontSize: '.7rem', display: 'block' }}>Nama</span>
+                        <p style={{ margin: '4px 0 0', color: '#e2e8f0', fontSize: '.85rem' }}>
+                          {searchResult.nama_pelanggan || '-'}
+                        </p>
                       </div>
-                      <div>
-                        <span style={{ color: '#64748b' }}>No HP</span>
-                        <p style={{ margin: '2px 0 0', color: '#e2e8f0' }}>{searchResult.no_hp || '-'}</p>
+                      <div style={{
+                        background: 'rgba(255,255,255,.03)',
+                        padding: '10px 12px',
+                        borderRadius: 10,
+                        textAlign: 'center'
+                      }}>
+                        <span style={{ color: '#64748b', fontSize: '.7rem', display: 'block' }}>No HP</span>
+                        <p style={{ margin: '4px 0 0', color: '#e2e8f0', fontSize: '.85rem' }}>
+                          {searchResult.no_hp || '-'}
+                        </p>
                       </div>
-                      <div>
-                        <span style={{ color: '#64748b' }}>Merk HP</span>
-                        <p style={{ margin: '2px 0 0', color: '#e2e8f0' }}>{searchResult.merk_hp || '-'}</p>
+                      <div style={{
+                        background: 'rgba(255,255,255,.03)',
+                        padding: '10px 12px',
+                        borderRadius: 10,
+                        textAlign: 'center'
+                      }}>
+                        <span style={{ color: '#64748b', fontSize: '.7rem', display: 'block' }}>Merk HP</span>
+                        <p style={{ margin: '4px 0 0', color: '#e2e8f0', fontSize: '.85rem' }}>
+                          {searchResult.merk_hp || '-'}
+                        </p>
                       </div>
-                      <div>
-                        <span style={{ color: '#64748b' }}>Estimasi</span>
-                        <p style={{ margin: '2px 0 0', color: '#e2e8f0' }}>{searchResult.estimasi_biaya ? `Rp ${Number(searchResult.estimasi_biaya).toLocaleString('id-ID')}` : '-'}</p>
+                      <div style={{
+                        background: 'rgba(255,255,255,.03)',
+                        padding: '10px 12px',
+                        borderRadius: 10,
+                        textAlign: 'center'
+                      }}>
+                        <span style={{ color: '#64748b', fontSize: '.7rem', display: 'block' }}>Estimasi</span>
+                        <p style={{ margin: '4px 0 0', color: '#e2e8f0', fontSize: '.85rem' }}>
+                          {searchResult.estimasi_biaya ? `Rp ${Number(searchResult.estimasi_biaya).toLocaleString('id-ID')}` : '-'}
+                        </p>
                       </div>
-                      <div style={{ gridColumn: '1 / -1' }}>
-                        <span style={{ color: '#64748b' }}>Keluhan</span>
-                        <p style={{ margin: '2px 0 0', color: '#e2e8f0' }}>{searchResult.keluhan || '-'}</p>
+                      <div style={{
+                        background: 'rgba(255,255,255,.03)',
+                        padding: '10px 12px',
+                        borderRadius: 10,
+                        textAlign: 'center'
+                      }}>
+                        <span style={{ color: '#64748b', fontSize: '.7rem', display: 'block' }}>Keluhan</span>
+                        <p style={{ margin: '4px 0 0', color: '#e2e8f0', fontSize: '.85rem' }}>
+                          {searchResult.keluhan || '-'}
+                        </p>
                       </div>
                     </div>
                   </div>
