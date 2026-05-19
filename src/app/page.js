@@ -26,7 +26,11 @@ const fallbackTestimonials = [
 export default function Home() {
   const [loaded, setLoaded] = useState(false)
   const [darkMode, setDarkMode] = useState(true)
+  const [showCekServis, setShowCekServis] = useState(false)
   const [testimonials, setTestimonials] = useState(fallbackTestimonials)
+  const [searchInput, setSearchInput] = useState('')
+  const [searchResult, setSearchResult] = useState(null)
+  const [searching, setSearching] = useState(false)
 
   useEffect(() => {
     setLoaded(true)
@@ -43,6 +47,32 @@ export default function Home() {
     const newTheme = !darkMode
     setDarkMode(newTheme)
     localStorage.setItem('theme', newTheme ? 'dark' : 'light')
+  }
+
+  const handleCekServis = async (e) => {
+    e.preventDefault()
+    if (!searchInput.trim()) return
+
+    setSearching(true)
+    try {
+      const res = await fetch(`/api/servis?search=${encodeURIComponent(searchInput)}`)
+      const data = await res.json()
+      if (Array.isArray(data) && data.length > 0) {
+        setSearchResult(data[0])
+      } else {
+        setSearchResult({ not_found: true })
+      }
+    } catch (error) {
+      setSearchResult({ error: true })
+    } finally {
+      setSearching(false)
+    }
+  }
+
+  const resetCekServis = () => {
+    setSearchInput('')
+    setSearchResult(null)
+    setShowCekServis(false)
   }
 
   const fetchTestimonials = async () => {
@@ -258,7 +288,10 @@ export default function Home() {
           animation: loaded ? 'fadeInUp 0.8s .15s ease-out both' : 'none',
           opacity: loaded ? 1 : 0
         }}>
-          <Link href="/cek-servis" className="cek-servis-card">
+          <button
+            onClick={() => setShowCekServis(true)}
+            className="cek-servis-card"
+          >
             <div style={{
               display: 'flex', alignItems: 'center', gap: 16
             }}>
@@ -289,8 +322,115 @@ export default function Home() {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="9 18 15 12 9 6"/>
             </svg>
-          </Link>
+          </button>
         </div>
+
+        {/* Cek Servis Modal */}
+        {showCekServis && (
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 1000,
+            background: 'rgba(0,0,0,.8)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '1rem'
+          }} onClick={resetCekServis}>
+            <div style={{
+              background: '#1e293b', borderRadius: 20,
+              padding: '2rem', width: '100%', maxWidth: 420
+            }} onClick={(e) => e.stopPropagation()}>
+              <div style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                marginBottom: '1.5rem'
+              }}>
+                <h3 style={{ margin: 0, color: '#fff', fontSize: '1.1rem' }}>
+                  Cek Status Servis
+                </h3>
+                <button
+                  onClick={resetCekServis}
+                  style={{
+                    background: 'rgba(255,255,255,.1)', border: 'none',
+                    borderRadius: '50%', width: 32, height: 32,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    cursor: 'pointer', color: '#94a3b8'
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </svg>
+                </button>
+              </div>
+
+              <form onSubmit={handleCekServis}>
+                <input
+                  type="text"
+                  className="am-input"
+                  placeholder="Masukkan nomor nota..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  style={{ marginBottom: '1rem' }}
+                />
+                <button
+                  type="submit"
+                  className="am-btn am-btn-primary"
+                  style={{ width: '100%' }}
+                  disabled={searching}
+                >
+                  {searching ? 'Mencari...' : 'Cari'}
+                </button>
+              </form>
+
+              {searchResult && (
+                <div style={{
+                  marginTop: '1.5rem', padding: '1rem',
+                  background: searchResult.not_found || searchResult.error
+                    ? 'rgba(239,68,68,.1)'
+                    : 'rgba(16,185,129,.1)',
+                  borderRadius: 12, border: `1px solid ${searchResult.not_found || searchResult.error ? 'rgba(239,68,68,.3)' : 'rgba(16,185,129,.3)'}`
+                }}>
+                  {searchResult.not_found ? (
+                    <p style={{ color: '#ef4444', margin: 0, textAlign: 'center' }}>
+                      Nota tidak ditemukan. Pastikan nomor nota benar.
+                    </p>
+                  ) : searchResult.error ? (
+                    <p style={{ color: '#ef4444', margin: 0, textAlign: 'center' }}>
+                      Terjadi kesalahan. Coba lagi nanti.
+                    </p>
+                  ) : (
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                        <span style={{ color: '#94a3b8', fontSize: '.8rem' }}>Nota</span>
+                        <span style={{ color: '#fff', fontWeight: 600 }}>{searchResult.no_nota}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                        <span style={{ color: '#94a3b8', fontSize: '.8rem' }}>Pelanggan</span>
+                        <span style={{ color: '#fff' }}>{searchResult.nama_pelanggan || 'N/A'}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                        <span style={{ color: '#94a3b8', fontSize: '.8rem' }}>Tipe</span>
+                        <span style={{ color: '#fff' }}>{searchResult.tipe_hp || 'N/A'}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                        <span style={{ color: '#94a3b8', fontSize: '.8rem' }}>Kerusakan</span>
+                        <span style={{ color: '#fff' }}>{searchResult.kerusakan || 'N/A'}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ color: '#94a3b8', fontSize: '.8rem' }}>Status</span>
+                        <span style={{
+                          padding: '4px 12px', borderRadius: 999,
+                          fontSize: '.75rem', fontWeight: 600,
+                          background: searchResult.status === 'SELESAI'
+                            ? 'rgba(16,185,129,.2)' : 'rgba(245,158,11,.2)',
+                          color: searchResult.status === 'SELESAI' ? '#10b981' : '#f59e0b'
+                        }}>
+                          {searchResult.status || 'DIPROSES'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Services Section */}
         <div style={{

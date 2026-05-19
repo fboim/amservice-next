@@ -20,11 +20,6 @@ export const metadata = {
   },
   viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
   themeColor: '#07070f',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'black-translucent',
-    title: 'AM Service',
-  },
 }
 
 export default function RootLayout({ children }) {
@@ -32,8 +27,7 @@ export default function RootLayout({ children }) {
     <html lang="id">
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" href="/icon-192.svg" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
       </head>
