@@ -2,220 +2,201 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
 
-const menuItems = [
-  { href: '/dashboard', icon: 'bi-grid-1x2', label: 'Dashboard' },
-  { href: '/servis/data', icon: 'bi-list-check', label: 'Data Servis' },
-  { href: '/servis/tambah', icon: 'bi-plus-circle', label: 'Servis Baru' },
-  { href: '/pelanggan', icon: 'bi-people', label: 'Pelanggan' },
-  { href: '/sparepart', icon: 'bi-box-seam', label: 'Sparepart' },
-  { href: '/testimoni', icon: 'bi-star', label: 'Testimoni' },
-  { href: '/laporan', icon: 'bi-graph-up', label: 'Laporan' },
-  { href: '/user', icon: 'bi-shield', label: 'User' },
-  { href: '/pengaturan', icon: 'bi-gear', label: 'Pengaturan' },
-]
+// Menu items by role
+const menuItems = {
+  admin: [
+    { href: '/dashboard', icon: 'bi-grid-1x2', label: 'Dashboard' },
+    { href: '/servis/data', icon: 'bi-list-check', label: 'Data Servis' },
+    { href: '/servis/tambah', icon: 'bi-plus-circle', label: 'Servis Baru' },
+    { href: '/pelanggan', icon: 'bi-people', label: 'Pelanggan' },
+    { href: '/sparepart', icon: 'bi-box-seam', label: 'Sparepart' },
+    { href: '/testimoni', icon: 'bi-star', label: 'Testimoni' },
+    { href: '/laporan', icon: 'bi-graph-up', label: 'Laporan' },
+    { href: '/user', icon: 'bi-shield', label: 'User' },
+    { href: '/pengaturan', icon: 'bi-gear', label: 'Pengaturan' },
+    { href: '/backup', icon: 'bi-archive', label: 'Backup' },
+  ],
+  teknisi: [
+    { href: '/dashboard', icon: 'bi-grid-1x2', label: 'Dashboard' },
+    { href: '/servis/data', icon: 'bi-list-check', label: 'Data Servis' },
+    { href: '/servis/tambah', icon: 'bi-plus-circle', label: 'Servis Baru' },
+    { href: '/sparepart', icon: 'bi-box-seam', label: 'Sparepart' },
+  ],
+  pengunjung: [
+    { href: '/dashboard', icon: 'bi-grid-1x2', label: 'Dashboard' },
+  ],
+}
 
-export default function Sidebar({ collapsed, onToggle }) {
+export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }) {
   const pathname = usePathname()
+  const [theme, setTheme] = useState('dark')
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    // Load theme
+    const savedTheme = localStorage.getItem('ams_theme') || 'dark'
+    setTheme(savedTheme)
+    document.documentElement.classList.toggle('dark', savedTheme === 'dark')
+
+    // Load user
+    const userData = localStorage.getItem('ams_user')
+    if (userData) {
+      try {
+        setUser(JSON.parse(userData))
+      } catch (e) {
+        console.error('Failed to parse user data')
+      }
+    }
+  }, [])
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark'
+    setTheme(newTheme)
+    localStorage.setItem('ams_theme', newTheme)
+    document.documentElement.classList.toggle('dark', newTheme === 'dark')
+  }
+
+  const getMenuItems = () => {
+    if (!user) return menuItems.pengunjung
+    const role = user.role?.toLowerCase()
+    return menuItems[role] || menuItems.pengunjung
+  }
 
   const isActive = (href) => {
     if (href === '/dashboard') return pathname === '/dashboard'
     return pathname.startsWith(href)
   }
 
+  const getRoleBadge = () => {
+    if (!user) return null
+    const roleMap = {
+      admin: { label: 'Admin', class: 'bg-purple-500/20 text-purple-400' },
+      teknisi: { label: 'Teknisi', class: 'bg-blue-500/20 text-blue-400' },
+      pengunjung: { label: 'Pengunjung', class: 'bg-gray-500/20 text-gray-400' },
+    }
+    const role = user.role?.toLowerCase()
+    const badge = roleMap[role]
+    if (!badge) return null
+    return (
+      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${badge.class}`}>
+        {badge.label}
+      </span>
+    )
+  }
+
   return (
-    <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
-      {/* Logo */}
-      <div className="sidebar-logo-wrap">
-        <div className="sidebar-logo">
-          <img src="/logo_am.png" alt="AM Service" />
-        </div>
-        {!collapsed && (
-          <div className="sidebar-brand">
-            <span className="brand-name">AM SERVICE</span>
-            <span className="brand-sub">Repair Center</span>
-          </div>
-        )}
-      </div>
-
-      {/* Toggle */}
-      <button className="sidebar-toggle" onClick={onToggle}>
-        <i className={`bi ${collapsed ? 'bi-chevron-right' : 'bi-chevron-left'}`} />
-      </button>
-
-      {/* Nav */}
-      <nav className="sidebar-nav">
-        <ul>
-          {menuItems.map((item) => (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                className={`nav-link ${isActive(item.href) ? 'active' : ''}`}
-              >
-                <i className={`bi ${item.icon}`} />
-                {!collapsed && <span>{item.label}</span>}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      {/* Footer */}
-      {!collapsed && (
-        <div className="sidebar-footer">
-          <span>v1.0.0</span>
-        </div>
+    <>
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={onMobileClose}
+        />
       )}
 
-      <style jsx>{`
-        .sidebar {
-          position: fixed;
-          left: 0;
-          top: 0;
-          width: 250px;
-          height: 100vh;
-          background: var(--am-surface);
-          border-right: 1px solid var(--am-border);
-          display: flex;
-          flex-direction: column;
-          z-index: 100;
-          transition: width 0.2s ease;
-        }
+      <aside
+        className={`
+          fixed top-0 left-0 h-screen w-64 bg-[#1e293b] border-r border-white/5
+          flex flex-col z-50 transition-transform duration-300
+          ${collapsed ? 'lg:w-[72px]' : 'lg:w-64'}
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}
+      >
+        {/* Logo */}
+        <div className="px-4 py-5 border-b border-white/5 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-0.5 flex-shrink-0">
+            <div className="w-full h-full bg-white rounded-[10px] p-1">
+              <img src="/logo_am.png" alt="AM Service" className="w-full h-full object-contain" />
+            </div>
+          </div>
+          {!collapsed && (
+            <div className="flex flex-col min-w-0">
+              <span className="text-white font-extrabold text-sm tracking-tight truncate">
+                AM SERVICE
+              </span>
+              <span className="text-slate-500 text-[10px] uppercase tracking-widest">
+                Repair Center
+              </span>
+            </div>
+          )}
+        </div>
 
-        .sidebar.collapsed {
-          width: 64px;
-        }
+        {/* Toggle - Desktop */}
+        <button
+          className="hidden lg:flex absolute -right-3 top-[72px] w-6 h-6 rounded-full
+            bg-slate-700 border-2 border-slate-600 text-slate-400 items-center justify-center
+            text-xs hover:bg-blue-500 hover:border-blue-500 hover:text-white transition-all z-10"
+          onClick={onToggle}
+        >
+          <i className={`bi ${collapsed ? 'bi-chevron-right' : 'bi-chevron-left'}`} />
+        </button>
 
-        .sidebar-logo-wrap {
-          padding: 1.25rem;
-          border-bottom: 1px solid var(--am-border);
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          min-height: 72px;
-        }
+        {/* Navigation */}
+        <nav className="flex-1 py-4 px-3 overflow-y-auto">
+          <ul className="space-y-1">
+            {getMenuItems().map((item) => (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  onClick={onMobileClose}
+                  className={`
+                    flex items-center gap-3 px-3 py-2.5 rounded-xl
+                    text-sm font-medium transition-all duration-200
+                    ${isActive(item.href)
+                      ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/25'
+                      : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                    }
+                    ${collapsed ? 'lg:justify-center lg:px-2' : ''}
+                  `}
+                >
+                  <i className={`bi ${item.icon} text-lg w-5 text-center flex-shrink-0`} />
+                  {!collapsed && <span className="truncate">{item.label}</span>}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-        .sidebar-logo {
-          width: 40px;
-          height: 40px;
-          border-radius: 10px;
-          overflow: hidden;
-          flex-shrink: 0;
-          background: linear-gradient(135deg, var(--am-primary), #6366f1);
-          padding: 2px;
-        }
+        {/* Footer */}
+        <div className="p-3 border-t border-white/5 space-y-2">
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
+              text-slate-400 hover:bg-white/5 hover:text-white transition-all duration-200"
+          >
+            <i className={`bi ${theme === 'dark' ? 'bi-sun' : 'bi-moon'} text-lg w-5 text-center`} />
+            {!collapsed && (
+              <span className="text-sm font-medium">
+                {theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
+              </span>
+            )}
+          </button>
 
-        .sidebar-logo img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-          border-radius: 8px;
-          background: #fff;
-        }
+          {/* User Profile */}
+          {!collapsed && user && (
+            <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/5">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600
+                flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                {user.nama?.charAt(0)?.toUpperCase() || 'U'}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white truncate">{user.nama || 'User'}</p>
+                {getRoleBadge()}
+              </div>
+            </div>
+          )}
 
-        .sidebar-brand {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .brand-name {
-          font-size: .95rem;
-          font-weight: 800;
-          color: var(--am-text);
-          letter-spacing: -0.01em;
-        }
-
-        .brand-sub {
-          font-size: .6rem;
-          color: var(--am-text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-        }
-
-        .sidebar-toggle {
-          position: absolute;
-          right: -12px;
-          top: 24px;
-          width: 24px;
-          height: 24px;
-          border-radius: 50%;
-          background: var(--am-surface);
-          border: 2px solid var(--am-border);
-          color: var(--am-text-muted);
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: .7rem;
-          z-index: 101;
-          transition: all 0.2s;
-        }
-
-        .sidebar-toggle:hover {
-          background: var(--am-primary);
-          border-color: var(--am-primary);
-          color: white;
-        }
-
-        .sidebar-nav {
-          flex: 1;
-          padding: 1rem 0.75rem;
-          overflow-y: auto;
-        }
-
-        .sidebar-nav ul {
-          list-style: none;
-          margin: 0;
-          padding: 0;
-        }
-
-        .sidebar-nav li {
-          margin-bottom: 0.25rem;
-        }
-
-        .nav-link {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          padding: 0.7rem 1rem;
-          border-radius: 8px;
-          color: var(--am-text-muted);
-          text-decoration: none;
-          transition: all 0.15s;
-          font-size: .875rem;
-          font-weight: 500;
-        }
-
-        .sidebar.collapsed .nav-link {
-          justify-content: center;
-          padding: 0.7rem;
-        }
-
-        .nav-link:hover {
-          background: var(--am-bg);
-          color: var(--am-text);
-        }
-
-        .nav-link.active {
-          background: linear-gradient(135deg, var(--am-primary), #6366f1);
-          color: white;
-          font-weight: 600;
-        }
-
-        .nav-link i {
-          font-size: 1.1rem;
-          width: 20px;
-          text-align: center;
-        }
-
-        .sidebar-footer {
-          padding: 1rem;
-          border-top: 1px solid var(--am-border);
-          text-align: center;
-          font-size: .7rem;
-          color: var(--am-text-muted);
-        }
-      `}</style>
-    </aside>
+          {/* Version */}
+          {!collapsed && (
+            <p className="text-center text-[11px] text-slate-600 pt-1">
+              AM Service v1.0.0
+            </p>
+          )}
+        </div>
+      </aside>
+    </>
   )
 }
