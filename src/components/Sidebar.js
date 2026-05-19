@@ -15,6 +15,7 @@ export default function Sidebar() {
     { href: '/pelanggan', icon: 'bi-people', label: 'Pelanggan' },
     { href: '/trash', icon: 'bi-trash3', label: 'Riwayat' },
     { href: '/sparepart', icon: 'bi-box-seam', label: 'Sparepart' },
+    { href: '/testimoni', icon: 'bi-star', label: 'Testimoni' },
     { href: '/laporan', icon: 'bi-graph-up', label: 'Laporan' },
     { href: '/blast', icon: 'bi-whatsapp', label: 'WA Blast' },
     { href: '/backup', icon: 'bi-cloud-arrow-up', label: 'Backup' },

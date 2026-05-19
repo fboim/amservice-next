@@ -5,39 +5,28 @@ import { useState, useEffect } from 'react'
 
 // Services catalog data
 const services = [
-  { name: 'Service LCD/Display', price: 'Mulai 150rb', icon: '📱', color: '#3b82f6' },
-  { name: 'Ganti Baterai', price: 'Mulai 100rb', icon: '🔋', color: '#10b981' },
-  { name: 'Service Mesin', price: 'Mulai 200rb', icon: '⚙️', color: '#f59e0b' },
-  { name: 'Ganti Touchscreen', price: 'Mulai 120rb', icon: '👆', color: '#8b5cf6' },
-  { name: 'Flash / Upgrade', price: 'Mulai 50rb', icon: '💾', color: '#ec4899' },
-  { name: 'Service IC Power', price: 'Mulai 250rb', icon: '🔌', color: '#06b6d4' },
+  { name: 'Service LCD/Display', price: 'Mulai 150rb', color: '#3b82f6' },
+  { name: 'Ganti Baterai', price: 'Mulai 100rb', color: '#10b981' },
+  { name: 'Service Mesin', price: 'Mulai 100rb', color: '#f59e0b' },
+  { name: 'Service Ringan', price: 'Mulai 20rb', color: '#8b5cf6' },
+  { name: 'Flash / Upgrade', price: 'Mulai 50rb', color: '#ec4899' },
+  { name: 'Ganti IC', price: 'Mulai 150rb', color: '#06b6d4' },
 ]
 
-// Testimonials data
-const testimonials = [
+// Static fallback testimonials (shown when API fails)
+const fallbackTestimonials = [
   {
     name: 'Budi Santoso',
     text: 'Pelayanan sangat memuaskan! HP saya yang rusak layar bisa like new lagi.',
     rating: 5,
-    date: '2 minggu lalu'
-  },
-  {
-    name: 'Siti Rahayu',
-    text: 'Harga terjangkau, teknisi ramah dan profesional. Recommended!',
-    rating: 5,
-    date: '1 bulan lalu'
-  },
-  {
-    name: 'Ahmad Fauzi',
-    text: 'Cepat dan akurat. Servis HP Samsung saya selesai dalam 2 jam saja.',
-    rating: 5,
-    date: '1 bulan lalu'
+    date: 'Baru saja'
   },
 ]
 
 export default function Home() {
   const [loaded, setLoaded] = useState(false)
   const [darkMode, setDarkMode] = useState(true)
+  const [testimonials, setTestimonials] = useState(fallbackTestimonials)
 
   useEffect(() => {
     setLoaded(true)
@@ -46,12 +35,31 @@ export default function Home() {
     if (savedTheme) {
       setDarkMode(savedTheme === 'dark')
     }
+    // Fetch testimonials from API
+    fetchTestimonials()
   }, [])
 
   const toggleTheme = () => {
     const newTheme = !darkMode
     setDarkMode(newTheme)
     localStorage.setItem('theme', newTheme ? 'dark' : 'light')
+  }
+
+  const fetchTestimonials = async () => {
+    try {
+      const res = await fetch('/api/testimonials')
+      const data = await res.json()
+      if (Array.isArray(data) && data.length > 0) {
+        setTestimonials(data.map(t => ({
+          ...t,
+          date: new Date(t.created_at).toLocaleDateString('id-ID', {
+            day: 'numeric', month: 'short', year: 'numeric'
+          })
+        })))
+      }
+    } catch (error) {
+      console.log('Using fallback testimonials')
+    }
   }
 
   return (
@@ -125,6 +133,7 @@ export default function Home() {
         target="_blank"
         rel="noopener noreferrer"
         className="wa-float-btn"
+        title="Konsultasi Fast Respon"
         style={{
           position: 'fixed',
           bottom: 24,
@@ -243,43 +252,44 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Action Cards */}
+        {/* Action Cards - Single Card */}
         <div style={{
-          display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem',
-          width: '100%', maxWidth: 420,
+          width: '100%', maxWidth: 400,
           animation: loaded ? 'fadeInUp 0.8s .15s ease-out both' : 'none',
           opacity: loaded ? 1 : 0
         }}>
-          <Link href="/cek-servis" className="action-card" style={{
-            '--hover-color': 'rgba(59,130,246,.15)'
-          }}>
-            <div className="action-icon" style={{
-              background: 'rgba(59,130,246,.15)',
-              color: '#60a5fa'
+          <Link href="/cek-servis" className="cek-servis-card">
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 16
             }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="m21 21-4.35-4.35"/>
-              </svg>
+              <div style={{
+                width: 48, height: 48, borderRadius: 14,
+                background: 'rgba(59,130,246,.15)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="m21 21-4.35-4.35"/>
+                </svg>
+              </div>
+              <div>
+                <h3 style={{
+                  fontSize: '.95rem', fontWeight: 700,
+                  color: '#e2e8f0', margin: '0 0 4px'
+                }}>
+                  Cek Status Servis
+                </h3>
+                <p style={{
+                  fontSize: '.78rem', color: '#64748b', margin: 0
+                }}>
+                  Masukkan nomor nota atau scan QR code
+                </p>
+              </div>
             </div>
-            <h3>Cek Status Servis</h3>
-            <p>Pantau progres via nomor nota atau scan QR</p>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
           </Link>
-
-          <a href="https://wa.me/6285647227779?text=Halo%20AM%20Service%2C%20saya%20ingin%20konsultasi%20servis%20HP" target="_blank" rel="noopener noreferrer" className="action-card" style={{
-            '--hover-color': 'rgba(16,185,129,.15)'
-          }}>
-            <div className="action-icon" style={{
-              background: 'rgba(16,185,129,.15)',
-              color: '#34d399'
-            }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/>
-              </svg>
-            </div>
-            <h3>Hubungi via WA</h3>
-            <p>Konsultasi langsung via WhatsApp resmi</p>
-          </a>
         </div>
 
         {/* Services Section */}
@@ -314,10 +324,45 @@ export default function Home() {
                   width: 44, height: 44, borderRadius: 12,
                   background: `${service.color}20`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '1.4rem',
                   marginBottom: 12
                 }}>
-                  {service.icon}
+                  {index === 0 && (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={service.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                      <line x1="12" y1="18" x2="12.01" y2="18"/>
+                    </svg>
+                  )}
+                  {index === 1 && (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={service.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="1" y="6" width="18" height="12" rx="2" ry="2"/>
+                      <line x1="23" y1="10" x2="23" y2="14"/>
+                    </svg>
+                  )}
+                  {index === 2 && (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={service.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="3"/>
+                      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                  )}
+                  {index === 3 && (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={service.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                    </svg>
+                  )}
+                  {index === 4 && (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={service.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="16 16 12 12 8 16"/>
+                      <line x1="12" y1="12" x2="12" y2="21"/>
+                      <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+                    </svg>
+                  )}
+                  {index === 5 && (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={service.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                      <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                      <line x1="12" y1="22.08" x2="12" y2="12"/>
+                    </svg>
+                  )}
                 </div>
                 <h4 style={{
                   fontSize: '.82rem',
@@ -710,6 +755,25 @@ export default function Home() {
           color: #64748b;
           margin: 0;
           line-height: 1.5;
+        }
+
+        /* Cek Servis Card */
+        .cek-servis-card {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 1.25rem 1.5rem;
+          background: rgba(255,255,255,.04);
+          border: 1px solid rgba(255,255,255,.08);
+          border-radius: 16px;
+          text-decoration: none;
+          transition: all 0.3s ease;
+        }
+
+        .cek-servis-card:hover {
+          background: rgba(59,130,246,.08);
+          border-color: rgba(59,130,246,.2);
+          transform: translateX(4px);
         }
 
         /* Map container */
