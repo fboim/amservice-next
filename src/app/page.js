@@ -162,7 +162,7 @@ export default function Home() {
         minHeight: '100vh',
         display: 'flex', flexDirection: 'column',
         alignItems: 'center',
-        padding: '2rem 1rem 6rem',
+        padding: '2rem 1rem 1rem',
         gap: 0
       }}>
         {/* Hero Section */}
