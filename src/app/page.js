@@ -54,9 +54,9 @@ export default function Home() {
           animation: loaded ? 'fadeInUp 0.8s ease-out' : 'none',
           opacity: loaded ? 1 : 0
         }}>
-          {/* Header row: Logo left, Badge right */}
-          <div className="hero-header">
-            {/* Logo with glow effect - left aligned */}
+          {/* Header row: Logo and Badge centered together */}
+          <div className="hero-header-center">
+            {/* Logo with glow effect */}
             <div style={{
               position: 'relative',
               display: 'inline-block'
@@ -87,7 +87,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Status badge - right aligned */}
+            {/* Status badge - centered below logo */}
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               fontSize: 12, fontWeight: 700, letterSpacing: '.15em',
@@ -95,7 +95,8 @@ export default function Home() {
               padding: '6px 14px',
               background: 'rgba(59,130,246,.1)',
               borderRadius: 999,
-              border: '1px solid rgba(59,130,246,.2)'
+              border: '1px solid rgba(59,130,246,.2)',
+              marginTop: '1rem'
             }}>
               <span style={{
                 width: 8, height: 8, borderRadius: '50%',
@@ -156,7 +157,7 @@ export default function Home() {
             <p>Pantau progres via nomor nota atau scan QR</p>
           </Link>
 
-          <a href="https://wa.me/6281234567890?text=Halo%20AM%20Service%2C%20saya%20ingin%20konsultasi%20servis%20HP" target="_blank" rel="noopener noreferrer" className="action-card" style={{
+          <a href="https://wa.me/6285647227779?text=Halo%20AM%20Service%2C%20saya%20ingin%20konsultasi%20servis%20HP" target="_blank" rel="noopener noreferrer" className="action-card" style={{
             '--hover-color': 'rgba(16,185,129,.15)'
           }}>
             <div className="action-icon" style={{
@@ -242,7 +243,7 @@ export default function Home() {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
                 </svg>
-                <span>0812-3456-7890</span>
+                <span>0856 4722 7779</span>
               </div>
             </div>
           </div>
@@ -293,10 +294,10 @@ export default function Home() {
           100% { background-position: 200% center; }
         }
 
-        /* Hero Header */
-        .hero-header {
+        /* Hero Header Center */
+        .hero-header-center {
           display: flex;
-          justify-content: space-between;
+          flex-direction: column;
           align-items: center;
           margin-bottom: 1.5rem;
           width: 100%;
@@ -308,16 +309,6 @@ export default function Home() {
           inset: 0;
           pointer-events: none;
           z-index: 0;
-        }
-
-        @media (max-width: 480px) {
-          .hero-header {
-            flex-direction: column;
-            gap: 1rem;
-          }
-          .hero-header > div:first-child {
-            margin-bottom: 0.5rem;
-          }
         }
 
         .particle {
