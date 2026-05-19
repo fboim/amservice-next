@@ -47,63 +47,64 @@ export default function Home() {
       }}>
         {/* Hero Section */}
         <div style={{
+          width: '100%', maxWidth: 500,
           textAlign: 'center',
           marginBottom: '2rem',
           paddingTop: '1rem',
           animation: loaded ? 'fadeInUp 0.8s ease-out' : 'none',
           opacity: loaded ? 1 : 0
         }}>
-          {/* Logo with glow effect */}
-          <div style={{
-            position: 'relative',
-            display: 'inline-block',
-            marginBottom: '1.5rem'
-          }}>
+          {/* Header row: Logo left, Badge right */}
+          <div className="hero-header">
+            {/* Logo with glow effect - left aligned */}
             <div style={{
-              position: 'absolute', inset: '-10px',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, rgba(59,130,246,.3), rgba(99,102,241,.3))',
-              filter: 'blur(20px)',
-              animation: 'pulseGlow 3s ease-in-out infinite'
-            }} />
-            <div style={{
-              width: 88, height: 88,
-              margin: '0 auto',
-              borderRadius: '50%',
-              padding: 3,
-              background: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)',
-              boxShadow: '0 0 0 6px rgba(59,130,246,.15), 0 8px 32px rgba(99,102,241,.3)',
               position: 'relative',
-              zIndex: 1
+              display: 'inline-block'
             }}>
-              <img src="/logo_am.png" alt="Logo" style={{
-                width: '100%', height: '100%',
+              <div style={{
+                position: 'absolute', inset: '-10px',
                 borderRadius: '50%',
-                background: '#fff',
-                objectFit: 'contain',
-                padding: 8, display: 'block'
+                background: 'linear-gradient(135deg, rgba(59,130,246,.3), rgba(99,102,241,.3))',
+                filter: 'blur(20px)',
+                animation: 'pulseGlow 3s ease-in-out infinite'
               }} />
+              <div style={{
+                width: 88, height: 88,
+                borderRadius: '50%',
+                padding: 3,
+                background: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)',
+                boxShadow: '0 0 0 6px rgba(59,130,246,.15), 0 8px 32px rgba(99,102,241,.3)',
+                position: 'relative',
+                zIndex: 1
+              }}>
+                <img src="/logo_am.png" alt="Logo" style={{
+                  width: '100%', height: '100%',
+                  borderRadius: '50%',
+                  background: '#fff',
+                  objectFit: 'contain',
+                  padding: 8, display: 'block'
+                }} />
+              </div>
             </div>
-          </div>
 
-          {/* Status badge */}
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            fontSize: 12, fontWeight: 700, letterSpacing: '.15em',
-            textTransform: 'uppercase', color: '#60a5fa',
-            marginBottom: '1.25rem',
-            padding: '6px 14px',
-            background: 'rgba(59,130,246,.1)',
-            borderRadius: 999,
-            border: '1px solid rgba(59,130,246,.2)'
-          }}>
-            <span style={{
-              width: 8, height: 8, borderRadius: '50%',
-              background: '#22c55e',
-              boxShadow: '0 0 0 0 rgba(34,197,94,.6)',
-              animation: 'pulseDot 2s ease-in-out infinite'
-            }} />
-            Servis Online
+            {/* Status badge - right aligned */}
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              fontSize: 12, fontWeight: 700, letterSpacing: '.15em',
+              textTransform: 'uppercase', color: '#60a5fa',
+              padding: '6px 14px',
+              background: 'rgba(59,130,246,.1)',
+              borderRadius: 999,
+              border: '1px solid rgba(59,130,246,.2)'
+            }}>
+              <span style={{
+                width: 8, height: 8, borderRadius: '50%',
+                background: '#22c55e',
+                boxShadow: '0 0 0 0 rgba(34,197,94,.6)',
+                animation: 'pulseDot 2s ease-in-out infinite'
+              }} />
+              Servis Online
+            </div>
           </div>
 
           <h1 style={{
@@ -292,12 +293,31 @@ export default function Home() {
           100% { background-position: 200% center; }
         }
 
+        /* Hero Header */
+        .hero-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1.5rem;
+          width: 100%;
+        }
+
         /* Particles */
         .particles {
           position: fixed;
           inset: 0;
           pointer-events: none;
           z-index: 0;
+        }
+
+        @media (max-width: 480px) {
+          .hero-header {
+            flex-direction: column;
+            gap: 1rem;
+          }
+          .hero-header > div:first-child {
+            margin-bottom: 0.5rem;
+          }
         }
 
         .particle {
