@@ -44,8 +44,9 @@ export async function GET(request) {
   // List servis with pagination
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '12')
-  const search = searchParams.get('search') || ''
+  const search = searchParams.get('cari') || ''
   const status = searchParams.get('status') || ''
+  const trash = searchParams.get('trash') === '1'
 
   const offset = (page - 1) * limit
 
@@ -54,7 +55,12 @@ export async function GET(request) {
     .select('*', { count: 'exact' })
     .order('id', { ascending: false })
 
-  query = query.is('deleted_at', null)
+  // Trash mode
+  if (trash) {
+    query = query.not('deleted_at', 'is', null)
+  } else {
+    query = query.is('deleted_at', null)
+  }
 
   if (search) {
     query = query.or(`no_servis.ilike.%${search}%,nama_pelanggan.ilike.%${search}%,merk_hp.ilike.%${search}%`)

@@ -525,3 +525,140 @@ body {
 }
 
 .merk-item:last-child { border-bottom: none; }
+
+/* Data Servis Page Layout */
+.ds-main {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.ds-sidebar {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .ds-main {
+    grid-template-columns: 1fr 280px;
+  }
+  .ds-sidebar {
+    display: block;
+  }
+}
+
+/* Dual Column Table */
+.dual-wrap {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 860px) {
+  .dual-wrap {
+    grid-template-columns: 1fr 1fr;
+  }
+  .dual-wrap .dt-col:first-child {
+    border-right: 2px solid var(--am-border);
+    padding-right: 8px;
+  }
+  .dual-wrap .dt-col:last-child {
+    padding-left: 8px;
+  }
+}
+
+.dt-col {
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dt-col table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 550px;
+}
+
+.dt-col table thead th {
+  font-size: 0.63rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--am-text-muted);
+  background: var(--am-surface-2);
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--am-border);
+  white-space: nowrap;
+}
+
+.dt-col table tbody td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--am-border);
+  vertical-align: middle;
+}
+
+.dt-col table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.dt-col table tbody tr:hover {
+  background: var(--am-surface-2);
+}
+
+@media (max-width: 767px) {
+  .dt-col table thead th {
+    font-size: 0.61rem;
+    padding: 7px 7px;
+  }
+  .dt-col table tbody td {
+    font-size: 0.76rem;
+    padding: 7px 7px;
+  }
+}
+
+/* Print dropdown wrap */
+.print-dropdown-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.print-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 2px;
+  background: var(--am-surface);
+  border: 1px solid var(--am-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 140px;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.print-dropdown a {
+  display: block;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  color: var(--am-text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--am-border);
+  transition: background 0.15s;
+}
+
+.print-dropdown a:last-child {
+  border-bottom: none;
+}
+
+.print-dropdown a:hover {
+  background: var(--am-surface-2);
+}
+
+/* Table wrapper */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
