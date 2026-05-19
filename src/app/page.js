@@ -369,7 +369,7 @@ export default function Home() {
                           : searchResult.status === 'SIAP DIAMBIL'
                           ? 'rgba(59,130,246,.2)'
                           : searchResult.status === 'SUDAH DIAMBIL'
-                          ? 'rgba(234,179,8,.2)'
+                          ? 'rgba(16,185,129,.2)'
                           : 'rgba(148,163,184,.2)',
                         color: searchResult.status === 'TIDAK BISA'
                           ? '#ef4444'
@@ -380,7 +380,7 @@ export default function Home() {
                           : searchResult.status === 'SIAP DIAMBIL'
                           ? '#3b82f6'
                           : searchResult.status === 'SUDAH DIAMBIL'
-                          ? '#eab308'
+                          ? '#10b981'
                           : '#94a3b8'
                       }}>
                         {searchResult.status || 'DIPROSES'}
