@@ -3,38 +3,149 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 
+// Services catalog data
+const services = [
+  { name: 'Service LCD/Display', price: 'Mulai 150rb', icon: '📱', color: '#3b82f6' },
+  { name: 'Ganti Baterai', price: 'Mulai 100rb', icon: '🔋', color: '#10b981' },
+  { name: 'Service Mesin', price: 'Mulai 200rb', icon: '⚙️', color: '#f59e0b' },
+  { name: 'Ganti Touchscreen', price: 'Mulai 120rb', icon: '👆', color: '#8b5cf6' },
+  { name: 'Flash / Upgrade', price: 'Mulai 50rb', icon: '💾', color: '#ec4899' },
+  { name: 'Service IC Power', price: 'Mulai 250rb', icon: '🔌', color: '#06b6d4' },
+]
+
+// Testimonials data
+const testimonials = [
+  {
+    name: 'Budi Santoso',
+    text: 'Pelayanan sangat memuaskan! HP saya yang rusak layar bisa like new lagi.',
+    rating: 5,
+    date: '2 minggu lalu'
+  },
+  {
+    name: 'Siti Rahayu',
+    text: 'Harga terjangkau, teknisi ramah dan profesional. Recommended!',
+    rating: 5,
+    date: '1 bulan lalu'
+  },
+  {
+    name: 'Ahmad Fauzi',
+    text: 'Cepat dan akurat. Servis HP Samsung saya selesai dalam 2 jam saja.',
+    rating: 5,
+    date: '1 bulan lalu'
+  },
+]
+
 export default function Home() {
   const [loaded, setLoaded] = useState(false)
+  const [darkMode, setDarkMode] = useState(true)
 
   useEffect(() => {
     setLoaded(true)
+    // Check saved theme preference
+    const savedTheme = localStorage.getItem('theme')
+    if (savedTheme) {
+      setDarkMode(savedTheme === 'dark')
+    }
   }, [])
 
+  const toggleTheme = () => {
+    const newTheme = !darkMode
+    setDarkMode(newTheme)
+    localStorage.setItem('theme', newTheme ? 'dark' : 'light')
+  }
+
   return (
-    <div style={{ minHeight: '100vh', background: '#07070f', position: 'relative', overflow: 'hidden' }}>
+    <div style={{
+      minHeight: '100vh',
+      background: darkMode ? '#07070f' : '#f8fafc',
+      position: 'relative',
+      overflow: 'hidden',
+      transition: 'background 0.3s ease'
+    }}>
       {/* Animated background */}
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
-        background: `
-          radial-gradient(ellipse 80% 60% at 20% 10%, rgba(59,130,246,.2) 0%, transparent 50%),
-          radial-gradient(ellipse 70% 50% at 80% 85%, rgba(99,102,241,.18) 0%, transparent 50%),
-          radial-gradient(ellipse 60% 40% at 50% 100%, rgba(16,185,129,.1) 0%, transparent 50%)
-        `,
-      }} />
+      {darkMode && (
+        <>
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+            background: `
+              radial-gradient(ellipse 80% 60% at 20% 10%, rgba(59,130,246,.2) 0%, transparent 50%),
+              radial-gradient(ellipse 70% 50% at 80% 85%, rgba(99,102,241,.18) 0%, transparent 50%),
+              radial-gradient(ellipse 60% 40% at 50% 100%, rgba(16,185,129,.1) 0%, transparent 50%)
+            `,
+          }} />
+          <div className="particles">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className={`particle particle-${i + 1}`} />
+            ))}
+          </div>
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+            backgroundImage: 'radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px)',
+            backgroundSize: '32px 32px'
+          }} />
+        </>
+      )}
 
-      {/* Floating particles */}
-      <div className="particles">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className={`particle particle-${i + 1}`} />
-        ))}
-      </div>
+      {/* Theme Toggle Button */}
+      <button
+        onClick={toggleTheme}
+        className="theme-toggle"
+        style={{
+          position: 'fixed',
+          top: 20,
+          right: 20,
+          zIndex: 100,
+          width: 44,
+          height: 44,
+          borderRadius: '50%',
+          background: darkMode ? 'rgba(255,255,255,.1)' : 'rgba(0,0,0,.1)',
+          border: darkMode ? '1px solid rgba(255,255,255,.1)' : '1px solid rgba(0,0,0,.1)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+          color: darkMode ? '#fbbf24' : '#1e293b',
+        }}
+      >
+        {darkMode ? (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+        ) : (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+          </svg>
+        )}
+      </button>
 
-      {/* Dot grid */}
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
-        backgroundImage: 'radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px)',
-        backgroundSize: '32px 32px'
-      }} />
+      {/* Floating WhatsApp Button */}
+      <a
+        href="https://wa.me/6285647227779?text=Halo%20AM%20Service%2C%20saya%20ingin%20konsultasi%20servis%20HP"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="wa-float-btn"
+        style={{
+          position: 'fixed',
+          bottom: 24,
+          right: 24,
+          zIndex: 100,
+          width: 60,
+          height: 60,
+          borderRadius: '50%',
+          background: '#25D366',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 4px 20px rgba(37, 211, 102, 0.4)',
+          transition: 'all 0.3s ease',
+          animation: 'waPulse 2s ease-in-out infinite',
+        }}
+      >
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+        </svg>
+      </a>
 
       {/* Content */}
       <div style={{
@@ -42,7 +153,7 @@ export default function Home() {
         minHeight: '100vh',
         display: 'flex', flexDirection: 'column',
         alignItems: 'center',
-        padding: '2rem 1rem 2rem',
+        padding: '2rem 1rem 6rem',
         gap: 0
       }}>
         {/* Hero Section */}
@@ -56,7 +167,6 @@ export default function Home() {
         }}>
           {/* Header row: Logo and Badge centered together */}
           <div className="hero-header-center">
-            {/* Logo with glow effect */}
             <div style={{
               position: 'relative',
               display: 'inline-block'
@@ -87,7 +197,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Status badge - centered below logo */}
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               fontSize: 12, fontWeight: 700, letterSpacing: '.15em',
@@ -111,7 +220,7 @@ export default function Home() {
           <h1 style={{
             fontSize: 'clamp(2rem, 7vw, 3.5rem)',
             fontWeight: 900, letterSpacing: '-.03em', lineHeight: 1.05,
-            color: '#fff', marginBottom: '.6rem'
+            color: darkMode ? '#fff' : '#1e293b', marginBottom: '.6rem'
           }}>
             AM SERVICE
             <span style={{
@@ -126,7 +235,7 @@ export default function Home() {
           </h1>
 
           <p style={{
-            fontSize: '.92rem', color: '#64748b', lineHeight: 1.7,
+            fontSize: '.92rem', color: darkMode ? '#64748b' : '#64748b', lineHeight: 1.7,
             maxWidth: 340, margin: '0 auto',
             fontWeight: 500
           }}>
@@ -165,7 +274,7 @@ export default function Home() {
               color: '#34d399'
             }}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/>
               </svg>
             </div>
             <h3>Hubungi via WA</h3>
@@ -173,11 +282,147 @@ export default function Home() {
           </a>
         </div>
 
+        {/* Services Section */}
+        <div style={{
+          width: '100%', maxWidth: 500,
+          marginTop: '2.5rem',
+          animation: loaded ? 'fadeInUp 0.8s .25s ease-out both' : 'none',
+          opacity: loaded ? 1 : 0
+        }}>
+          <div className="section-header">
+            <h2 style={{
+              fontSize: '1.1rem',
+              fontWeight: 800,
+              color: darkMode ? '#fff' : '#1e293b',
+              marginBottom: '.35rem'
+            }}>
+              Layanan Kami
+            </h2>
+            <p style={{
+              fontSize: '.8rem',
+              color: darkMode ? '#64748b' : '#64748b',
+              margin: 0
+            }}>
+              Harga bervariasi sesuai tipe & kerusakan
+            </p>
+          </div>
+
+          <div className="services-grid">
+            {services.map((service, index) => (
+              <div key={index} className="service-card">
+                <div style={{
+                  width: 44, height: 44, borderRadius: 12,
+                  background: `${service.color}20`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '1.4rem',
+                  marginBottom: 12
+                }}>
+                  {service.icon}
+                </div>
+                <h4 style={{
+                  fontSize: '.82rem',
+                  fontWeight: 700,
+                  color: darkMode ? '#e2e8f0' : '#1e293b',
+                  margin: '0 0 4px'
+                }}>
+                  {service.name}
+                </h4>
+                <p style={{
+                  fontSize: '.72rem',
+                  color: service.color,
+                  fontWeight: 600,
+                  margin: 0
+                }}>
+                  {service.price}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Testimonials Section */}
+        <div style={{
+          width: '100%', maxWidth: 500,
+          marginTop: '2.5rem',
+          animation: loaded ? 'fadeInUp 0.8s .35s ease-out both' : 'none',
+          opacity: loaded ? 1 : 0
+        }}>
+          <div className="section-header">
+            <h2 style={{
+              fontSize: '1.1rem',
+              fontWeight: 800,
+              color: darkMode ? '#fff' : '#1e293b',
+              marginBottom: '.35rem'
+            }}>
+              Testimoni Pelanggan
+            </h2>
+            <p style={{
+              fontSize: '.8rem',
+              color: darkMode ? '#64748b' : '#64748b',
+              margin: 0
+            }}>
+              Apa kata mereka tentang layanan kami
+            </p>
+          </div>
+
+          <div className="testimonials-scroll">
+            {testimonials.map((testimonial, index) => (
+              <div key={index} className="testimonial-card">
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  marginBottom: 12
+                }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#fff',
+                    fontWeight: 700,
+                    fontSize: '.9rem'
+                  }}>
+                    {testimonial.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h4 style={{
+                      fontSize: '.85rem', fontWeight: 700,
+                      color: darkMode ? '#e2e8f0' : '#1e293b',
+                      margin: 0
+                    }}>
+                      {testimonial.name}
+                    </h4>
+                    <p style={{
+                      fontSize: '.65rem', color: '#64748b',
+                      margin: '2px 0 0'
+                    }}>
+                      {testimonial.date}
+                    </p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 2, marginBottom: 8 }}>
+                  {[...Array(5)].map((_, i) => (
+                    <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={i < testimonial.rating ? '#fbbf24' : '#334155'}>
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                  ))}
+                </div>
+                <p style={{
+                  fontSize: '.8rem',
+                  color: darkMode ? '#94a3b8' : '#64748b',
+                  lineHeight: 1.6,
+                  margin: 0
+                }}>
+                  "{testimonial.text}"
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Map Section */}
         <div style={{
           width: '100%', maxWidth: 500,
-          marginTop: '2rem',
-          animation: loaded ? 'fadeInUp 0.8s .3s ease-out both' : 'none',
+          marginTop: '2.5rem',
+          animation: loaded ? 'fadeInUp 0.8s .45s ease-out both' : 'none',
           opacity: loaded ? 1 : 0
         }}>
           <div className="map-container">
@@ -198,7 +443,7 @@ export default function Home() {
                   </svg>
                 </div>
                 <div>
-                  <h4 style={{ fontSize: '.85rem', fontWeight: 700, color: '#e2e8f0', margin: 0 }}>Lokasi Toko</h4>
+                  <h4 style={{ fontSize: '.85rem', fontWeight: 700, color: darkMode ? '#e2e8f0' : '#1e293b', margin: 0 }}>Lokasi Toko</h4>
                   <p style={{ fontSize: '.7rem', color: '#64748b', margin: '2px 0 0' }}>AM Service Kulon Progo</p>
                 </div>
               </div>
@@ -254,7 +499,7 @@ export default function Home() {
           marginTop: 'auto',
           paddingTop: '2.5rem',
           textAlign: 'center',
-          animation: loaded ? 'fadeInUp 0.8s .45s ease-out both' : 'none',
+          animation: loaded ? 'fadeInUp 0.8s .55s ease-out both' : 'none',
           opacity: loaded ? 1 : 0
         }}>
           <Link href="/login" className="staff-link">
@@ -294,16 +539,11 @@ export default function Home() {
           100% { background-position: 200% center; }
         }
 
-        /* Hero Header Center */
-        .hero-header-center {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          margin-bottom: 1.5rem;
-          width: 100%;
+        @keyframes waPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.1); }
         }
 
-        /* Particles */
         .particles {
           position: fixed;
           inset: 0;
@@ -332,6 +572,93 @@ export default function Home() {
           25% { transform: translateY(-20px) rotate(90deg); opacity: .8; }
           50% { transform: translateY(-40px) rotate(180deg); opacity: .4; }
           75% { transform: translateY(-20px) rotate(270deg); opacity: .8; }
+        }
+
+        .theme-toggle {
+          cursor: pointer;
+        }
+
+        .theme-toggle:hover {
+          transform: scale(1.1);
+        }
+
+        .wa-float-btn:hover {
+          transform: scale(1.1);
+          box-shadow: 0 6px 30px rgba(37, 211, 102, 0.5);
+        }
+
+        /* Hero Header Center */
+        .hero-header-center {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin-bottom: 1.5rem;
+          width: 100%;
+        }
+
+        /* Section Header */
+        .section-header {
+          text-align: center;
+          margin-bottom: 1.25rem;
+        }
+
+        /* Services Grid */
+        .services-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: .875rem;
+        }
+
+        .service-card {
+          background: rgba(255,255,255,.04);
+          border: 1px solid rgba(255,255,255,.08);
+          border-radius: 16px;
+          padding: 1rem;
+          text-align: center;
+          transition: all 0.3s ease;
+        }
+
+        .service-card:hover {
+          background: rgba(255,255,255,.08);
+          transform: translateY(-2px);
+        }
+
+        /* Testimonials Scroll */
+        .testimonials-scroll {
+          display: flex;
+          gap: 1rem;
+          overflow-x: auto;
+          padding-bottom: 1rem;
+          scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .testimonials-scroll::-webkit-scrollbar {
+          height: 4px;
+        }
+
+        .testimonials-scroll::-webkit-scrollbar-track {
+          background: rgba(255,255,255,.05);
+          border-radius: 4px;
+        }
+
+        .testimonials-scroll::-webkit-scrollbar-thumb {
+          background: rgba(255,255,255,.2);
+          border-radius: 4px;
+        }
+
+        .testimonial-card {
+          min-width: 280px;
+          background: rgba(255,255,255,.04);
+          border: 1px solid rgba(255,255,255,.08);
+          border-radius: 16px;
+          padding: 1.25rem;
+          scroll-snap-align: start;
+          transition: all 0.3s ease;
+        }
+
+        .testimonial-card:hover {
+          background: rgba(255,255,255,.08);
         }
 
         /* Action Cards */
@@ -449,15 +776,14 @@ export default function Home() {
 
         /* Responsive */
         @media (max-width: 480px) {
-          .action-card {
-            padding: 1.25rem 1rem;
+          .services-grid {
+            grid-template-columns: repeat(2, 1fr);
           }
-          .action-icon {
-            width: 48px;
-            height: 48px;
+          .service-card {
+            padding: .875rem .75rem;
           }
-          .map-container {
-            padding: 1rem;
+          .testimonial-card {
+            min-width: 260px;
           }
         }
 
