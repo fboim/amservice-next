@@ -4,44 +4,42 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
-// Menu items by role
-const menuItems = {
-  admin: [
-    { href: '/dashboard', icon: 'bi-grid-1x2', label: 'Dashboard' },
-    { href: '/servis/data', icon: 'bi-list-check', label: 'Data Servis' },
-    { href: '/servis/tambah', icon: 'bi-plus-circle', label: 'Servis Baru' },
-    { href: '/pelanggan', icon: 'bi-people', label: 'Pelanggan' },
-    { href: '/sparepart', icon: 'bi-box-seam', label: 'Sparepart' },
-    { href: '/testimoni', icon: 'bi-star', label: 'Testimoni' },
-    { href: '/laporan', icon: 'bi-graph-up', label: 'Laporan' },
-    { href: '/user', icon: 'bi-shield', label: 'User' },
-    { href: '/pengaturan', icon: 'bi-gear', label: 'Pengaturan' },
-    { href: '/backup', icon: 'bi-archive', label: 'Backup' },
-  ],
-  teknisi: [
-    { href: '/dashboard', icon: 'bi-grid-1x2', label: 'Dashboard' },
-    { href: '/servis/data', icon: 'bi-list-check', label: 'Data Servis' },
-    { href: '/servis/tambah', icon: 'bi-plus-circle', label: 'Servis Baru' },
-    { href: '/sparepart', icon: 'bi-box-seam', label: 'Sparepart' },
-  ],
-  pengunjung: [
-    { href: '/dashboard', icon: 'bi-grid-1x2', label: 'Dashboard' },
-  ],
-}
+// Menu items - matches PHP sidebar exactly
+const menuItems = [
+  { href: '/dashboard.php', icon: 'bi-speedometer2', label: 'Dashboard', roles: ['admin', 'teknisi', 'pengunjung'] },
+  { href: '/servis/data_servis.php', icon: 'bi-tools', label: 'Data Servis', roles: ['admin', 'teknisi', 'pengunjung'] },
+  { href: '/sparepart.php', icon: 'bi-box-seam', label: 'Sparepart', roles: ['admin', 'teknisi', 'pengunjung'] },
+  { href: '/data_pelanggan.php', icon: 'bi-person-lines-fill', label: 'Data Pelanggan', roles: ['admin', 'teknisi', 'pengunjung'] },
+  { href: '/riwayat.php', icon: 'bi-clock-history', label: 'Riwayat Servis', roles: ['admin', 'teknisi', 'pengunjung'] },
+]
+
+// Admin-only menu items
+const adminMenuItems = [
+  { href: '/data_user.php', icon: 'bi-people', label: 'Manajemen User' },
+  { href: '/laporan.php', icon: 'bi-file-earmark-bar-graph', label: 'Laporan Keuangan' },
+  { href: '/pengaturan.php', icon: 'bi-gear-fill', label: 'Pengaturan Toko' },
+]
 
 export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }) {
   const pathname = usePathname()
-  const [theme, setTheme] = useState('dark')
   const [user, setUser] = useState(null)
+  const [theme, setTheme] = useState('dark')
 
   useEffect(() => {
-    // Load theme
-    const savedTheme = localStorage.getItem('ams_theme') || 'dark'
-    setTheme(savedTheme)
-    document.documentElement.classList.toggle('dark', savedTheme === 'dark')
+    // Load theme from localStorage or system preference
+    const savedTheme = localStorage.getItem('am_theme')
+    if (savedTheme) {
+      setTheme(savedTheme)
+    } else {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      setTheme(prefersDark ? 'dark' : 'light')
+    }
+
+    // Apply theme to document
+    document.documentElement.setAttribute('data-theme', theme)
 
     // Load user
-    const userData = localStorage.getItem('ams_user')
+    const userData = localStorage.getItem('ams_user') || sessionStorage.getItem('ams_user')
     if (userData) {
       try {
         setUser(JSON.parse(userData))
@@ -49,154 +47,287 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
         console.error('Failed to parse user data')
       }
     }
-  }, [])
+  }, [theme])
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
 
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark'
     setTheme(newTheme)
-    localStorage.setItem('ams_theme', newTheme)
-    document.documentElement.classList.toggle('dark', newTheme === 'dark')
+    localStorage.setItem('am_theme', newTheme)
+    document.documentElement.setAttribute('data-theme', newTheme)
   }
 
-  const getMenuItems = () => {
-    if (!user) return menuItems.pengunjung
-    const role = user.role?.toLowerCase()
-    return menuItems[role] || menuItems.pengunjung
+  const handleLogout = () => {
+    if (confirm('Yakin ingin keluar dari sistem?')) {
+      localStorage.removeItem('ams_token')
+      localStorage.removeItem('ams_user')
+      sessionStorage.removeItem('ams_token')
+      sessionStorage.removeItem('ams_user')
+      window.location.href = '/login'
+    }
+  }
+
+  const getRoleLabel = () => {
+    if (!user) return 'Pengunjung'
+    const roleMap = {
+      admin: 'Admin',
+      teknisi: 'Teknisi',
+      pengunjung: 'Pengunjung',
+    }
+    return roleMap[user.role?.toLowerCase()] || 'Pengunjung'
+  }
+
+  const getRoleClass = () => {
+    if (!user) return ''
+    const classMap = {
+      admin: 'bg-purple-500/20 text-purple-400',
+      teknisi: 'bg-blue-500/20 text-blue-400',
+      pengunjung: 'bg-gray-500/20 text-gray-400',
+    }
+    return classMap[user.role?.toLowerCase()] || classMap.pengunjung
   }
 
   const isActive = (href) => {
-    if (href === '/dashboard') return pathname === '/dashboard'
-    return pathname.startsWith(href)
+    // Handle both .php and .js extensions
+    const currentPath = pathname.replace('.js', '.php')
+    return currentPath.endsWith(href)
   }
 
-  const getRoleBadge = () => {
-    if (!user) return null
-    const roleMap = {
-      admin: { label: 'Admin', class: 'bg-purple-500/20 text-purple-400' },
-      teknisi: { label: 'Teknisi', class: 'bg-blue-500/20 text-blue-400' },
-      pengunjung: { label: 'Pengunjung', class: 'bg-gray-500/20 text-gray-400' },
-    }
-    const role = user.role?.toLowerCase()
-    const badge = roleMap[role]
-    if (!badge) return null
-    return (
-      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${badge.class}`}>
-        {badge.label}
-      </span>
-    )
-  }
+  const isAdmin = user?.role?.toLowerCase() === 'admin'
 
   return (
     <>
-      {/* Mobile Overlay */}
+      {/* Mobile Topbar */}
+      <div className="am-mobile-topbar">
+        <button
+          onClick={onMobileClose}
+          style={{
+            position: 'relative',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            padding: '8px',
+            borderRadius: '8px',
+            color: 'rgba(255,255,255,.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '42px',
+            height: '42px',
+          }}
+        >
+          <i className="bi bi-list" style={{ fontSize: '1.5rem', lineHeight: 1 }} />
+        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, justifyContent: 'center' }}>
+          <div style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg,#3b82f6,#6366f1)',
+            padding: '2px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <img src="/logo_am.png" alt="Logo" style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#fff', objectFit: 'contain', padding: '4px' }} />
+          </div>
+          <span style={{ color: '#f1f5f9', fontWeight: '800', fontSize: '1rem', letterSpacing: '.06em' }}>
+            AM SERVICE
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <button
+            onClick={toggleTheme}
+            title="Ganti Tema"
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '8px',
+              borderRadius: '8px',
+              color: 'rgba(255,255,255,.75)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '40px',
+              height: '40px',
+            }}
+          >
+            <i className={`bi ${theme === 'dark' ? 'bi-moon-stars' : 'bi-sun'} ${theme === 'dark' ? '' : ''}`} style={{ fontSize: '1.1rem', lineHeight: 1 }} />
+          </button>
+          <button
+            onClick={handleLogout}
+            style={{
+              background: '#ef4444',
+              color: '#fff',
+              fontSize: '.75rem',
+              fontWeight: '700',
+              padding: '8px 14px',
+              borderRadius: '20px',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 2px 8px rgba(239,68,68,.3)',
+            }}
+          >
+            <i className="bi bi-power" style={{ fontSize: '.9rem' }} />
+            <span>Keluar</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Sidebar Overlay (mobile) */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={onMobileClose}
+          style={{
+            display: 'block',
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,.45)',
+            zIndex: 35,
+            backdropFilter: 'blur(1px)',
+          }}
         />
       )}
 
-      <aside
-        className={`
-          fixed top-0 left-0 h-screen w-64 bg-[#1e293b] border-r border-white/5
-          flex flex-col z-50 transition-transform duration-300
-          ${collapsed ? 'lg:w-[72px]' : 'lg:w-64'}
-          ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        `}
-      >
-        {/* Logo */}
-        <div className="px-4 py-5 border-b border-white/5 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 p-0.5 flex-shrink-0">
-            <div className="w-full h-full bg-white rounded-[10px] p-1">
-              <img src="/logo_am.png" alt="AM Service" className="w-full h-full object-contain" />
-            </div>
+      {/* Sidebar */}
+      <aside className={`am-sidebar ${mobileOpen ? 'open' : ''}`}>
+        {/* Brand */}
+        <div style={{ padding: '1.5rem 1rem 1.25rem', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,.07)' }}>
+          <div style={{
+            width: '60px',
+            height: '60px',
+            margin: '0 auto 10px',
+            borderRadius: '50%',
+            padding: '2px',
+            background: 'linear-gradient(135deg,#3b82f6,#6366f1)',
+            boxShadow: '0 0 0 4px rgba(59,130,246,.12),0 0 20px rgba(99,102,241,.2)',
+          }}>
+            <img
+              src="/logo_am.png"
+              alt="Logo AM Service"
+              style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#fff', objectFit: 'contain', padding: '8px', display: 'block' }}
+              onError={(e) => { e.target.src = 'https://cdn-icons-png.flaticon.com/512/3563/3563395.png' }}
+            />
           </div>
-          {!collapsed && (
-            <div className="flex flex-col min-w-0">
-              <span className="text-white font-extrabold text-sm tracking-tight truncate">
-                AM SERVICE
-              </span>
-              <span className="text-slate-500 text-[10px] uppercase tracking-widest">
-                Repair Center
-              </span>
-            </div>
-          )}
+          <div style={{ color: '#f1f5f9', fontWeight: '700', fontSize: '.875rem', letterSpacing: '.06em' }}>AM SERVICE</div>
+          <div style={{ color: 'rgba(255,255,255,.40)', fontSize: '.65rem', marginTop: '2px', letterSpacing: '.04em' }}>Jual Beli &amp; Servis HP</div>
         </div>
 
-        {/* Toggle - Desktop */}
-        <button
-          className="hidden lg:flex absolute -right-3 top-[72px] w-6 h-6 rounded-full
-            bg-slate-700 border-2 border-slate-600 text-slate-400 items-center justify-center
-            text-xs hover:bg-blue-500 hover:border-blue-500 hover:text-white transition-all z-10"
-          onClick={onToggle}
-        >
-          <i className={`bi ${collapsed ? 'bi-chevron-right' : 'bi-chevron-left'}`} />
-        </button>
-
-        {/* Navigation */}
-        <nav className="flex-1 py-4 px-3 overflow-y-auto">
-          <ul className="space-y-1">
-            {getMenuItems().map((item) => (
+        {/* Nav Menu */}
+        <nav style={{ flex: 1, minHeight: 0, padding: '.75rem 0', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {menuItems.map((item) => (
               <li key={item.href}>
                 <Link
-                  href={item.href}
+                  href={item.href.replace('.php', '')}
                   onClick={onMobileClose}
-                  className={`
-                    flex items-center gap-3 px-3 py-2.5 rounded-xl
-                    text-sm font-medium transition-all duration-200
-                    ${isActive(item.href)
-                      ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-lg shadow-blue-500/25'
-                      : 'text-slate-400 hover:bg-white/5 hover:text-white'
-                    }
-                    ${collapsed ? 'lg:justify-center lg:px-2' : ''}
-                  `}
+                  className={`nav-link ${isActive(item.href) ? 'active' : ''}`}
                 >
-                  <i className={`bi ${item.icon} text-lg w-5 text-center flex-shrink-0`} />
-                  {!collapsed && <span className="truncate">{item.label}</span>}
+                  <i className={`bi ${item.icon}`} />
+                  <span>{item.label}</span>
                 </Link>
               </li>
             ))}
+
+            {isAdmin && (
+              <>
+                {/* Admin Section */}
+                <li>
+                  <span className="am-nav-section">Admin Panel</span>
+                </li>
+                {adminMenuItems.map((item) => (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href.replace('.php', '')}
+                      onClick={onMobileClose}
+                      className={`nav-link ${isActive(item.href) ? 'active' : ''}`}
+                    >
+                      <i className={`bi ${item.icon}`} />
+                      <span>{item.label}</span>
+                    </Link>
+                  </li>
+                ))}
+              </>
+            )}
           </ul>
         </nav>
 
-        {/* Footer */}
-        <div className="p-3 border-t border-white/5 space-y-2">
-          {/* Theme Toggle */}
-          <button
-            onClick={toggleTheme}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl
-              text-slate-400 hover:bg-white/5 hover:text-white transition-all duration-200"
-          >
-            <i className={`bi ${theme === 'dark' ? 'bi-sun' : 'bi-moon'} text-lg w-5 text-center`} />
-            {!collapsed && (
-              <span className="text-sm font-medium">
-                {theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
-              </span>
-            )}
-          </button>
+        {/* Bottom Section */}
+        <div style={{ borderTop: '1px solid rgba(255,255,255,.07)', padding: '.6rem 0 .75rem', flexShrink: 0 }}>
+          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            <li>
+              <button onClick={toggleTheme} className="nav-link" style={{ width: '100%', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer' }}>
+                <i className={`bi ${theme === 'dark' ? 'bi-moon-stars' : 'bi-sun'}`} />
+                <span>Ganti Tema</span>
+              </button>
+            </li>
+            <li>
+              <Link href="/ganti_password.php" className="nav-link">
+                <i className="bi bi-key" />
+                <span>Ganti Password</span>
+              </Link>
+            </li>
+            <li>
+              <button onClick={handleLogout} className="nav-link nav-logout" style={{ width: '100%', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer' }}>
+                <i className="bi bi-box-arrow-right" />
+                <span>Logout ({user?.nama || 'User'})</span>
+              </button>
+            </li>
+          </ul>
 
-          {/* User Profile */}
-          {!collapsed && user && (
-            <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/5">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600
-                flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                {user.nama?.charAt(0)?.toUpperCase() || 'U'}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">{user.nama || 'User'}</p>
-                {getRoleBadge()}
-              </div>
+          {isAdmin && (
+            <div style={{ padding: '6px 12px 0' }}>
+              <Link
+                href="/backup.php"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  width: '100%',
+                  background: 'linear-gradient(135deg,#db2777,#be185d)',
+                  color: '#fff',
+                  fontSize: '.72rem',
+                  fontWeight: '700',
+                  padding: '7px 12px',
+                  borderRadius: '999px',
+                  textDecoration: 'none',
+                  boxShadow: '0 2px 10px rgba(219,39,119,.25)',
+                }}
+              >
+                <i className="bi bi-hdd-fill" /> Backup Data
+              </Link>
             </div>
           )}
 
-          {/* Version */}
-          {!collapsed && (
-            <p className="text-center text-[11px] text-slate-600 pt-1">
-              AM Service v1.0.0
-            </p>
-          )}
+          {/* User info chip */}
+          <div style={{ margin: '10px 12px 6px', padding: '8px 10px', background: 'rgba(255,255,255,.04)', borderRadius: '8px', border: '1px solid rgba(255,255,255,.07)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'linear-gradient(135deg,#3b82f6,#6366f1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <i className="bi bi-person-fill" style={{ color: '#fff', fontSize: '.8rem' }} />
+            </div>
+            <div style={{ minWidth: 0, flex: 1, overflow: 'hidden' }}>
+              <div style={{ color: 'rgba(255,255,255,.85)', fontSize: '.75rem', fontWeight: '600', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {user?.nama || 'User'}
+              </div>
+              <div style={{ color: 'rgba(255,255,255,.35)', fontSize: '.62rem', textTransform: 'uppercase', letterSpacing: '.08em' }}>
+                {getRoleLabel()}
+              </div>
+            </div>
+          </div>
         </div>
       </aside>
+
+      {/* Page Loader */}
+      <div id="am-top-loader" />
     </>
   )
 }

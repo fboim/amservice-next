@@ -6,135 +6,102 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
 import MonthlyChart from '@/components/MonthlyChart'
-import StockWarning from '@/components/StockWarning'
 import { formatRupiah } from '@/lib/utils'
 
-// Stat Card Component
-function StatCard({ icon, label, value, sub, color, bgClass }) {
-  return (
-    <div className="relative bg-slate-800/50 border border-slate-700/50 rounded-2xl p-5
-      hover:border-slate-600 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/20
-      transition-all duration-300 overflow-hidden group">
-      {/* Glow effect */}
-      <div
-        className="absolute top-0 left-0 w-1 h-full transition-all duration-300"
-        style={{ background: color }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-br from-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-
-      <div className="relative flex items-center gap-4">
-        <div
-          className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
-          style={{ background: `${color}20`, color }}
-        >
-          <i className={`bi ${icon}`} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">{label}</p>
-          <p className="text-2xl sm:text-3xl font-extrabold text-white">{value}</p>
-          <p className="text-xs text-slate-500 mt-0.5">{sub}</p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// Revenue Card Component
-function RevenueCard({ label, value, color, icon }) {
-  return (
-    <div className="relative bg-gradient-to-br from-slate-800/50 to-slate-800/20 border border-slate-700/50
-      rounded-2xl p-5 overflow-hidden">
-      <div
-        className="absolute inset-0 opacity-10"
-        style={{ background: `linear-gradient(135deg, ${color}, transparent)` }}
-      />
-      <div className="relative">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{label}</span>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${color}20`, color }}>
-            <i className={`bi ${icon}`} />
-          </div>
-        </div>
-        <p className="text-xl sm:text-2xl font-extrabold text-white truncate">{value}</p>
-      </div>
-    </div>
-  )
+// Format date helper
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 export default function Dashboard() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
   const [stats, setStats] = useState({
-    antrean: 0,
-    proses: 0,
-    siap: 0,
-    selesai: 0,
-    omzet_hari: 0,
-    omzet_bulan: 0,
-    monthly_data: [],
+    antrean: 0, proses: 0, siap: 0, selesai: 0, omzet_hari: 0, omzet_bulan: 0
   })
   const [servisTerbaru, setServisTerbaru] = useState([])
+  const [stokMenipis, setStokMenipis] = useState([])
+  const [merkPopuler, setMerkPopuler] = useState([])
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
     const token = localStorage.getItem('ams_token') || sessionStorage.getItem('ams_token')
+    const userData = localStorage.getItem('ams_user') || sessionStorage.getItem('ams_user')
+
     if (!token) {
       router.push('/login')
       return
     }
 
-    fetchDashboard()
-
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(() => {
-      fetchDashboard(true)
-    }, 30000)
-
-    return () => clearInterval(interval)
-  }, [router])
-
-  const fetchDashboard = async (isRefresh = false) => {
-    if (isRefresh) {
-      setRefreshing(true)
+    if (userData) {
+      try {
+        setUser(JSON.parse(userData))
+      } catch (e) {
+        console.error('Failed to parse user')
+      }
     }
 
+    fetchDashboard()
+  }, [router])
+
+  const fetchDashboard = async () => {
     try {
-      const [dashboardRes, servisRes] = await Promise.all([
+      const [dashRes, servisRes] = await Promise.all([
         fetch('/api/dashboard'),
         fetch('/api/servis?limit=10'),
       ])
 
-      const dashboardData = await dashboardRes.json()
+      const dashData = await dashRes.json()
       const servisData = await servisRes.json()
 
-      setStats(dashboardData)
+      setStats(dashData)
       setServisTerbaru(servisData.servis || [])
     } catch (err) {
       console.error('Fetch error:', err)
     } finally {
       setLoading(false)
-      setRefreshing(false)
     }
   }
 
+  const isAdmin = user?.role?.toLowerCase() === 'admin'
+  const isPengunjung = user?.role?.toLowerCase() === 'pengunjung'
+
   const getBadgeClass = (status) => {
     const map = {
-      'Antrean': 'bg-blue-500/15 text-blue-400',
-      'Proses': 'bg-amber-500/15 text-amber-400',
-      'Siap Diambil': 'bg-cyan-500/15 text-cyan-400',
-      'Sudah Diambil': 'bg-emerald-500/15 text-emerald-400',
-      'Tidak Bisa': 'bg-red-500/15 text-red-400',
+      'Antrean': 'badge-antrean',
+      'Proses': 'badge-proses',
+      'Siap Diambil': 'badge-siap',
+      'Sudah Diambil': 'badge-selesai',
+      'Tidak Bisa': 'badge-gagal',
     }
-    return map[status] || 'bg-slate-500/15 text-slate-400'
+    return map[status] || 'badge-antrean'
+  }
+
+  const getBadgeText = (status) => {
+    const map = {
+      'Antrean': 'Antrean',
+      'Proses': 'Proses',
+      'Siap Diambil': 'Siap',
+      'Sudah Diambil': 'Selesai',
+      'Tidak Bisa': 'Gagal',
+    }
+    return map[status] || status
+  }
+
+  const formatNoWA = (no) => {
+    if (!no) return ''
+    const clean = no.replace(/[^0-9]/g, '')
+    if (clean.startsWith('0')) return '62' + clean.slice(1)
+    return clean
   }
 
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <div className="w-12 h-12 border-4 border-slate-700 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-slate-500">Memuat dashboard...</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+          <div style={{ textAlign: 'center', color: 'var(--am-text-muted)' }}>
+            <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
+            <p style={{ marginTop: '8px' }}>Memuat dashboard...</p>
           </div>
         </div>
       </AppLayout>
@@ -143,192 +110,279 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
-        {/* Header Row */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-extrabold text-white tracking-tight">Dashboard</h1>
-            <p className="text-sm text-slate-500 mt-1">
-              {new Date().toLocaleDateString('id-ID', {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-              })}
-            </p>
+      {/* Stats Cards - 4 columns */}
+      <div className="dash-row-4" style={{ marginBottom: '8px', marginTop: '4px' }}>
+        <div className="scard" style={{ borderLeft: '3px solid #3b82f6' }}>
+          <div style={{ width: '42px', height: '42px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0, background: 'rgba(59,130,246,.12)', color: '#3b82f6' }}>
+            <i className="bi bi-person-plus-fill" />
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => fetchDashboard(true)}
-              disabled={refreshing}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10
-                text-slate-400 rounded-xl text-sm font-medium hover:bg-white/10 hover:text-white
-                transition-all disabled:opacity-50"
-            >
-              <i className={`bi bi-arrow-clockwise ${refreshing ? 'animate-spin' : ''}`} />
-              <span>Refresh</span>
-            </button>
-            <Link
-              href="/servis/tambah"
-              className="flex items-center gap-2 px-4 py-2.5
-                bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl
-                text-sm font-semibold shadow-lg shadow-blue-500/25
-                hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all"
-            >
-              <i className="bi bi-plus-circle" />
-              <span>Servis Baru</span>
-            </Link>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: '.68rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.4px' }}>Antrean</div>
+            <div style={{ fontSize: '1.55rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1, margin: '2px 0' }}>{stats.antrean}</div>
+            <div style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>Unit hari ini</div>
           </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          <StatCard
-            icon="bi-person-plus-fill"
-            label="Antrean"
-            value={stats.antrean}
-            sub="Unit hari ini"
-            color="#3b82f6"
-          />
-          <StatCard
-            icon="bi-tools"
-            label="Dikerjakan"
-            value={stats.proses}
-            sub="Sedang diproses"
-            color="#f59e0b"
-          />
-          <StatCard
-            icon="bi-bag-check-fill"
-            label="Siap Diambil"
-            value={stats.siap}
-            sub="Tunggu pelanggan"
-            color="#06b6d4"
-          />
-          <StatCard
-            icon="bi-check-circle-fill"
-            label="Selesai"
-            value={stats.selesai}
-            sub="Diambil hari ini"
-            color="#10b981"
-          />
-          <div className="col-span-2 lg:col-span-4 xl:col-span-1">
-            <RevenueCard
-              label="Omzet Hari Ini"
-              value={formatRupiah(stats.omzet_hari)}
-              color="#8b5cf6"
-              icon="bi-cash-stack"
-            />
+        <div className="scard" style={{ borderLeft: '3px solid #f59e0b' }}>
+          <div style={{ width: '42px', height: '42px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0, background: 'rgba(245,158,11,.12)', color: '#d97706' }}>
+            <i className="bi bi-tools" />
+          </div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: '.68rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.4px' }}>Dikerjakan</div>
+            <div style={{ fontSize: '1.55rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1, margin: '2px 0' }}>{stats.proses}</div>
+            <div style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>Sedang diproses</div>
           </div>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          {/* Chart Section */}
-          <div className="xl:col-span-2 bg-slate-800/50 border border-slate-700/50 rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <i className="bi bi-bar-chart text-blue-400" />
-                Tren Unit Masuk
-              </h2>
-              <span className="text-xs text-slate-500">6 Bulan Terakhir</span>
-            </div>
-            <MonthlyChart data={stats.monthly_data} />
+        <div className="scard" style={{ borderLeft: '3px solid #06b6d4' }}>
+          <div style={{ width: '42px', height: '42px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0, background: 'rgba(6,182,212,.12)', color: '#0891b2' }}>
+            <i className="bi bi-bag-check-fill" />
           </div>
-
-          {/* Stock Warning Sidebar */}
-          <div className="xl:col-span-1">
-            <StockWarning />
-
-            {/* Quick Omzet Monthly */}
-            <div className="mt-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10
-              border border-purple-500/20 rounded-2xl p-5">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-bold text-white flex items-center gap-2">
-                  <i className="bi bi-calendar-month text-purple-400" />
-                  Omzet Tahun Ini
-                </span>
-              </div>
-              <p className="text-2xl font-extrabold text-white">
-                {formatRupiah(stats.omzet_bulan)}
-              </p>
-              <p className="text-xs text-slate-500 mt-1">
-                Total pendapatan tahun {new Date().getFullYear()}
-              </p>
-            </div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: '.68rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.4px' }}>Siap Diambil</div>
+            <div style={{ fontSize: '1.55rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1, margin: '2px 0' }}>{stats.siap}</div>
+            <div style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>Tunggu pelanggan</div>
           </div>
         </div>
 
+        <div className="scard" style={{ borderLeft: '3px solid #10b981' }}>
+          <div style={{ width: '42px', height: '42px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0, background: 'rgba(16,185,129,.12)', color: '#059669' }}>
+            <i className="bi bi-check-circle-fill" />
+          </div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: '.68rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.4px' }}>Selesai</div>
+            <div style={{ fontSize: '1.55rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1, margin: '2px 0' }}>{stats.selesai}</div>
+            <div style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>Diambil hari ini</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Omzet Cards - 2 columns */}
+      <div className="dash-row-2" style={{ marginBottom: '20px' }}>
+        <div className="scard" style={{ borderLeft: '3px solid #8b5cf6' }}>
+          <div style={{ width: '42px', height: '42px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0, background: 'rgba(139,92,246,.12)', color: '#7c3aed' }}>
+            <i className="bi bi-cash-stack" />
+          </div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: '.68rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.4px' }}>Omzet Hari Ini</div>
+            <div style={{ fontSize: '1.05rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1, margin: '2px 0' }}>{formatRupiah(stats.omzet_hari)}</div>
+            <div style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>{stats.selesai} transaksi selesai</div>
+          </div>
+        </div>
+
+        <div className="scard" style={{ borderLeft: '3px solid #f43f5e' }}>
+          <div style={{ width: '42px', height: '42px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0, background: 'rgba(244,63,94,.12)', color: '#e11d48' }}>
+            <i className="bi bi-graph-up-arrow" />
+          </div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontSize: '.68rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.4px' }}>Omzet Bulan Ini</div>
+            <div style={{ fontSize: '1.05rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1, margin: '2px 0' }}>{formatRupiah(stats.omzet_bulan)}</div>
+            <div style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>{new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Table + Sidebar */}
+      <div className="dash-row-tb" style={{ marginBottom: '20px' }}>
         {/* Servis Table */}
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/50">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <i className="bi bi-clock-history text-cyan-400" />
-              Servis Terbaru
-            </h2>
+        <div className="section-card">
+          <div className="card-header">
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.875rem', fontWeight: '600', color: 'var(--am-text)' }}>
+              <i className="bi bi-clock-history" style={{ color: '#3b82f6' }} /> Servis Terbaru
+            </span>
             <Link
               href="/servis/data"
-              className="text-sm text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 transition-colors"
+              style={{ fontSize: '.75rem', color: 'var(--am-primary)', textDecoration: 'none', fontWeight: '600' }}
             >
-              Lihat Semua
-              <i className="bi bi-chevron-double-right" />
+              Lihat Semua <i className="bi bi-arrow-right" />
             </Link>
           </div>
+          <div className="table-wrapper">
+            <table className="ds-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Pelanggan</th>
+                  <th>Unit HP</th>
+                  <th>Keluhan</th>
+                  <th>Status</th>
+                  <th>Biaya</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {servisTerbaru.length > 0 ? servisTerbaru.map((s, i) => {
+                  const hp = formatNoWA(s.no_hp)
+                  const wa_msg = `Halo *${s.nama_pelanggan}*, perangkat *${s.merk_hp} ${s.tipe_hp}* (nota: *${s.no_servis}*) statusnya: *${s.status.toUpperCase()}*\n\nhttps://amservice.web.id/cek_servis.php?no=${s.no_servis}`
 
-          {servisTerbaru.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-slate-900/50">
-                    <th className="px-5 py-3 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">No</th>
-                    <th className="px-5 py-3 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">No Servis</th>
-                    <th className="px-5 py-3 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">Pelanggan</th>
-                    <th className="px-5 py-3 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">Unit HP</th>
-                    <th className="px-5 py-3 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                    <th className="px-5 py-3 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider">Biaya</th>
-                    <th className="px-5 py-3 text-center text-[11px] font-bold text-slate-500 uppercase tracking-wider">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-700/30">
-                  {servisTerbaru.map((s, i) => (
-                    <tr key={s.id} className="hover:bg-white/5 transition-colors">
-                      <td className="px-5 py-3 text-sm text-slate-500">{i + 1}</td>
-                      <td className="px-5 py-3 text-sm font-mono text-slate-400">{s.no_servis}</td>
-                      <td className="px-5 py-3">
-                        <div className="text-sm font-medium text-white">{s.nama_pelanggan}</div>
-                        <div className="text-xs text-slate-500">{s.no_hp || '-'}</div>
+                  return (
+                    <tr key={s.id}>
+                      <td style={{ color: 'var(--am-text-muted)', fontSize: '.75rem' }}>{i + 1}</td>
+                      <td style={{ textAlign: 'left' }}>
+                        <div style={{ lineHeight: 1.3 }}>
+                          <div style={{ fontWeight: '600', color: 'var(--am-text)', fontSize: '.82rem' }}>{s.nama_pelanggan}</div>
+                          <div style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>{s.no_servis}</div>
+                        </div>
                       </td>
-                      <td className="px-5 py-3 text-sm text-slate-300">
-                        {s.merk_hp} {s.tipe_hp}
+                      <td style={{ textAlign: 'left' }}>
+                        <div style={{ lineHeight: 1.3 }}>
+                          <div style={{ fontWeight: '600', color: 'var(--am-text)', fontSize: '.82rem' }}>{s.merk_hp} {s.tipe_hp}</div>
+                          <div style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>{formatDate(s.tanggal)}</div>
+                        </div>
                       </td>
-                      <td className="px-5 py-3">
-                        <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${getBadgeClass(s.status)}`}>
-                          {s.status}
-                        </span>
+                      <td style={{ textAlign: 'left', maxWidth: '160px' }}>
+                        {s.keluhan ? (
+                          <div style={{ fontSize: '.8rem', color: 'var(--am-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '160px' }} title={s.keluhan}>
+                            {s.keluhan.length > 30 ? s.keluhan.slice(0, 30) + '...' : s.keluhan}
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: '.8rem', color: 'var(--am-text-muted)' }}>-</span>
+                        )}
                       </td>
-                      <td className="px-5 py-3 text-sm font-semibold text-white">
+                      <td>
+                        <span className={`badge-soft ${getBadgeClass(s.status)}`}>{getBadgeText(s.status)}</span>
+                      </td>
+                      <td style={{ fontWeight: '600', color: 'var(--am-text)', fontSize: '.82rem' }}>
                         {s.estimasi_biaya ? formatRupiah(s.estimasi_biaya) : '-'}
                       </td>
-                      <td className="px-5 py-3 text-center">
-                        <Link
-                          href={`/servis/edit/${s.id}`}
-                          className="inline-flex items-center justify-center w-9 h-9
-                            bg-blue-500/10 text-blue-400 rounded-lg
-                            hover:bg-blue-500/20 hover:text-blue-300 transition-all"
-                        >
-                          <i className="bi bi-eye" />
-                        </Link>
+                      <td>
+                        <div className="btn-group-act">
+                          {!isPengunjung && (
+                            <>
+                              <Link href={`/servis/edit/${s.id}`} className="btn-act btn-act-blue" title="Edit">
+                                <i className="bi bi-pencil-square" />
+                              </Link>
+                              <a href={`https://wa.me/${hp}?text=${encodeURIComponent(wa_msg)}`} target="_blank" className="btn-act btn-act-green" title="Kirim WA">
+                                <i className="bi bi-whatsapp" />
+                              </a>
+                            </>
+                          )}
+                          {isAdmin && (
+                            <button className="btn-act btn-act-red" title="Hapus">
+                              <i className="bi bi-trash" />
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  )
+                }) : (
+                  <tr>
+                    <td colSpan="7" style={{ textAlign: 'center', padding: '24px', color: 'var(--am-text-muted)' }}>
+                      <i className="bi bi-inbox" style={{ fontSize: '2rem', opacity: 0.3 }} />
+                      <p style={{ margin: '8px 0 0' }}>Belum ada data servis</p>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Sidebar Column - Stock Warning + Merk Populer */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Stok Menipis Widget */}
+          <div className="section-card">
+            <div className="card-header">
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.75rem', fontWeight: '600', color: 'var(--am-text)' }}>
+                <i className="bi bi-exclamation-triangle" style={{ color: '#f59e0b' }} /> Stok Menipis
+              </span>
+              {stokMenipis.length > 0 && (
+                <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>{stokMenipis.length} item</span>
+              )}
             </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-16 text-slate-500">
-              <i className="bi bi-inbox text-5xl mb-3 opacity-20" />
-              <p className="text-sm">Belum ada data servis</p>
+            <div style={{ padding: '8px 0' }}>
+              {stokMenipis.length > 0 ? stokMenipis.map((item) => (
+                <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 16px', borderBottom: '1px solid var(--am-border)' }}>
+                  <span style={{ fontSize: '.8rem', color: 'var(--am-text)' }}>{item.nama_sparepart || item.nama}</span>
+                  <span style={{
+                    fontSize: '.68rem',
+                    fontWeight: '700',
+                    padding: '2px 8px',
+                    borderRadius: '999px',
+                    background: item.stok === 0 ? 'rgba(239,68,68,.15)' : 'rgba(245,158,11,.15)',
+                    color: item.stok === 0 ? '#dc2626' : '#d97706',
+                  }}>
+                    {item.stok}
+                  </span>
+                </div>
+              )) : (
+                <div style={{ padding: '16px', textAlign: 'center', color: 'var(--am-text-muted)', fontSize: '.8rem' }}>
+                  <i className="bi bi-check-circle" style={{ color: '#10b981' }} /> Stok Aman
+                </div>
+              )}
             </div>
-          )}
+          </div>
+
+          {/* Merk HP Populer */}
+          <div className="section-card">
+            <div className="card-header">
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.75rem', fontWeight: '600', color: 'var(--am-text)' }}>
+                <i className="bi bi-phone" style={{ color: '#3b82f6' }} /> Merk Populer
+              </span>
+            </div>
+            <div>
+              {merkPopuler.length > 0 ? merkPopuler.map((merk, i) => (
+                <div key={i} className="merk-item">
+                  <span style={{ fontSize: '.8rem', color: 'var(--am-text)' }}>{merk.merk_hp}</span>
+                  <span style={{ fontSize: '.7rem', fontWeight: '600', color: 'var(--am-text-muted)' }}>{merk.total}x</span>
+                </div>
+              )) : (
+                <div style={{ padding: '16px', textAlign: 'center', color: 'var(--am-text-muted)', fontSize: '.8rem' }}>
+                  Belum ada data
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Section - Chart + Popular Brands */}
+      <div className="dash-row-bot">
+        {/* Monthly Chart */}
+        <div className="section-card">
+          <div className="card-header">
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.875rem', fontWeight: '600', color: 'var(--am-text)' }}>
+              <i className="bi bi-bar-chart" style={{ color: '#3b82f6' }} /> Grafik Servis
+            </span>
+            <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>{new Date().getFullYear()}</span>
+          </div>
+          <div style={{ padding: '16px' }}>
+            <div style={{ height: '220px' }}>
+              <MonthlyChart data={stats.monthly_data} />
+            </div>
+          </div>
+        </div>
+
+        {/* Popular Brands Stats */}
+        <div className="section-card">
+          <div className="card-header">
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.875rem', fontWeight: '600', color: 'var(--am-text)' }}>
+              <i className="bi bi-trophy" style={{ color: '#f59e0b' }} /> Brand Stats
+            </span>
+          </div>
+          <div style={{ padding: '8px 0' }}>
+            {merkPopuler.length > 0 ? merkPopuler.slice(0, 5).map((merk, i) => {
+              const maxTotal = Math.max(...merkPopuler.map(m => m.total))
+              const percentage = (merk.total / maxTotal) * 100
+
+              return (
+                <div key={i} style={{ padding: '10px 16px', borderBottom: '1px solid var(--am-border)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '.8rem', fontWeight: '600', color: 'var(--am-text)' }}>{merk.merk_hp}</span>
+                    <span style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>{merk.total} unit</span>
+                  </div>
+                  <div style={{ height: '4px', background: 'var(--am-border)', borderRadius: '2px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${percentage}%`, background: 'linear-gradient(90deg, #3b82f6, #6366f1)', borderRadius: '2px' }} />
+                  </div>
+                </div>
+              )
+            }) : (
+              <div style={{ padding: '16px', textAlign: 'center', color: 'var(--am-text-muted)', fontSize: '.8rem' }}>
+                Belum ada data
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </AppLayout>
