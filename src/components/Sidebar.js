@@ -6,18 +6,18 @@ import { useState, useEffect } from 'react'
 
 // Menu items - matches PHP sidebar exactly
 const menuItems = [
-  { href: '/dashboard.php', icon: 'bi-speedometer2', label: 'Dashboard', roles: ['admin', 'teknisi', 'pengunjung'] },
-  { href: '/servis/data_servis.php', icon: 'bi-tools', label: 'Data Servis', roles: ['admin', 'teknisi', 'pengunjung'] },
-  { href: '/sparepart.php', icon: 'bi-box-seam', label: 'Sparepart', roles: ['admin', 'teknisi', 'pengunjung'] },
-  { href: '/data_pelanggan.php', icon: 'bi-person-lines-fill', label: 'Data Pelanggan', roles: ['admin', 'teknisi', 'pengunjung'] },
-  { href: '/riwayat.php', icon: 'bi-clock-history', label: 'Riwayat Servis', roles: ['admin', 'teknisi', 'pengunjung'] },
+  { href: '/dashboard', icon: 'bi-speedometer2', label: 'Dashboard', roles: ['admin', 'teknisi', 'pengunjung'] },
+  { href: '/servis/data', icon: 'bi-tools', label: 'Data Servis', roles: ['admin', 'teknisi', 'pengunjung'] },
+  { href: '/sparepart', icon: 'bi-box-seam', label: 'Sparepart', roles: ['admin', 'teknisi', 'pengunjung'] },
+  { href: '/pelanggan', icon: 'bi-person-lines-fill', label: 'Data Pelanggan', roles: ['admin', 'teknisi', 'pengunjung'] },
+  { href: '/trash', icon: 'bi-clock-history', label: 'Riwayat Servis', roles: ['admin', 'teknisi', 'pengunjung'] },
 ]
 
 // Admin-only menu items
 const adminMenuItems = [
-  { href: '/data_user.php', icon: 'bi-people', label: 'Manajemen User' },
-  { href: '/laporan.php', icon: 'bi-file-earmark-bar-graph', label: 'Laporan Keuangan' },
-  { href: '/pengaturan.php', icon: 'bi-gear-fill', label: 'Pengaturan Toko' },
+  { href: '/user', icon: 'bi-people', label: 'Manajemen User' },
+  { href: '/laporan', icon: 'bi-file-earmark-bar-graph', label: 'Laporan Keuangan' },
+  { href: '/pengaturan', icon: 'bi-gear-fill', label: 'Pengaturan Toko' },
 ]
 
 export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }) {
@@ -91,9 +91,8 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
   }
 
   const isActive = (href) => {
-    // Handle both .php and .js extensions
-    const currentPath = pathname.replace('.js', '.php')
-    return currentPath.endsWith(href)
+    // Handle Next.js paths (without .php extension)
+    return pathname === href || pathname.startsWith(href + '/')
   }
 
   const isAdmin = user?.role?.toLowerCase() === 'admin'
@@ -228,7 +227,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
             {menuItems.map((item) => (
               <li key={item.href}>
                 <Link
-                  href={item.href.replace('.php', '')}
+                  href={item.href}
                   onClick={onMobileClose}
                   className={`nav-link ${isActive(item.href) ? 'active' : ''}`}
                 >
@@ -247,7 +246,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
                 {adminMenuItems.map((item) => (
                   <li key={item.href}>
                     <Link
-                      href={item.href.replace('.php', '')}
+                      href={item.href}
                       onClick={onMobileClose}
                       className={`nav-link ${isActive(item.href) ? 'active' : ''}`}
                     >
