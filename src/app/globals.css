@@ -120,7 +120,6 @@ body {
 
 /* Mobile Topbar */
 .am-mobile-topbar {
-  display: none;
   position: fixed;
   top: 0;
   left: 0;
@@ -134,12 +133,6 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-@media (max-width: 767px) {
-  .am-mobile-topbar {
-    display: flex;
-  }
-}
-
 /* Main Content Area */
 .am-main {
   margin-left: var(--am-sidebar-w);
@@ -148,6 +141,14 @@ body {
   transition: margin-left 0.3s ease;
   position: relative;
   z-index: 1;
+}
+
+@media (max-width: 767px) {
+  .am-main {
+    margin-left: 0;
+    padding: 16px;
+    padding-top: 72px;
+  }
 }
 
 @media (max-width: 767px) {
@@ -727,5 +728,3 @@ body {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
-
-/* Duplicate removed - see above .am-sidebar-container */

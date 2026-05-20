@@ -24,9 +24,17 @@ export default function Sidebar() {
   const [user, setUser] = useState(null)
   const [theme, setTheme] = useState('dark')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
-  // Check if mobile
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  // Detect mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     const userData = localStorage.getItem('ams_user') || sessionStorage.getItem('ams_user')
@@ -56,8 +64,10 @@ export default function Sidebar() {
 
   // Close sidebar on route change
   useEffect(() => {
-    setSidebarOpen(false)
-  }, [pathname])
+    if (isMobile) {
+      setSidebarOpen(false)
+    }
+  }, [pathname, isMobile])
 
   const toggleSidebar = useCallback(() => {
     setSidebarOpen(prev => !prev)
@@ -89,82 +99,78 @@ export default function Sidebar() {
   const isActive = (href) => pathname === href || pathname.startsWith(href + '/')
   const isAdmin = user?.role?.toLowerCase() === 'admin'
 
+  // Desktop: always visible. Mobile: toggle based on state
+  const sidebarVisible = !isMobile || sidebarOpen
+
   return (
     <>
-      {/* Mobile Topbar */}
-      <div className="am-mobile-topbar" style={{ pointerEvents: 'auto' }}>
-        <button
-          onClick={toggleSidebar}
-          aria-label="Toggle sidebar"
-          style={{
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '8px',
-            borderRadius: '8px',
-            color: 'rgba(255,255,255,.85)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '42px',
-            height: '42px',
-          }}
-        >
-          <i className={`bi ${sidebarOpen ? 'bi-x-lg' : 'bi-list'}`} style={{ fontSize: '1.5rem' }} />
-        </button>
+      {/* Mobile Topbar - only show on mobile */}
+      {isMobile && (
+        <div className="am-mobile-topbar">
+          <button
+            onClick={toggleSidebar}
+            aria-label="Toggle sidebar"
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '8px',
+              borderRadius: '8px',
+              color: 'rgba(255,255,255,.85)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '42px',
+              height: '42px',
+            }}
+          >
+            <i className={`bi ${sidebarOpen ? 'bi-x-lg' : 'bi-list'}`} style={{ fontSize: '1.5rem' }} />
+          </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, justifyContent: 'center' }}>
-          <div style={{
-            width: '32px', height: '32px', borderRadius: '50%',
-            background: 'linear-gradient(135deg,#3b82f6,#6366f1)',
-            padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <img src="/logo_am.png" alt="Logo" style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#fff', objectFit: 'contain', padding: '4px' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, justifyContent: 'center' }}>
+            <div style={{
+              width: '32px', height: '32px', borderRadius: '50%',
+              background: 'linear-gradient(135deg,#3b82f6,#6366f1)',
+              padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <img src="/logo_am.png" alt="Logo" style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#fff', objectFit: 'contain', padding: '4px' }} />
+            </div>
+            <span style={{ color: '#f1f5f9', fontWeight: '800', fontSize: '1rem', letterSpacing: '.06em' }}>AM SERVICE</span>
           </div>
-          <span style={{ color: '#f1f5f9', fontWeight: '800', fontSize: '1rem', letterSpacing: '.06em' }}>AM SERVICE</span>
-        </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <button
-            onClick={toggleTheme}
-            title="Ganti Tema"
-            style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '8px', color: 'rgba(255,255,255,.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px' }}
-          >
-            <i className={`bi ${theme === 'dark' ? 'bi-moon-stars' : 'bi-sun'}`} style={{ fontSize: '1.1rem' }} />
-          </button>
-          <button
-            onClick={handleLogout}
-            style={{ background: '#ef4444', color: '#fff', fontSize: '.75rem', fontWeight: '700', padding: '8px 14px', borderRadius: '20px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 8px rgba(239,68,68,.3)' }}
-          >
-            <i className="bi bi-power" style={{ fontSize: '.9rem' }} />
-            <span>Keluar</span>
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <button
+              onClick={toggleTheme}
+              title="Ganti Tema"
+              style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '8px', color: 'rgba(255,255,255,.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px' }}
+            >
+              <i className={`bi ${theme === 'dark' ? 'bi-moon-stars' : 'bi-sun'}`} style={{ fontSize: '1.1rem' }} />
+            </button>
+            <button
+              onClick={handleLogout}
+              style={{ background: '#ef4444', color: '#fff', fontSize: '.75rem', fontWeight: '700', padding: '8px 14px', borderRadius: '20px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 8px rgba(239,68,68,.3)' }}
+            >
+              <i className="bi bi-power" style={{ fontSize: '.9rem' }} />
+              <span>Keluar</span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Sidebar Overlay */}
-      {sidebarOpen && (
+      {isMobile && sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 35 }}
         />
       )}
 
-      {/* Sidebar - using display for simplicity */}
+      {/* Sidebar */}
       <div
         className="am-sidebar-container"
         style={{
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          width: 'var(--am-sidebar-w)',
-          height: '100vh',
-          background: 'var(--am-sidebar-bg)',
-          zIndex: 40,
-          transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
+          transform: (isMobile && !sidebarOpen) ? 'translateX(-100%)' : 'translateX(0)',
           transition: 'transform 0.3s ease',
-          display: 'flex',
-          flexDirection: 'column',
         }}
       >
         <div style={{ padding: '1.5rem 1rem 1.25rem', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,.07)' }}>
