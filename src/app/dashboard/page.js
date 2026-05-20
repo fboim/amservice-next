@@ -121,7 +121,10 @@ export default function Dashboard() {
 
   // Close dropdowns when clicking outside
   useEffect(() => {
-    const handleClickOutside = () => {
+    const handleClickOutside = (e) => {
+      // Don't close if clicking on the dropdown trigger or inside dropdown
+      const dropdown = e.target.closest('.btn-group-act, .print-dropdown')
+      if (dropdown) return
       setOpenDropdown(null)
       setOpenWADropdown(null)
     }
