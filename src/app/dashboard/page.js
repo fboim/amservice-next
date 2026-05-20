@@ -245,7 +245,7 @@ export default function Dashboard() {
                   const hp = formatNoWA(s.no_hp)
                   const wa_msg = `Halo *${s.nama_pelanggan}*, perangkat *${s.merk_hp} ${s.tipe_hp}* (nota: *${s.no_servis}*) statusnya: *${s.status.toUpperCase()}*\n\nhttps://amservice.web.id/cek_servis.php?no=${s.no_servis}`
                   return (
-                    <tr key={s.id}>
+                    <tr key={s.id} style={{ borderBottom: '1px solid var(--am-border)' }}>
                       <td style={{ padding: '12px', fontSize: '.75rem', color: 'var(--am-text-muted)', fontWeight: '700', textAlign: 'center' }}>{i + 1}</td>
                       <td style={{ padding: '12px' }}>
                         <div style={{ fontWeight: '700', color: '#3b82f6', fontSize: '.79rem' }}>{s.no_servis}</div>
