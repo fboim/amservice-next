@@ -25,6 +25,14 @@ export default function MonthlyChart({ data = [] }) {
     const chart = {
       ctx,
       data: { labels, values, maxValue },
+      destroyed: false,
+      destroy() {
+        this.destroyed = true
+        if (canvasRef.current) {
+          const ctx = canvasRef.current.getContext('2d')
+          ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+        }
+      },
       draw() {
         const { ctx, data } = this
         const canvas = canvasRef.current
@@ -87,11 +95,13 @@ export default function MonthlyChart({ data = [] }) {
 
     // Handle resize
     const handleResize = () => {
-      if (canvasRef.current) {
-        const container = canvasRef.current.parentElement
-        canvasRef.current.width = container.clientWidth
-        canvasRef.current.height = container.clientHeight
-        if (chartRef.current) chartRef.current.draw()
+      if (chartRef.current && !chartRef.current.destroyed) {
+        if (canvasRef.current) {
+          const container = canvasRef.current.parentElement
+          canvasRef.current.width = container.clientWidth
+          canvasRef.current.height = container.clientHeight
+          chartRef.current.draw()
+        }
       }
     }
 
@@ -101,7 +111,7 @@ export default function MonthlyChart({ data = [] }) {
 
     return () => {
       window.removeEventListener('resize', handleResize)
-      if (chartRef.current) {
+      if (chartRef.current && !chartRef.current.destroyed) {
         chartRef.current.destroy()
       }
     }
