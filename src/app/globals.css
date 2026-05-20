@@ -722,9 +722,26 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Mobile sidebar improvements */
+/* Sidebar Container */
+.am-sidebar-container {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: var(--am-sidebar-w);
+  height: 100vh;
+  background: var(--am-sidebar-bg);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease;
+}
+
 @media (max-width: 767px) {
-  .am-sidebar {
+  .am-sidebar-container {
     width: 280px;
+  }
+  .am-sidebar-container .nav-link {
+    margin: 2px 8px;
+    padding: 10px 16px;
   }
 }
