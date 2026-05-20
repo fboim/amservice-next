@@ -122,14 +122,14 @@ export default function Dashboard() {
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
-      // Don't close if clicking on the dropdown trigger or inside dropdown
-      const dropdown = e.target.closest('.btn-group-act, .print-dropdown')
-      if (dropdown) return
-      setOpenDropdown(null)
-      setOpenWADropdown(null)
+      if (!e.target.closest('.btn-group-act')) {
+        setOpenDropdown(null)
+        setOpenWADropdown(null)
+      }
     }
-    document.addEventListener('click', handleClickOutside)
-    return () => document.removeEventListener('click', handleClickOutside)
+    // Use setTimeout to ensure this runs after any child click handlers
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
   // Calculate chart data
@@ -326,12 +326,13 @@ export default function Dashboard() {
                               <Link href={`/servis/edit/${s.id}`} className="btn-act btn-act-blue" title="Edit">
                                 <i className="bi bi-pencil-square" />
                               </Link>
-                              <div style={{ position: 'relative' }}>
+                              <div style={{ position: 'relative', display: 'inline-block' }}>
                                 <button
                                   type="button"
                                   className="btn-act btn-act-dark"
                                   title="Cetak"
-                                  onClick={(e) => {
+                                  onMouseDown={(e) => {
+                                    e.preventDefault()
                                     e.stopPropagation()
                                     setOpenDropdown(openDropdown === `${s.id}-print` ? null : `${s.id}-print`)
                                     setOpenWADropdown(null)
@@ -341,7 +342,8 @@ export default function Dashboard() {
                                 </button>
                                 {openDropdown === `${s.id}-print` && (
                                   <div
-                                    className="print-dropdown"
+                                    className="print-dropdown show"
+                                    onMouseDown={(e) => e.stopPropagation()}
                                     onClick={(e) => e.stopPropagation()}
                                     style={{
                                       position: 'absolute',
@@ -353,27 +355,29 @@ export default function Dashboard() {
                                       border: '1px solid var(--am-border)',
                                       borderRadius: '8px',
                                       boxShadow: '0 4px 12px rgba(0,0,0,.15)',
-                                      overflow: 'hidden'
+                                      overflow: 'hidden',
+                                      display: 'block'
                                     }}
                                   >
-                                    <Link href={`/nota/${s.id}/penerimaan`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '.7rem', color: 'var(--am-text)', textDecoration: 'none' }}>
+                                    <a href={`/nota/${s.id}/penerimaan`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '.7rem', color: 'var(--am-text)', textDecoration: 'none' }}>
                                       <i className="bi bi-receipt-cutoff" style={{ color: 'var(--am-text-muted)', width: '12px' }} />Nota
-                                    </Link>
-                                    <Link href={`/nota/${s.id}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '.7rem', color: 'var(--am-text)', textDecoration: 'none' }}>
+                                    </a>
+                                    <a href={`/nota/${s.id}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '.7rem', color: 'var(--am-text)', textDecoration: 'none' }}>
                                       <i className="bi bi-qr-code" style={{ color: 'var(--am-text-muted)', width: '12px' }} />QR Code
-                                    </Link>
-                                    <Link href={`/nota/${s.id}/garansi`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '.7rem', color: 'var(--am-text)', textDecoration: 'none' }}>
+                                    </a>
+                                    <a href={`/nota/${s.id}/garansi`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '.7rem', color: 'var(--am-text)', textDecoration: 'none' }}>
                                       <i className="bi bi-shield-check" style={{ color: 'var(--am-text-muted)', width: '12px' }} />Garansi
-                                    </Link>
+                                    </a>
                                   </div>
                                 )}
                               </div>
-                              <div style={{ position: 'relative' }}>
+                              <div style={{ position: 'relative', display: 'inline-block' }}>
                                 <button
                                   type="button"
                                   className="btn-act btn-act-green"
                                   title="WA"
-                                  onClick={(e) => {
+                                  onMouseDown={(e) => {
+                                    e.preventDefault()
                                     e.stopPropagation()
                                     setOpenWADropdown(openWADropdown === `${s.id}-wa` ? null : `${s.id}-wa`)
                                     setOpenDropdown(null)
@@ -383,7 +387,8 @@ export default function Dashboard() {
                                 </button>
                                 {openWADropdown === `${s.id}-wa` && (
                                   <div
-                                    className="print-dropdown"
+                                    className="print-dropdown show"
+                                    onMouseDown={(e) => e.stopPropagation()}
                                     onClick={(e) => e.stopPropagation()}
                                     style={{
                                       position: 'absolute',
@@ -395,7 +400,8 @@ export default function Dashboard() {
                                       border: '1px solid var(--am-border)',
                                       borderRadius: '8px',
                                       boxShadow: '0 4px 12px rgba(0,0,0,.15)',
-                                      overflow: 'hidden'
+                                      overflow: 'hidden',
+                                      display: 'block'
                                     }}
                                   >
                                     <a href={`https://wa.me/${hp}?text=${encodeURIComponent(wa_msg)}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '.7rem', color: 'var(--am-text)', textDecoration: 'none' }}>
