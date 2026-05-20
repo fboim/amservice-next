@@ -110,47 +110,22 @@ export default function Sidebar() {
           <button
             onClick={toggleSidebar}
             aria-label="Toggle sidebar"
-            style={{
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '8px',
-              borderRadius: '8px',
-              color: 'rgba(255,255,255,.85)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '42px',
-              height: '42px',
-            }}
+            className="topbar-btn"
           >
-            <i className={`bi ${sidebarOpen ? 'bi-x-lg' : 'bi-list'}`} style={{ fontSize: '1.5rem' }} />
+            <i className={`bi ${sidebarOpen ? 'bi-x-lg' : 'bi-list'}`} />
           </button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, justifyContent: 'center' }}>
-            <div style={{
-              width: '32px', height: '32px', borderRadius: '50%',
-              background: 'linear-gradient(135deg,#3b82f6,#6366f1)',
-              padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <img src="/logo_am.png" alt="Logo" style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#fff', objectFit: 'contain', padding: '4px' }} />
-            </div>
-            <span style={{ color: '#f1f5f9', fontWeight: '800', fontSize: '1rem', letterSpacing: '.06em' }}>AM SERVICE</span>
+          <div className="topbar-brand">
+            <img src="/logo_am.png" alt="Logo" className="topbar-logo" onError={(e) => { e.target.src = 'https://cdn-icons-png.flaticon.com/512/3563/3563395.png' }} />
+            <span>AM SERVICE</span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <button
-              onClick={toggleTheme}
-              title="Ganti Tema"
-              style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '8px', color: 'rgba(255,255,255,.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px' }}
-            >
-              <i className={`bi ${theme === 'dark' ? 'bi-moon-stars' : 'bi-sun'}`} style={{ fontSize: '1.1rem' }} />
+          <div className="topbar-actions">
+            <button onClick={toggleTheme} title="Ganti Tema" className="topbar-btn">
+              <i className={`bi ${theme === 'dark' ? 'bi-moon-stars' : 'bi-sun'}`} />
             </button>
-            <button
-              onClick={handleLogout}
-              style={{ background: '#ef4444', color: '#fff', fontSize: '.75rem', fontWeight: '700', padding: '8px 14px', borderRadius: '20px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', boxShadow: '0 2px 8px rgba(239,68,68,.3)' }}
-            >
-              <i className="bi bi-power" style={{ fontSize: '.9rem' }} />
+            <button onClick={handleLogout} className="topbar-logout">
+              <i className="bi bi-power" />
               <span>Keluar</span>
             </button>
           </div>

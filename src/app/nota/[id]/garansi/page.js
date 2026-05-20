@@ -131,12 +131,21 @@ export default function GaransiServis() {
     logoImg.onerror = () => { lanjutCetak() }
 
     const lanjutCetak = () => {
-      // Header
+      // Header - Logo already sent before this function
       btSend('tebal', true)
       btSend('teks', tengah(namaToko))
       btSend('tebal', false)
 
+      // Alamat dan WA (font kecil + center)
       btSend('teks', '\x1b\x4d\x01\x1b\x61\x01')
+      if (pengaturan.alamat) {
+        const alamatLines = pengaturan.alamat.split('\n')
+        alamatLines.forEach(line => {
+          line = line.trim()
+          if (!line) return
+          btSend('teks', line + '\n')
+        })
+      }
       if (noWa) btSend('teks', 'WA: ' + noWa + '\n')
       btSend('teks', '\x1b\x4d\x00\x1b\x61\x00')
 
@@ -164,15 +173,29 @@ export default function GaransiServis() {
       btSend('teks', '\x1b\x61\x00')
       btSend('teks', '--------------------------------\n')
 
-      // SYK Garansi
+      // SYK Garansi - Fixed wrapping
       if (snkGaransi) {
         btSend('teks', '.------------------------------.\n')
-        const lines = snkGaransi.split('\n')
-        lines.forEach(pt => {
+        const rawLines = snkGaransi.split('\n')
+        rawLines.forEach(pt => {
           pt = pt.trim()
           if (!pt) return
-          const wrapped = pt.length > 28 ? pt.substring(0, 28) + '\n' + pt.substring(28) : pt
-          btSend('teks', '| ' + wrapped.padEnd(28, ' ') + ' |\n')
+          // Wrap text at 28 chars without breaking words
+          const words = pt.split(' ')
+          let currentLine = ''
+          words.forEach(word => {
+            if ((currentLine + ' ' + word).trim().length > 28) {
+              if (currentLine) {
+                btSend('teks', '| ' + currentLine.trim().padEnd(28, ' ') + ' |\n')
+              }
+              currentLine = word
+            } else {
+              currentLine = (currentLine + ' ' + word).trim()
+            }
+          })
+          if (currentLine) {
+            btSend('teks', '| ' + currentLine.trim().padEnd(28, ' ') + ' |\n')
+          }
         })
         btSend('teks', "'------------------------------'\n")
       }
