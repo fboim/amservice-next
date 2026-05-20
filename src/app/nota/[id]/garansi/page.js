@@ -132,44 +132,44 @@ export default function GaransiServis() {
 
   return (
     <>
-      {/* Print Preview - thermal paper style */}
+      {/* Print Preview - thermal paper style (exact size match) */}
       <div className="preview-wrapper">
         <div ref={printRef} className="thermal-preview">
           {/* Header dengan Logo */}
-          <div className="center" style={{ marginBottom: '8px' }}>
-            <img src="/logo_am.png" style={{ width: '50px', height: 'auto' }} alt="Logo" />
+          <div className="center" style={{ marginBottom: '10px' }}>
+            <img src="/logo_am.png" style={{ width: '60px', height: 'auto' }} alt="Logo" />
           </div>
-          <div className="center bold" style={{ fontSize: '14px' }}>{(p.nama_toko || 'AM SERVICE').toUpperCase()}</div>
+          <div className="center bold" style={{ fontSize: '16px' }}>{(p.nama_toko || 'AM SERVICE').toUpperCase()}</div>
           {p.alamat && (
-            <div className="center" style={{ fontSize: '10px', marginTop: '2px', lineHeight: 1.3 }}>{p.alamat}</div>
+            <div className="center" style={{ fontSize: '10px', marginTop: '4px', lineHeight: 1.4 }}>{p.alamat}</div>
           )}
           {p.no_wa && (
-            <div className="center" style={{ fontSize: '10px', marginTop: '2px' }}>WA: {p.no_wa}</div>
+            <div className="center" style={{ fontSize: '10px', marginTop: '4px', marginBottom: '6px' }}>WA: {p.no_wa}</div>
           )}
 
           <div style={{ borderBottom: '1px dashed #000', margin: '8px 0' }}></div>
-          <div className="center" style={{ fontSize: '10px' }}>NOTA GARANSI SERVIS</div>
+          <div className="center bold" style={{ fontSize: '12px' }}>NOTA GARANSI SERVIS</div>
           <div style={{ borderBottom: '1px dashed #000', margin: '8px 0' }}></div>
 
           {/* Data */}
-          <div style={{ fontSize: '10px', lineHeight: 1.4 }}>
+          <div style={{ fontSize: '12px', lineHeight: 1.5 }}>
             <div><span style={{ fontWeight: 'bold' }}>No:</span> {servis.no_servis} | {new Date(servis.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' })}</div>
             <div><span style={{ fontWeight: 'bold' }}>Nama:</span> {servis.nama_pelanggan} ({servis.no_hp || '-'})</div>
             <div><span style={{ fontWeight: 'bold' }}>Unit:</span> {servis.merk_hp} {tipeBersih}</div>
             <div><span style={{ fontWeight: 'bold' }}>Keluhan:</span> {keluhanBersih}</div>
           </div>
 
-          <div style={{ borderBottom: '1px dashed #000', margin: '8px 0' }}></div>
+          <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
 
           {/* Total */}
-          <div className="center" style={{ margin: '6px 0' }}>
-            <div style={{ fontSize: '10px' }}>TOTAL BIAYA:</div>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#dc2626' }}>Rp {totalBiaya}</div>
+          <div className="center" style={{ margin: '8px 0' }}>
+            <div style={{ fontSize: '12px' }}>TOTAL BIAYA:</div>
+            <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#dc2626' }}>Rp {totalBiaya}</div>
           </div>
 
           {/* Garansi */}
-          <div style={{ border: '1px dashed #000', padding: '6px', marginTop: '6px', fontSize: '10px', lineHeight: 1.4 }}>
-            <div className="center" style={{ fontWeight: 'bold', marginBottom: '4px', fontSize: '11px' }}>
+          <div style={{ border: '1px dashed #000', padding: '8px', marginTop: '8px', fontSize: '11px', lineHeight: 1.5 }}>
+            <div className="center bold" style={{ marginBottom: '6px', fontSize: '12px' }}>
               MASA GARANSI: {masaGaransi.toUpperCase()}
             </div>
             {snkGaransi ? snkGaransi.split('\n').map((line, i) => (
@@ -177,15 +177,15 @@ export default function GaransiServis() {
             )) : <div>-</div>}
           </div>
 
-          <div style={{ borderBottom: '1px dashed #000', margin: '8px 0' }}></div>
+          <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
 
           {/* QR */}
-          <div className="center" style={{ marginTop: '8px' }}>
-            <div style={{ fontWeight: 'bold', fontSize: '10px' }}>Bantu Kami Berkembang!</div>
-            <div style={{ fontSize: '9px', marginTop: '2px' }}>Scan untuk review:</div>
+          <div className="center" style={{ marginTop: '12px' }}>
+            <div style={{ fontWeight: 'bold', fontSize: '11px' }}>Bantu Kami Berkembang!</div>
+            <div style={{ fontSize: '10px', marginTop: '4px' }}>Scan untuk review:</div>
             <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&margin=2&data=${encodeURIComponent(p.link_maps || 'https://maps.google.com')}`}
-              style={{ width: '80px', height: '80px', marginTop: '4px' }}
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=4&data=${encodeURIComponent(p.link_maps || 'https://maps.google.com')}`}
+              style={{ width: '100px', height: '100px', marginTop: '6px' }}
               alt="QR Maps"
             />
           </div>
@@ -230,13 +230,12 @@ export default function GaransiServis() {
         }
         .thermal-preview {
           width: 58mm;
-          max-width: 58mm;
           background: #fff;
-          padding: 8px;
+          padding: 10px;
           font-family: 'Courier New', Courier, monospace;
-          font-size: 10px;
+          font-size: 12px;
           color: #000;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
           box-sizing: border-box;
           display: flex;
           flex-direction: column;
@@ -304,7 +303,6 @@ export default function GaransiServis() {
           }
           .thermal-preview {
             width: 100%;
-            max-width: 100%;
             box-shadow: none;
           }
         }
