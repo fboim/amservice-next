@@ -26,6 +26,14 @@ export default function Sidebar() {
   const { mobileOpen, setMobileOpen, onMobileClose, onMobileOpen } = useSidebar()
   const [user, setUser] = useState(null)
   const [theme, setTheme] = useState('dark')
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Load user data on mount and pathname change
   useEffect(() => {
@@ -127,7 +135,8 @@ export default function Sidebar() {
         <button
           onClick={(e) => {
             e.stopPropagation()
-            toggleMobileSidebar()
+            e.preventDefault()
+            setMobileOpen(!mobileOpen)
           }}
           style={{
             position: 'relative',
@@ -142,6 +151,7 @@ export default function Sidebar() {
             justifyContent: 'center',
             width: '42px',
             height: '42px',
+            zIndex: 50,
           }}
         >
           <i className={`bi ${mobileOpen ? 'bi-x-lg' : 'bi-list'}`} style={{ fontSize: '1.5rem', lineHeight: 1 }} />
@@ -224,7 +234,14 @@ export default function Sidebar() {
       )}
 
       {/* Sidebar */}
-      <aside className={`am-sidebar ${mobileOpen ? 'am-sidebar-open' : ''}`}>
+      <aside
+        className="am-sidebar"
+        style={{
+          transform: isMobile
+            ? (mobileOpen ? 'translateX(0)' : 'translateX(-100%)')
+            : undefined
+        }}
+      >
         {/* Brand */}
         <div style={{ padding: '1.5rem 1rem 1.25rem', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,.07)' }}>
           <div style={{
