@@ -388,10 +388,12 @@ export default function GaransiServis() {
       <style jsx>{`
         .print-preview-container {
           display: flex;
-          justify-content: center;
-          padding: 20px;
+          flex-direction: column;
+          align-items: center;
+          padding: 16px;
           background: #e2e8f0;
-          min-height: calc(100vh - 100px);
+          min-height: calc(100vh - 80px);
+          box-sizing: border-box;
         }
         .print-preview {
           width: 58mm;
@@ -402,15 +404,29 @@ export default function GaransiServis() {
           font-family: 'Courier New', Courier, monospace;
           font-size: 12px;
           color: #000;
+          box-sizing: border-box;
         }
-        @media (max-width: 400px) {
+        @media (max-width: 480px) {
           .print-preview-container {
             padding: 8px;
+            min-height: auto;
           }
           .print-preview {
-            width: 92%;
-            max-width: 92%;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            width: calc(100vw - 32px);
+            max-width: calc(100vw - 32px);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+          }
+          .no-print {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            background: #fff;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
           }
         }
       `}</style>
