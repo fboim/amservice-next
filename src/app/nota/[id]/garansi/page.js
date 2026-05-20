@@ -222,14 +222,17 @@ export default function GaransiServis() {
       <style jsx>{`
         .preview-wrapper {
           background: #e2e8f0;
-          min-height: calc(100vh - 70px);
+          min-height: 100vh;
           padding: 16px;
           display: flex;
           justify-content: center;
+          overflow-x: auto;
           overflow-y: auto;
+          box-sizing: border-box;
         }
         .thermal-preview {
           width: 220px;
+          flex-shrink: 0;
           background: #fff;
           padding: 12px;
           font-family: 'Courier New', Courier, monospace;
@@ -244,6 +247,11 @@ export default function GaransiServis() {
           display: block;
           margin-left: auto;
           margin-right: auto;
+          max-width: 100%;
+        }
+        .thermal-preview * {
+          max-width: 100%;
+          word-wrap: break-word;
         }
 
         .action-bar {
@@ -256,6 +264,7 @@ export default function GaransiServis() {
           padding: 12px 16px;
           background: #fff;
           box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+          z-index: 10;
         }
         .btn-back {
           width: 44px;
@@ -292,12 +301,9 @@ export default function GaransiServis() {
 
         @media (max-width: 480px) {
           .preview-wrapper {
-            padding: 12px;
+            padding: 8px;
             padding-bottom: 80px;
-          }
-          .thermal-preview {
-            width: 100%;
-            box-shadow: none;
+            justify-content: flex-start;
           }
         }
       `}</style>
