@@ -46,7 +46,7 @@ export default function GaransiServis() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fff', fontFamily: 'Courier New, monospace' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fff', fontFamily: 'Courier New, Courier, monospace' }}>
         <p style={{ fontSize: '12px' }}>Memuat...</p>
       </div>
     )
@@ -58,6 +58,8 @@ export default function GaransiServis() {
   const keluhanBersih = getKeluhanBersih(servis.keluhan)
   const totalBiaya = formatRupiah(servis.estimasi_biaya)
   const masaGaransi = servis.garansi || 'Tidak Ada'
+
+  const snkGaransi = "1. Garansi hanya berlaku untuk sparepart yang diganti.\n2. Kerusakan akibat jatuh, kena air, atau kesalahan pemakian tidak termasuk garansi.\n3. Garansi tidak berlaku jika stiker garansi sobek atau hilang."
 
   return (
     <>
@@ -77,7 +79,13 @@ export default function GaransiServis() {
         .line { border-bottom: 1px dashed #000; margin: 5px 0; }
         table { width: 100%; font-size: 12px; border-collapse: collapse; }
         td { vertical-align: top; padding-bottom: 3px; }
-        .garansi-box { border: 1px dashed #000; padding: 5px; margin-top: 5px; font-size: 10px; text-align: left; }
+        .garansi-box {
+          border: 1px dashed #000;
+          padding: 5px;
+          margin-top: 5px;
+          font-size: 10px;
+          text-align: left;
+        }
         @media print {
           body { width: 100%; margin: 0; padding: 0; }
         }
@@ -92,31 +100,31 @@ export default function GaransiServis() {
         fontSize: '12px',
         color: '#000'
       }}>
-        {/* Header */}
+        {/* Header dengan Logo */}
         <div className="center">
           <img src="/logo_am.png" style={{ width: '60px', height: 'auto' }} alt="Logo AM Service" />
         </div>
         <div className="center bold" style={{ fontSize: '16px', marginTop: '3px' }}>AM SERVICE</div>
-        <div className="center" style={{ fontSize: '10px', marginTop: '2px' }}>WA: 0856 4722 7779</div>
+        <div className="center" style={{ fontSize: '10px', marginBottom: '3px' }}>WA: 0856 4722 7779</div>
 
         <div className="line"></div>
         <div className="center" style={{ fontSize: '10px' }}>NOTA GARANSI SERVIS</div>
         <div className="line"></div>
 
-        {/* Data */}
+        {/* Data Table */}
         <table>
           <tbody>
             <tr>
-              <td colSpan={2}>No: {servis.no_servis} | {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+              <td colSpan="2">No: {servis.no_servis} | {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '/')}</td>
             </tr>
             <tr>
-              <td colSpan={2}>Nama: {servis.nama_pelanggan} ({servis.no_hp || '-'})</td>
+              <td colSpan="2">Nama: {servis.nama_pelanggan} ({servis.no_hp || '-'})</td>
             </tr>
             <tr>
-              <td colSpan={2}>Unit: <span className="bold">{servis.merk_hp} {tipeBersih}</span></td>
+              <td colSpan="2">Unit: <span className="bold">{servis.merk_hp} {tipeBersih}</span></td>
             </tr>
             <tr>
-              <td colSpan={2}>Keluhan: {keluhanBersih}</td>
+              <td colSpan="2">Keluhan: {keluhanBersih}</td>
             </tr>
           </tbody>
         </table>
@@ -125,7 +133,7 @@ export default function GaransiServis() {
 
         {/* Total Biaya */}
         <div className="center" style={{ margin: '8px 0' }}>
-          <div style={{ fontSize: '12px' }}>TOTAL BIAYA:</div>
+          <div style={{ fontSize: '12px' }}>TOTAL BIAYA :</div>
           <div className="bold" style={{ fontSize: '16px' }}>Rp {totalBiaya}</div>
         </div>
 
@@ -134,9 +142,9 @@ export default function GaransiServis() {
           <div className="bold center" style={{ marginBottom: '4px', fontSize: '11px' }}>
             MASA GARANSI: {masaGaransi.toUpperCase()}
           </div>
-          1. Garansi valid sesuai masa garansi<br/>
-          2. Garansi meliputi sparepart yang diganti<br/>
-          3. Tidak berlaku jika kerusakan akibat human error
+          {snkGaransi.split('\n').map((line, i) => (
+            <span key={i}>{line}<br/></span>
+          ))}
         </div>
 
         <div className="line"></div>
