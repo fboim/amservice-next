@@ -509,8 +509,8 @@ export default function Dashboard() {
               </span>
               <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>All Time</span>
             </div>
-            <div style={{ padding: '4px 0', overflowY: 'auto' }}>
-              {stats.merk_populer && stats.merk_populer.length > 0 ? stats.merk_populer.map((merk, i) => {
+            <div style={{ padding: '4px 0' }}>
+              {stats.merk_populer && stats.merk_populer.length > 0 ? stats.merk_populer.slice(0, 7).map((merk, i) => {
                 const maxTotal = Math.max(...stats.merk_populer.map(m => m.total), 1)
                 const pct = (merk.total / maxTotal) * 100
                 return (

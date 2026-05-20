@@ -68,11 +68,12 @@ body {
   transition: transform 0.3s ease;
 }
 
+/* Mobile sidebar - hidden by default, shown when .am-sidebar-open class is added */
 @media (max-width: 767px) {
   .am-sidebar {
     transform: translateX(-100%);
   }
-  .am-sidebar.open {
+  .am-sidebar.am-sidebar-open {
     transform: translateX(0);
   }
 }
