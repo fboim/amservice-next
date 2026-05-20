@@ -350,23 +350,26 @@ export default function Dashboard() {
                                       right: 0,
                                       top: 'calc(100% + 4px)',
                                       zIndex: 50,
-                                      width: '130px',
+                                      width: '160px',
                                       background: 'var(--am-surface)',
                                       border: '1px solid var(--am-border)',
-                                      borderRadius: '8px',
-                                      boxShadow: '0 4px 12px rgba(0,0,0,.15)',
+                                      borderRadius: '10px',
+                                      boxShadow: '0 8px 24px rgba(0,0,0,.2)',
                                       overflow: 'hidden',
                                       display: 'block'
                                     }}
                                   >
-                                    <a href={`/nota/${s.id}/penerimaan`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '.7rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                      <i className="bi bi-receipt-cutoff" style={{ color: 'var(--am-text-muted)', width: '12px' }} />Nota
+                                    <a href={`/nota/${s.id}/label`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', fontSize: '.75rem', color: 'var(--am-text)', textDecoration: 'none', borderBottom: '1px solid var(--am-border)' }}>
+                                      <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'linear-gradient(135deg,#06b6d4,#0891b2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><i className="bi bi-upc" style={{ color: '#fff', fontSize: '.7rem' }} /></span>
+                                      <span style={{ fontWeight: '600' }}>Label</span>
                                     </a>
-                                    <a href={`/nota/${s.id}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '.7rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                      <i className="bi bi-qr-code" style={{ color: 'var(--am-text-muted)', width: '12px' }} />QR Code
+                                    <a href={`/nota/${s.id}/penerimaan`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', fontSize: '.75rem', color: 'var(--am-text)', textDecoration: 'none', borderBottom: '1px solid var(--am-border)' }}>
+                                      <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'linear-gradient(135deg,#8b5cf6,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><i className="bi bi-file-earmark-text" style={{ color: '#fff', fontSize: '.7rem' }} /></span>
+                                      <span style={{ fontWeight: '600' }}>Nota Penerimaan</span>
                                     </a>
-                                    <a href={`/nota/${s.id}/garansi`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '.7rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                      <i className="bi bi-shield-check" style={{ color: 'var(--am-text-muted)', width: '12px' }} />Garansi
+                                    <a href={`/nota/${s.id}/garansi`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', fontSize: '.75rem', color: 'var(--am-text)', textDecoration: 'none' }}>
+                                      <span style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'linear-gradient(135deg,#f59e0b,#d97706)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><i className="bi bi-shield-check" style={{ color: '#fff', fontSize: '.7rem' }} /></span>
+                                      <span style={{ fontWeight: '600' }}>Nota Garansi</span>
                                     </a>
                                   </div>
                                 )}

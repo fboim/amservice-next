@@ -18,6 +18,30 @@ export default function NotaServis() {
     fetchServis()
   }, [id])
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        router.back()
+      } else if (e.ctrlKey && e.key === 'p') {
+        e.preventDefault()
+        window.print()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [router])
+
+  // Auto-print after content loads
+  useEffect(() => {
+    if (!loading && servis && printRef.current) {
+      const timer = setTimeout(() => {
+        window.print()
+      }, 800)
+      return () => clearTimeout(timer)
+    }
+  }, [loading, servis])
+
   const fetchServis = async () => {
     try {
       const res = await fetch(`/api/servis?id=${id}`)
@@ -53,10 +77,6 @@ export default function NotaServis() {
       month: 'long',
       year: 'numeric'
     })
-  }
-
-  const handlePrint = () => {
-    window.print()
   }
 
   const handleSendWA = async () => {
@@ -146,10 +166,42 @@ export default function NotaServis() {
     }
   }
 
+  // Loading Skeleton
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a' }}>
-        <div className="spinner" style={{ width: 40, height: 40 }} />
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#e2e8f0',
+        padding: '20px'
+      }}>
+        <div className="nota-skeleton">
+          <div className="skeleton-header"></div>
+          <div className="skeleton-info-row">
+            <div className="skeleton-info"></div>
+            <div className="skeleton-info"></div>
+          </div>
+          <div className="skeleton-divider"></div>
+          <div className="skeleton-two-col">
+            <div>
+              <div className="skeleton-label"></div>
+              <div className="skeleton-text"></div>
+            </div>
+            <div>
+              <div className="skeleton-label"></div>
+              <div className="skeleton-text"></div>
+            </div>
+          </div>
+          <div className="skeleton-divider"></div>
+          <div className="skeleton-total"></div>
+        </div>
+        <p style={{ fontSize: '13px', color: '#64748b', marginTop: '16px' }}>
+          <i className="bi bi-printer" style={{ marginRight: '8px' }} />
+          Mencetak nota...
+        </p>
       </div>
     )
   }
@@ -161,6 +213,78 @@ export default function NotaServis() {
   return (
     <div style={{ minHeight: '100vh', background: '#e2e8f0', padding: '2rem' }}>
       <style jsx>{`
+        .nota-skeleton {
+          width: 100%;
+          max-width: 600px;
+          background: #fff;
+          border-radius: 12px;
+          padding: 24px;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .skeleton-header {
+          height: 80px;
+          background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+          border-radius: 8px;
+          margin-bottom: 16px;
+        }
+        .skeleton-info-row {
+          display: flex;
+          gap: 16px;
+          margin-bottom: 16px;
+        }
+        .skeleton-info {
+          flex: 1;
+          height: 60px;
+          background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+          border-radius: 8px;
+        }
+        .skeleton-divider {
+          height: 2px;
+          background: #e2e8f0;
+          margin: 16px 0;
+        }
+        .skeleton-two-col {
+          display: flex;
+          gap: 24px;
+        }
+        .skeleton-two-col > div {
+          flex: 1;
+        }
+        .skeleton-label {
+          width: 80px;
+          height: 12px;
+          background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+          border-radius: 4px;
+          margin-bottom: 8px;
+        }
+        .skeleton-text {
+          width: 100%;
+          height: 40px;
+          background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+          border-radius: 4px;
+        }
+        .skeleton-total {
+          width: 200px;
+          height: 50px;
+          background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+          border-radius: 8px;
+          margin: 16px auto 0;
+        }
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+
         @media print {
           body * {
             visibility: hidden;
@@ -185,7 +309,7 @@ export default function NotaServis() {
 
       {/* Action Buttons */}
       <div style={{ maxWidth: 800, margin: '0 auto 2rem' }} className="no-print">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <button
             onClick={() => router.back()}
             style={{
@@ -197,17 +321,18 @@ export default function NotaServis() {
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: 8
+              gap: 8,
+              fontWeight: 600
             }}
           >
-            ← Kembali
+            <i className="bi bi-arrow-left" /> Kembali
           </button>
-          <div style={{ display: 'flex', gap: 12 }}>
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             {servis.no_hp && (
               <button
                 onClick={handleSendWA}
                 style={{
-                  padding: '10px 24px',
+                  padding: '10px 20px',
                   background: '#25D366',
                   color: '#fff',
                   border: 'none',
@@ -219,15 +344,14 @@ export default function NotaServis() {
                   gap: 8
                 }}
               >
-                <i className="bi bi-whatsapp" />
-                Kirim WA
+                <i className="bi bi-whatsapp" /> Kirim WA
               </button>
             )}
             <a
               href={`/nota/${id}/penerimaan`}
               target="_blank"
               style={{
-                padding: '10px 24px',
+                padding: '10px 20px',
                 background: '#64748b',
                 color: '#fff',
                 border: 'none',
@@ -240,14 +364,13 @@ export default function NotaServis() {
                 textDecoration: 'none'
               }}
             >
-              <i className="bi bi-file-earmark-text" />
-              Nota Terima
+              <i className="bi bi-file-earmark-text" /> Nota Terima
             </a>
             <a
               href={`/nota/${id}/garansi`}
               target="_blank"
               style={{
-                padding: '10px 24px',
+                padding: '10px 20px',
                 background: '#8b5cf6',
                 color: '#fff',
                 border: 'none',
@@ -260,14 +383,13 @@ export default function NotaServis() {
                 textDecoration: 'none'
               }}
             >
-              <i className="bi bi-shield-check" />
-              Garansi
+              <i className="bi bi-shield-check" /> Garansi
             </a>
             <a
               href={`/nota/${id}/label`}
               target="_blank"
               style={{
-                padding: '10px 24px',
+                padding: '10px 20px',
                 background: '#06b6d4',
                 color: '#fff',
                 border: 'none',
@@ -280,14 +402,13 @@ export default function NotaServis() {
                 textDecoration: 'none'
               }}
             >
-              <i className="bi bi-upc" />
-              Label
+              <i className="bi bi-upc" /> Label
             </a>
             <button
               onClick={handleDownloadPDF}
               disabled={downloading}
               style={{
-                padding: '10px 24px',
+                padding: '10px 20px',
                 background: '#059669',
                 color: '#fff',
                 border: 'none',
@@ -304,9 +425,9 @@ export default function NotaServis() {
               {downloading ? 'Memproses...' : 'Download PDF'}
             </button>
             <button
-              onClick={handlePrint}
+              onClick={() => window.print()}
               style={{
-                padding: '10px 24px',
+                padding: '10px 20px',
                 background: '#3b82f6',
                 color: '#fff',
                 border: 'none',
@@ -318,8 +439,7 @@ export default function NotaServis() {
                 gap: 8
               }}
             >
-              <i className="bi bi-printer" />
-              Cetak Nota
+              <i className="bi bi-printer" /> Cetak Nota
             </button>
           </div>
         </div>

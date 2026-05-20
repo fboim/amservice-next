@@ -12,12 +12,35 @@ export default function GaransiServis() {
   const [loading, setLoading] = useState(true)
   const [servisData, setServisData] = useState(null)
   const [pengaturanData, setPengaturanData] = useState(null)
-  const [allReady, setAllReady] = useState(false)
   const [downloading, setDownloading] = useState(false)
 
   useEffect(() => {
     fetchAllData()
   }, [id])
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        router.back()
+      } else if (e.ctrlKey && e.key === 'p') {
+        e.preventDefault()
+        window.print()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [router])
+
+  // Auto-print after content loads
+  useEffect(() => {
+    if (!loading && servisData && printRef.current) {
+      const timer = setTimeout(() => {
+        window.print()
+      }, 800)
+      return () => clearTimeout(timer)
+    }
+  }, [loading, servisData])
 
   const fetchAllData = async () => {
     try {
@@ -38,8 +61,6 @@ export default function GaransiServis() {
           setPengaturanData(pengaturanJson.pengaturan)
         }
       }
-
-      setAllReady(true)
     } catch (err) {
       alert('Gagal memuat data: ' + err.message)
       router.back()
@@ -72,8 +93,6 @@ export default function GaransiServis() {
       const { jsPDF } = await loadJsPDF()
 
       const content = printRef.current
-
-      // Capture with high quality
       const canvas = await html2canvas(content, {
         scale: 3,
         useCORS: true,
@@ -82,15 +101,12 @@ export default function GaransiServis() {
       })
 
       const imgData = canvas.toDataURL('image/png')
-
-      // PDF dimensions in mm (58mm width = thermal paper)
       const pdfWidth = 58
       const imgWidth = canvas.width
       const imgHeight = canvas.height
       const ratio = pdfWidth / imgWidth
       const pdfHeight = imgHeight * ratio
 
-      // Create PDF with exact thermal paper size
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -100,7 +116,6 @@ export default function GaransiServis() {
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
       pdf.save(`GARANSI-${servisData.no_servis}.pdf`)
     } catch (err) {
-      console.error('PDF Error:', err)
       alert('Gagal download PDF: ' + err.message)
     } finally {
       setDownloading(false)
@@ -127,10 +142,32 @@ export default function GaransiServis() {
     })
   }
 
+  // Loading Skeleton
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fff', fontFamily: 'Courier New, Courier, monospace' }}>
-        <p style={{ fontSize: '12px' }}>Memuat...</p>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#e2e8f0' }}>
+        <div className="thermal-skeleton">
+          <div className="skeleton-logo"></div>
+          <div className="skeleton-line skeleton-title"></div>
+          <div className="skeleton-line skeleton-address"></div>
+          <div className="skeleton-divider"></div>
+          <div className="skeleton-line skeleton-header"></div>
+          <div className="skeleton-divider"></div>
+          <div className="skeleton-line"></div>
+          <div className="skeleton-line"></div>
+          <div className="skeleton-line"></div>
+          <div className="skeleton-divider"></div>
+          <div className="skeleton-line skeleton-total"></div>
+          <div className="skeleton-divider"></div>
+          <div className="skeleton-line"></div>
+          <div className="skeleton-line"></div>
+          <div className="skeleton-divider"></div>
+          <div className="skeleton-qr"></div>
+        </div>
+        <p style={{ fontSize: '12px', color: '#64748b', marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <i className="bi bi-printer" style={{ fontSize: '16px' }} />
+          Mencetak nota garansi...
+        </p>
       </div>
     )
   }
@@ -147,44 +184,44 @@ export default function GaransiServis() {
 
   return (
     <>
-      {/* Print Preview - thermal paper style (exact size match) */}
+      {/* Print Preview */}
       <div className="preview-wrapper">
         <div ref={printRef} className="thermal-preview">
-          {/* Header dengan Logo */}
-          <div className="center" style={{ marginBottom: '10px' }}>
-            <img src="/logo_am.png" style={{ width: '60px', height: 'auto' }} alt="Logo" />
+          {/* Header with centered Logo */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '10px' }}>
+            <img src="/logo_am.png" style={{ width: '50px', height: 'auto' }} alt="Logo" onError={(e) => { e.target.style.display = 'none' }} />
           </div>
-          <div className="center bold" style={{ fontSize: '16px' }}>{(p.nama_toko || 'AM SERVICE').toUpperCase()}</div>
+          <div className="center bold" style={{ fontSize: '14px' }}>{(p.nama_toko || 'AM SERVICE').toUpperCase()}</div>
           {p.alamat && (
-            <div className="center" style={{ fontSize: '10px', marginTop: '4px', lineHeight: 1.4 }}>{p.alamat}</div>
+            <div className="center" style={{ fontSize: '9px', marginTop: '3px', lineHeight: 1.4 }}>{p.alamat}</div>
           )}
           {p.no_wa && (
-            <div className="center" style={{ fontSize: '10px', marginTop: '4px', marginBottom: '6px' }}>WA: {p.no_wa}</div>
+            <div className="center" style={{ fontSize: '9px', marginTop: '3px', marginBottom: '6px' }}>WA: {p.no_wa}</div>
           )}
 
           <div style={{ borderBottom: '1px dashed #000', margin: '8px 0' }}></div>
-          <div className="center bold" style={{ fontSize: '12px' }}>NOTA GARANSI SERVIS</div>
+          <div className="center bold" style={{ fontSize: '11px' }}>NOTA GARANSI SERVIS</div>
           <div style={{ borderBottom: '1px dashed #000', margin: '8px 0' }}></div>
 
           {/* Data */}
-          <div style={{ fontSize: '12px', lineHeight: 1.5 }}>
-            <div><span style={{ fontWeight: 'bold' }}>No:</span> {servis.no_servis} | {new Date(servis.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' })}</div>
-            <div><span style={{ fontWeight: 'bold' }}>Nama:</span> {servis.nama_pelanggan} ({servis.no_hp || '-'})</div>
-            <div><span style={{ fontWeight: 'bold' }}>Unit:</span> {servis.merk_hp} {tipeBersih}</div>
-            <div><span style={{ fontWeight: 'bold' }}>Keluhan:</span> {keluhanBersih}</div>
+          <div style={{ fontSize: '11px', lineHeight: 1.6 }}>
+            <div>No: {servis.no_servis} | {new Date(servis.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' })}</div>
+            <div>Nama: {servis.nama_pelanggan} ({servis.no_hp || '-'})</div>
+            <div>Unit: <span className="bold">{servis.merk_hp} {tipeBersih}</span></div>
+            <div>Keluhan: {keluhanBersih}</div>
           </div>
 
           <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
 
           {/* Total */}
           <div className="center" style={{ margin: '8px 0' }}>
-            <div style={{ fontSize: '12px' }}>TOTAL BIAYA:</div>
-            <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#dc2626' }}>Rp {totalBiaya}</div>
+            <div style={{ fontSize: '11px' }}>TOTAL BIAYA:</div>
+            <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#dc2626' }}>Rp {totalBiaya}</div>
           </div>
 
           {/* Garansi */}
-          <div style={{ border: '1px dashed #000', padding: '8px', marginTop: '8px', fontSize: '11px', lineHeight: 1.5 }}>
-            <div className="center bold" style={{ marginBottom: '6px', fontSize: '12px' }}>
+          <div style={{ border: '1px dashed #000', padding: '6px 8px', marginTop: '8px', fontSize: '9px', lineHeight: 1.5 }}>
+            <div className="center bold" style={{ marginBottom: '4px', fontSize: '11px' }}>
               MASA GARANSI: {masaGaransi.toUpperCase()}
             </div>
             {snkGaransi ? snkGaransi.split('\n').map((line, i) => (
@@ -194,26 +231,27 @@ export default function GaransiServis() {
 
           <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
 
-          {/* QR */}
-          <div className="center" style={{ marginTop: '12px' }}>
-            <div style={{ fontWeight: 'bold', fontSize: '11px' }}>Bantu Kami Berkembang!</div>
-            <div style={{ fontSize: '10px', marginTop: '4px' }}>Scan untuk review:</div>
+          {/* QR - Centered */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10px' }}>
+            <div style={{ fontWeight: 'bold', fontSize: '10px' }}>Bantu Kami Berkembang!</div>
+            <div style={{ fontSize: '9px', marginTop: '3px' }}>Scan untuk review:</div>
             <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=4&data=${encodeURIComponent(p.link_maps || 'https://maps.google.com')}`}
-              style={{ width: '100px', height: '100px', marginTop: '6px' }}
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&margin=4&data=${encodeURIComponent(p.link_maps || 'https://maps.google.com')}`}
+              style={{ width: '80px', height: '80px', marginTop: '6px' }}
               alt="QR Maps"
             />
           </div>
         </div>
       </div>
 
-      {/* Download Button */}
+      {/* Action Bar */}
       <div className="action-bar">
-        <button
-          onClick={() => window.history.back()}
-          className="btn-back"
-        >
+        <button onClick={() => router.back()} className="btn-back" title="Kembali (Esc)">
           <i className="bi bi-arrow-left" />
+        </button>
+        <button onClick={() => window.print()} className="btn-print" title="Cetak (Ctrl+P)">
+          <i className="bi bi-printer" />
+          Cetak
         </button>
         <button
           onClick={handleDownloadPDF}
@@ -235,6 +273,54 @@ export default function GaransiServis() {
       </div>
 
       <style jsx>{`
+        /* Skeleton Loading */
+        .thermal-skeleton {
+          width: 220px;
+          padding: 12px;
+          background: #fff;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          border-radius: 4px;
+        }
+        .skeleton-logo {
+          width: 50px;
+          height: 50px;
+          background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+          border-radius: 4px;
+          margin: 0 auto 10px;
+        }
+        .skeleton-line {
+          height: 12px;
+          background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+          border-radius: 3px;
+          margin: 8px auto;
+        }
+        .skeleton-title { width: 70%; height: 14px; }
+        .skeleton-address { width: 90%; }
+        .skeleton-header { width: 80%; }
+        .skeleton-total { width: 60%; height: 16px; }
+        .skeleton-divider {
+          height: 1px;
+          background: #e2e8f0;
+          margin: 10px 0;
+        }
+        .skeleton-qr {
+          width: 80px;
+          height: 80px;
+          background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+          border-radius: 4px;
+          margin: 12px auto 0;
+        }
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+
         .preview-wrapper {
           background: #e2e8f0;
           min-height: 100vh;
@@ -244,6 +330,7 @@ export default function GaransiServis() {
           overflow-x: auto;
           overflow-y: auto;
           box-sizing: border-box;
+          padding-bottom: 80px;
         }
         .thermal-preview {
           width: 220px;
@@ -294,6 +381,21 @@ export default function GaransiServis() {
           align-items: center;
           justify-content: center;
         }
+        .btn-print {
+          flex: 1;
+          height: 44px;
+          border-radius: 8px;
+          border: none;
+          background: #3b82f6;
+          color: #fff;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
         .btn-download {
           flex: 1;
           height: 44px;
@@ -312,6 +414,18 @@ export default function GaransiServis() {
         .btn-download:disabled {
           opacity: 0.7;
           cursor: wait;
+        }
+
+        @media print {
+          .action-bar { display: none; }
+          .preview-wrapper {
+            padding: 0;
+            background: #fff;
+          }
+          .thermal-preview {
+            box-shadow: none;
+            width: 58mm;
+          }
         }
 
         @media (max-width: 480px) {
