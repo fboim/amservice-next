@@ -5,31 +5,42 @@ import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
+import { SparepartSkeleton } from '@/components/Skeleton'
 
 function DataSparepartContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [loading, setLoading] = useState(true)
+  const [initialLoad, setInitialLoad] = useState(true)
   const [sparepart, setSparepart] = useState([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState(searchParams.get('cari') || '')
 
   useEffect(() => {
-    fetchSparepart()
+    const timer = setTimeout(() => {
+      fetchSparepart()
+    }, 100)
+    return () => clearTimeout(timer)
   }, [page, search])
 
   const fetchSparepart = async () => {
     try {
       const params = new URLSearchParams({ page, limit: 12, search })
-      const res = await fetch(`/api/sparepart?${params}`)
+      const res = await fetch(`/api/sparepart?${params}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      })
       const data = await res.json()
       setSparepart(data.sparepart || [])
       setTotal(data.total || 0)
     } catch (err) {
       console.error('Fetch error:', err)
     } finally {
-      setLoading(false)
+      setTimeout(() => {
+        setLoading(false)
+        setInitialLoad(false)
+      }, 200)
     }
   }
 
@@ -53,23 +64,31 @@ function DataSparepartContent() {
     return 'Tersedia'
   }
 
-  if (loading) {
+  if (initialLoad || loading) {
     return (
       <AppLayout>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-          <div style={{ textAlign: 'center', color: 'var(--am-text-muted)' }}>
-            <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
-            <p style={{ marginTop: '8px' }}>Memuat data sparepart...</p>
-          </div>
-        </div>
+        <SparepartSkeleton />
       </AppLayout>
     )
   }
 
   return (
     <AppLayout>
+      <style jsx global>{`
+        .fade-in {
+          animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .section-card {
+          animation: fadeIn 0.4s ease-out;
+        }
+      `}</style>
+
       {/* Page Header */}
-      <div className="pg-header">
+      <div className="pg-header fade-in">
         <div>
           <h4 className="pg-title">
             <i className="bi bi-box-seam" style={{ color: '#3b82f6', marginRight: 8 }} />

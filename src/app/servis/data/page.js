@@ -5,12 +5,13 @@ import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
-import { formatRupiah } from '@/lib/utils'
+import { DataServisSkeleton } from '@/components/Skeleton'
 
 function DataServisContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [loading, setLoading] = useState(true)
+  const [initialLoad, setInitialLoad] = useState(true)
   const [servis, setServis] = useState([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -29,7 +30,11 @@ function DataServisContent() {
   }, [searchParams])
 
   useEffect(() => {
-    fetchServis()
+    // Small delay for smooth transition
+    const timer = setTimeout(() => {
+      fetchServis()
+    }, 100)
+    return () => clearTimeout(timer)
   }, [page, search, statusFilter, showTrash])
 
   const fetchServis = async () => {
@@ -37,14 +42,20 @@ function DataServisContent() {
       const params = new URLSearchParams({ page, limit: 12, search })
       if (statusFilter) params.set('status', statusFilter)
       if (showTrash) params.set('trash', '1')
-      const res = await fetch(`/api/servis?${params}`)
+      const res = await fetch(`/api/servis?${params}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      })
       const data = await res.json()
       setServis(data.servis || [])
       setTotal(data.total || 0)
     } catch (err) {
       console.error('Fetch error:', err)
     } finally {
-      setLoading(false)
+      setTimeout(() => {
+        setLoading(false)
+        setInitialLoad(false)
+      }, 200)
     }
   }
 
@@ -154,23 +165,31 @@ function DataServisContent() {
     }
   }
 
-  if (loading) {
+  if (initialLoad || loading) {
     return (
       <AppLayout>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-          <div style={{ textAlign: 'center', color: 'var(--am-text-muted)' }}>
-            <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
-            <p style={{ marginTop: '8px' }}>Memuat data servis...</p>
-          </div>
-        </div>
+        <DataServisSkeleton />
       </AppLayout>
     )
   }
 
   return (
     <AppLayout>
+      <style jsx global>{`
+        .fade-in {
+          animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .section-card {
+          animation: fadeIn 0.4s ease-out;
+        }
+      `}</style>
+
       {/* Page Header */}
-      <div className="pg-header">
+      <div className="pg-header fade-in">
         <div>
           {showTrash ? (
             <>
@@ -215,7 +234,7 @@ function DataServisContent() {
       </div>
 
       {/* Search + Filter */}
-      <div className="section-card" style={{ marginBottom: '16px', padding: '12px' }}>
+      <div className="section-card fade-in" style={{ marginBottom: '16px', padding: '12px' }}>
         <form onSubmit={handleSearch} style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
           <input
             type="text"
@@ -252,7 +271,7 @@ function DataServisContent() {
       </div>
 
       {/* Main Layout: Table + Sidebar */}
-      <div className="ds-main">
+      <div className="ds-main fade-in">
         {/* Table Area */}
         <div>
           <div className="section-card" style={{ marginBottom: '14px', overflow: 'hidden' }}>

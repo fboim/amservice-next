@@ -7,15 +7,12 @@ import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
 import MonthlyChart from '@/components/MonthlyChart'
 import { formatRupiah } from '@/lib/utils'
-
-// Format date helper
-const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
-}
+import { DashboardSkeleton } from '@/components/Skeleton'
 
 export default function Dashboard() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
+  const [initialLoad, setInitialLoad] = useState(true)
   const [stats, setStats] = useState({
     antrean: 0, proses: 0, siap: 0, selesai: 0, omzet_hari: 0, omzet_bulan: 0
   })
@@ -41,25 +38,63 @@ export default function Dashboard() {
       }
     }
 
-    fetchDashboard()
+    // Small delay for smooth transition
+    const timer = setTimeout(() => {
+      fetchDashboard()
+    }, 100)
+
+    return () => clearTimeout(timer)
   }, [router])
 
   const fetchDashboard = async () => {
     try {
-      const [dashRes, servisRes] = await Promise.all([
-        fetch('/api/dashboard'),
-        fetch('/api/servis?limit=10'),
+      // Parallel fetch all data at once
+      const [dashRes, servisRes, sparepartRes] = await Promise.all([
+        fetch('/api/dashboard', {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' }
+        }),
+        fetch('/api/servis?limit=10', {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' }
+        }),
+        fetch('/api/sparepart?low=true&limit=5', {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' }
+        }),
       ])
 
-      const dashData = await dashRes.json()
-      const servisData = await servisRes.json()
+      const [dashData, servisData, sparepartData] = await Promise.all([
+        dashRes.json(),
+        servisRes.json(),
+        sparepartRes.json()
+      ])
 
-      setStats(dashData)
+      setStats(dashData || {})
       setServisTerbaru(servisData.servis || [])
+      setStokMenipis(sparepartData.sparepart || [])
+
+      // Calculate merk populer from servis
+      if (servisData.servis && servisData.servis.length > 0) {
+        const merkCount = {}
+        servisData.servis.forEach(s => {
+          const merk = s.merk_hp || 'Lainnya'
+          merkCount[merk] = (merkCount[merk] || 0) + 1
+        })
+        setMerkPopuler(
+          Object.entries(merkCount)
+            .map(([merk_hp, total]) => ({ merk_hp, total }))
+            .sort((a, b) => b.total - a.total)
+        )
+      }
     } catch (err) {
       console.error('Fetch error:', err)
     } finally {
-      setLoading(false)
+      // Smooth fade out
+      setTimeout(() => {
+        setLoading(false)
+        setInitialLoad(false)
+      }, 300)
     }
   }
 
@@ -95,23 +130,40 @@ export default function Dashboard() {
     return clean
   }
 
-  if (loading) {
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+  }
+
+  if (initialLoad || loading) {
     return (
       <AppLayout>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-          <div style={{ textAlign: 'center', color: 'var(--am-text-muted)' }}>
-            <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
-            <p style={{ marginTop: '8px' }}>Memuat dashboard...</p>
-          </div>
-        </div>
+        <DashboardSkeleton />
       </AppLayout>
     )
   }
 
   return (
     <AppLayout>
+      <style jsx global>{`
+        .fade-in {
+          animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .scard {
+          animation: fadeIn 0.4s ease-out;
+          animation-fill-mode: both;
+        }
+        .scard:nth-child(1) { animation-delay: 0ms; }
+        .scard:nth-child(2) { animation-delay: 50ms; }
+        .scard:nth-child(3) { animation-delay: 100ms; }
+        .scard:nth-child(4) { animation-delay: 150ms; }
+      `}</style>
+
       {/* Stats Cards - 4 columns */}
-      <div className="dash-row-4" style={{ marginBottom: '8px', marginTop: '4px' }}>
+      <div className="dash-row-4 fade-in" style={{ marginBottom: '8px', marginTop: '4px' }}>
         <div className="scard" style={{ borderLeft: '3px solid #3b82f6' }}>
           <div style={{ width: '42px', height: '42px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0, background: 'rgba(59,130,246,.12)', color: '#3b82f6' }}>
             <i className="bi bi-person-plus-fill" />
@@ -158,7 +210,7 @@ export default function Dashboard() {
       </div>
 
       {/* Omzet Cards - 2 columns */}
-      <div className="dash-row-2" style={{ marginBottom: '20px' }}>
+      <div className="dash-row-2 fade-in" style={{ marginBottom: '20px' }}>
         <div className="scard" style={{ borderLeft: '3px solid #8b5cf6' }}>
           <div style={{ width: '42px', height: '42px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', flexShrink: 0, background: 'rgba(139,92,246,.12)', color: '#7c3aed' }}>
             <i className="bi bi-cash-stack" />
@@ -183,7 +235,7 @@ export default function Dashboard() {
       </div>
 
       {/* Table + Sidebar */}
-      <div className="dash-row-tb" style={{ marginBottom: '20px' }}>
+      <div className="dash-row-tb fade-in" style={{ marginBottom: '20px' }}>
         {/* Servis Table */}
         <div className="section-card">
           <div className="card-header">
@@ -256,11 +308,6 @@ export default function Dashboard() {
                                 <i className="bi bi-whatsapp" />
                               </a>
                             </>
-                          )}
-                          {isAdmin && (
-                            <button className="btn-act btn-act-red" title="Hapus">
-                              <i className="bi bi-trash" />
-                            </button>
                           )}
                         </div>
                       </td>
@@ -338,7 +385,7 @@ export default function Dashboard() {
       </div>
 
       {/* Bottom Section - Chart + Popular Brands */}
-      <div className="dash-row-bot">
+      <div className="dash-row-bot fade-in">
         {/* Monthly Chart */}
         <div className="section-card">
           <div className="card-header">
