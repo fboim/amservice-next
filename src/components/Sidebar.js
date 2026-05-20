@@ -285,7 +285,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
               </button>
             </li>
             <li>
-              <Link href="/ganti_password.php" className="nav-link">
+              <Link href="/ganti_password" className="nav-link">
                 <i className="bi bi-key" />
                 <span>Ganti Password</span>
               </Link>
@@ -301,7 +301,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
           {isAdmin && (
             <div style={{ padding: '6px 12px 0' }}>
               <Link
-                href="/backup.php"
+                href="/backup"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
