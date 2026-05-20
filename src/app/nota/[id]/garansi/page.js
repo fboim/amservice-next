@@ -10,37 +10,38 @@ export default function GaransiServis() {
   const printRef = useRef(null)
 
   const [loading, setLoading] = useState(true)
-  const [servis, setServis] = useState(null)
-  const [pengaturan, setPengaturan] = useState(null)
-  const [dataReady, setDataReady] = useState(false)
+  const [servisData, setServisData] = useState(null)
+  const [pengaturanData, setPengaturanData] = useState(null)
+  const [allReady, setAllReady] = useState(false)
 
   useEffect(() => {
-    fetchData()
+    fetchAllData()
   }, [id])
 
-  const fetchData = async () => {
+  const fetchAllData = async () => {
     try {
       const baseUrl = window.location.origin
 
-      // Fetch servis first
-      const servisRes = await fetch(`${baseUrl}/api/servis?id=${id}`)
-      if (!servisRes.ok) throw new Error('Gagal memuat data servis')
-      const servisData = await servisRes.json()
-      if (servisData.error) throw new Error(servisData.error)
-      setServis(servisData)
+      // Fetch both at the same time
+      const [servisRes, pengaturanRes] = await Promise.all([
+        fetch(`${baseUrl}/api/servis?id=${id}`),
+        fetch(`${baseUrl}/api/pengaturan`)
+      ])
 
-      // Fetch pengaturan
-      try {
-        const pengaturanRes = await fetch(`${baseUrl}/api/pengaturan`)
-        if (pengaturanRes.ok) {
-          const json = await pengaturanRes.json()
-          if (json.pengaturan) {
-            setPengaturan(json.pengaturan)
-          }
+      // Parse servis
+      const servisJson = await servisRes.json()
+      if (servisJson.error) throw new Error(servisJson.error)
+      setServisData(servisJson)
+
+      // Parse pengaturan
+      if (pengaturanRes.ok) {
+        const pengaturanJson = await pengaturanRes.json()
+        if (pengaturanJson.pengaturan) {
+          setPengaturanData(pengaturanJson.pengaturan)
         }
-      } catch (e) {
-        console.warn('Pengaturan tidak tersedia')
       }
+
+      setAllReady(true)
     } catch (err) {
       alert('Gagal memuat data: ' + err.message)
       router.back()
@@ -49,16 +50,14 @@ export default function GaransiServis() {
     }
   }
 
-  // Auto print when both servis and pengaturan are loaded
+  // Auto print when all data is ready
   useEffect(() => {
-    if (servis && !dataReady) {
-      setDataReady(true)
-      // Auto print after data loads
+    if (allReady && servisData) {
       setTimeout(() => {
         eksekusiCetak()
       }, 500)
     }
-  }, [servis, dataReady])
+  }, [allReady])
 
   const getKeluhanBersih = (keluhan) => {
     if (!keluhan) return '-'
@@ -76,6 +75,7 @@ export default function GaransiServis() {
   }
 
   const wrapText = (text, maxLen) => {
+    if (!text) return []
     const words = text.split(' ')
     const lines = []
     let currentLine = ''
@@ -106,10 +106,12 @@ export default function GaransiServis() {
   }
 
   const printWithMesinKasir = () => {
-    if (!servis) return
+    if (!servisData) return
 
-    // Get data from state or use defaults
-    const p = pengaturan || {}
+    // Get data from state
+    const p = pengaturanData || {}
+    const servis = servisData
+
     const tipeBersih = (servis.tipe_hp || '').replace(/-/g, '').trim()
     const keluhanBersih = getKeluhanBersih(servis.keluhan)
     const totalBiaya = formatRupiah(servis.estimasi_biaya)
@@ -119,6 +121,8 @@ export default function GaransiServis() {
     const alamat = p.alamat || ''
     const snkGaransi = p.snk_garansi || ''
     const linkMaps = p.link_maps || 'https://maps.google.com'
+
+    console.log('PRINT DATA:', { namaToko, alamat, noWa, snkGaransi })
 
     const _btQueue = []
     let _btBusy = false
@@ -142,7 +146,7 @@ export default function GaransiServis() {
       setTimeout(_btNext, BT_DELAY)
     }
 
-    // Load logo and print
+    // Load logo
     const logoImg = new Image()
     logoImg.crossOrigin = 'Anonymous'
     logoImg.src = '/logo_am.png'
@@ -160,7 +164,7 @@ export default function GaransiServis() {
     logoImg.onerror = () => { lanjutCetak() }
 
     const lanjutCetak = () => {
-      // Header
+      // Header - Nama Toko
       btSend('tebal', true)
       btSend('teks', tengah(namaToko))
       btSend('tebal', false)
@@ -184,15 +188,15 @@ export default function GaransiServis() {
       btSend('tebal', false)
       btSend('teks', '--------------------------------\n')
 
-      // Data
-      btSend('teks', 'No: ' + servis.no_servis + ' | ' + new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' }) + '\n')
+      // Data Servis
+      btSend('teks', 'No: ' + servis.no_servis + ' | ' + new Date(servis.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' }) + '\n')
       btSend('teks', 'Nama: ' + servis.nama_pelanggan + ' (' + (servis.no_hp || '-') + ')\n')
       btSend('teks', 'Unit: ' + servis.merk_hp + ' ' + tipeBersih + '\n')
       btSend('teks', '--------------------------------\n')
       btSend('teks', 'Keluhan: ' + keluhanBersih + '\n')
       btSend('teks', '--------------------------------\n')
 
-      // Biaya & Garansi
+      // Total & Garansi
       btSend('teks', '\x1b\x61\x01')
       btSend('tebal', true)
       btSend('teks', 'TOTAL BIAYA  : Rp ' + totalBiaya + '\n')
@@ -234,9 +238,10 @@ export default function GaransiServis() {
     )
   }
 
-  if (!servis) return null
+  if (!servisData) return null
 
-  const p = pengaturan || {}
+  const p = pengaturanData || {}
+  const servis = servisData
   const tipeBersih = servis.tipe_hp?.replace(/-/g, '').trim() || ''
   const keluhanBersih = getKeluhanBersih(servis.keluhan)
   const totalBiaya = formatRupiah(servis.estimasi_biaya)
@@ -276,7 +281,7 @@ export default function GaransiServis() {
         .no-print { display: block; margin-top: 20px; text-align: center; }
       `}</style>
 
-      {/* Print Preview - scaled to 58mm thermal paper ratio on mobile */}
+      {/* Print Preview - scaled to 58mm thermal paper ratio */}
       <div className="print-preview-container">
         <div ref={printRef} className="print-preview">
           {/* Header dengan Logo */}
