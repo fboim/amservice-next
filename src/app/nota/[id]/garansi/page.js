@@ -405,12 +405,12 @@ export default function GaransiServis() {
         }
         @media (max-width: 400px) {
           .print-preview-container {
-            padding: 10px;
+            padding: 8px;
           }
           .print-preview {
-            width: 100%;
-            max-width: 100%;
-            box-shadow: none;
+            width: 92%;
+            max-width: 92%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
           }
         }
       `}</style>
