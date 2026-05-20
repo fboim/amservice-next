@@ -35,7 +35,6 @@ export default function GaransiServis() {
 
   const fetchData = async () => {
     try {
-      // Use absolute URLs for pages opened in new tab
       const baseUrl = window.location.origin
 
       // Fetch servis first
@@ -46,19 +45,17 @@ export default function GaransiServis() {
       setServis(servisData)
 
       // Fetch pengaturan
-      let pengaturanData = { pengaturan: null }
       try {
         const pengaturanRes = await fetch(`${baseUrl}/api/pengaturan`)
         if (pengaturanRes.ok) {
-          const text = await pengaturanRes.text()
-          if (text) {
-            pengaturanData = JSON.parse(text)
+          const json = await pengaturanRes.json()
+          if (json.pengaturan) {
+            setPengaturan(json.pengaturan)
           }
         }
       } catch (e) {
         console.warn('Pengaturan tidak tersedia, menggunakan default')
       }
-      setPengaturan(pengaturanData.pengaturan)
     } catch (err) {
       alert('Gagal memuat data: ' + err.message)
       router.back()
@@ -277,74 +274,86 @@ export default function GaransiServis() {
         .no-print { display: block; margin-top: 20px; text-align: center; }
       `}</style>
 
-      {/* Visual preview for browser */}
+      {/* Visual preview for browser - larger size */}
       <div style={{
-        maxWidth: '400px',
+        maxWidth: '380px',
         margin: '20px auto',
-        padding: '20px',
+        padding: '24px',
         fontFamily: 'Courier New, Courier, monospace',
-        fontSize: '12px',
+        fontSize: '14px',
         color: '#000',
         background: '#fff',
-        border: '1px solid #ccc'
+        border: '2px solid #333',
+        borderRadius: '12px',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.15)'
       }}>
         {/* Header dengan Logo */}
-        <div className="center">
-          <img src="/logo_am.png" style={{ width: '60px', height: 'auto' }} alt="Logo AM Service" />
+        <div className="center" style={{ marginBottom: '12px' }}>
+          <img src="/logo_am.png" style={{ width: '80px', height: 'auto' }} alt="Logo AM Service" />
         </div>
-        <div className="center bold" style={{ fontSize: '16px', marginTop: '3px' }}>{(pengaturan?.nama_toko || 'AM SERVICE').toUpperCase()}</div>
-        {pengaturan?.alamat && <div className="center" style={{ fontSize: '10px', marginTop: '2px' }}>{pengaturan.alamat}</div>}
-        {pengaturan?.no_wa && <div className="center" style={{ fontSize: '10px', marginBottom: '3px' }}>WA: {pengaturan.no_wa}</div>}
+        <div className="center bold" style={{ fontSize: '20px', marginTop: '4px' }}>{(pengaturan?.nama_toko || 'AM SERVICE').toUpperCase()}</div>
+        {pengaturan?.alamat && (
+          <div className="center" style={{ fontSize: '12px', marginTop: '4px', lineHeight: 1.4 }}>{pengaturan.alamat}</div>
+        )}
+        {pengaturan?.no_wa && (
+          <div className="center" style={{ fontSize: '12px', marginTop: '4px' }}>WA: {pengaturan.no_wa}</div>
+        )}
 
-        <div className="line"></div>
-        <div className="center" style={{ fontSize: '10px' }}>NOTA GARANSI SERVIS</div>
-        <div className="line"></div>
+        <div className="line" style={{ margin: '12px 0' }}></div>
+        <div className="center bold" style={{ fontSize: '14px' }}>NOTA GARANSI SERVIS</div>
+        <div className="line" style={{ margin: '12px 0' }}></div>
 
         {/* Data Table */}
-        <table>
+        <table style={{ fontSize: '13px' }}>
           <tbody>
             <tr>
-              <td colSpan="2">No: {servis.no_servis} | {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' })}</td>
+              <td style={{ padding: '4px 0' }}>No:</td>
+              <td style={{ padding: '4px 0' }}><strong>{servis.no_servis}</strong> | {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' })}</td>
             </tr>
             <tr>
-              <td colSpan="2">Nama: {servis.nama_pelanggan} ({servis.no_hp || '-'})</td>
+              <td style={{ padding: '4px 0' }}>Nama:</td>
+              <td style={{ padding: '4px 0' }}>{servis.nama_pelanggan} ({servis.no_hp || '-'})</td>
             </tr>
             <tr>
-              <td colSpan="2">Unit: <span className="bold">{servis.merk_hp} {tipeBersih}</span></td>
+              <td style={{ padding: '4px 0' }}>Unit:</td>
+              <td style={{ padding: '4px 0' }}><strong>{servis.merk_hp} {tipeBersih}</strong></td>
             </tr>
             <tr>
-              <td colSpan="2">Keluhan: {keluhanBersih}</td>
+              <td style={{ padding: '4px 0', verticalAlign: 'top' }}>Keluhan:</td>
+              <td style={{ padding: '4px 0' }}>{keluhanBersih}</td>
             </tr>
           </tbody>
         </table>
 
-        <div className="line"></div>
+        <div className="line" style={{ margin: '12px 0' }}></div>
 
         {/* Total Biaya */}
-        <div className="center" style={{ margin: '8px 0' }}>
-          <div style={{ fontSize: '12px' }}>TOTAL BIAYA :</div>
-          <div className="bold" style={{ fontSize: '16px' }}>Rp {totalBiaya}</div>
+        <div className="center" style={{ margin: '12px 0' }}>
+          <div style={{ fontSize: '14px' }}>TOTAL BIAYA:</div>
+          <div className="bold" style={{ fontSize: '22px', color: '#dc2626' }}>Rp {totalBiaya}</div>
         </div>
 
         {/* Garansi Box */}
-        <div className="garansi-box">
-          <div className="bold center" style={{ marginBottom: '4px', fontSize: '11px' }}>
+        <div className="garansi-box" style={{ margin: '12px 0' }}>
+          <div className="bold center" style={{ marginBottom: '8px', fontSize: '14px' }}>
             MASA GARANSI: {masaGaransi.toUpperCase()}
           </div>
-          {snkGaransi ? snkGaransi.split('\n').map((line, i) => (
-            <span key={i}>{line}<br/></span>
-          )) : '-'}
+          <div style={{ lineHeight: 1.6 }}>
+            {snkGaransi ? snkGaransi.split('\n').map((line, i) => (
+              line.trim() ? <div key={i}>{line.trim()}</div> : null
+            )) : <div>-</div>}
+          </div>
         </div>
 
-        <div className="line"></div>
+        <div className="line" style={{ margin: '12px 0' }}></div>
 
         {/* QR Maps */}
-        <div className="center" style={{ marginTop: '10px' }}>
-          <div className="bold">Bantu Kami Berkembang!</div>
-          <div style={{ fontSize: '10px', marginTop: '3px' }}>Scan QR ini untuk ulas di Google Maps:</div>
+        <div className="center" style={{ marginTop: '16px' }}>
+          <div className="bold" style={{ fontSize: '13px' }}>Bantu Kami Berkembang!</div>
+          <div style={{ fontSize: '11px', marginTop: '4px' }}>Scan untuk review di Google Maps:</div>
           <img
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=0&data=${encodeURIComponent(pengaturan?.link_maps || 'https://maps.google.com')}`}
-            style={{ width: '100px', height: '100px' }}
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=5&data=${encodeURIComponent(pengaturan?.link_maps || 'https://maps.google.com')}`}
+            style={{ width: '120px', height: '120px', marginTop: '8px' }}
             alt="QR Maps"
           />
         </div>
