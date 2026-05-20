@@ -29,12 +29,18 @@ export default function GaransiServis() {
 
   const fetchData = async () => {
     try {
-      const [servisRes, pengaturanRes] = await Promise.all([
-        fetch(`/api/servis?id=${id}`),
-        fetch('/api/pengaturan')
-      ])
+      const servisRes = await fetch(`/api/servis?id=${id}`)
       const servisData = await servisRes.json()
-      const pengaturanData = await pengaturanRes.json()
+
+      let pengaturanData = { pengaturan: null }
+      try {
+        const pengaturanRes = await fetch('/api/pengaturan')
+        if (pengaturanRes.ok) {
+          pengaturanData = await pengaturanRes.json()
+        }
+      } catch (e) {
+        console.warn('Gagal mengambil pengaturan, menggunakan default')
+      }
 
       if (servisData.error) throw new Error(servisData.error)
       setServis(servisData)
@@ -116,7 +122,7 @@ export default function GaransiServis() {
     // Load logo and print
     const logoImg = new Image()
     logoImg.crossOrigin = 'Anonymous'
-    logoImg.src = '/logo.png'
+    logoImg.src = '/logo_am.png'
     logoImg.onload = () => {
       const canvas = document.createElement('canvas')
       canvas.width = 120
