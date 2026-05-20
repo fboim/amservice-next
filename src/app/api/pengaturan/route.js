@@ -1,6 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 
-export async function GET() {
+export const dynamic = 'force-dynamic'
+
+export async function GET(request) {
+  // Prevent caching
+  const headers = new Headers()
+  headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+  headers.set('Pragma', 'no-cache')
+  headers.set('Expires', '0')
+
   try {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -15,7 +23,7 @@ export async function GET() {
 
     if (error || !data) {
       // Return default settings if none exist
-      return Response.json({
+      return new Response(JSON.stringify({
         pengaturan: {
           id: 1,
           nama_toko: 'AM SERVICE',
@@ -25,16 +33,20 @@ export async function GET() {
           snk_penerimaan: '1. Pelanggan wajib menunjukkan nota saat pengambilan unit.\n2. Garansi tidak berlaku jika kerusakan disebabkan oleh faktor eksternal.\n3. Estimasi waktu dapat berubah tergantung kondisi.',
           snk_garansi: '1. Garansi berlaku 7 hari sejak tanggal nota.\n2. Garansi hanya berlaku untuk kerusakan yang sama.\n3. Garansi tidak berlaku jika unit mengalami kerusakan fisik.'
         }
-      })
+      }), { headers })
     }
 
-    return Response.json({ pengaturan: data })
+    return new Response(JSON.stringify({ pengaturan: data }), { headers })
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 })
+    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers })
   }
 }
 
 export async function PUT(request) {
+  // Prevent caching
+  const headers = new Headers()
+  headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+
   try {
     const body = await request.json()
 
@@ -75,8 +87,8 @@ export async function PUT(request) {
       result = data
     }
 
-    return Response.json({ success: true, pengaturan: result })
+    return new Response(JSON.stringify({ success: true, pengaturan: result }), { headers })
   } catch (error) {
-    return Response.json({ error: error.message }, { status: 500 })
+    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers })
   }
 }
