@@ -68,24 +68,39 @@ export default function GaransiServis() {
     setDownloading(true)
 
     try {
-      // Dynamic import html2canvas and jspdf
       const html2canvas = await loadHtml2Canvas()
       const { jsPDF } = await loadJsPDF()
 
       const content = printRef.current
-      const canvas = await html2canvas(content, { scale: 2, useCORS: true, width: content.scrollWidth })
+
+      // Capture with high quality
+      const canvas = await html2canvas(content, {
+        scale: 3,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false
+      })
+
       const imgData = canvas.toDataURL('image/png')
 
-      const pdf = new jsPDF('p', 'mm', [58, content.scrollHeight / 2 + 20])
-      const pageWidth = pdf.internal.pageSize.getWidth()
+      // PDF dimensions in mm (58mm width = thermal paper)
+      const pdfWidth = 58
       const imgWidth = canvas.width
       const imgHeight = canvas.height
-      const ratio = pageWidth / imgWidth * 2
-      const scaledHeight = imgHeight * ratio
+      const ratio = pdfWidth / imgWidth
+      const pdfHeight = imgHeight * ratio
 
-      pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, scaledHeight)
+      // Create PDF with exact thermal paper size
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [pdfWidth, pdfHeight]
+      })
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
       pdf.save(`GARANSI-${servisData.no_servis}.pdf`)
     } catch (err) {
+      console.error('PDF Error:', err)
       alert('Gagal download PDF: ' + err.message)
     } finally {
       setDownloading(false)
