@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 
 const SidebarContext = createContext({
   mobileOpen: false,
@@ -10,10 +10,28 @@ const SidebarContext = createContext({
 })
 
 export function SidebarProvider({ children }) {
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const [mobileOpen, setMobileOpenState] = useState(false)
 
-  const onMobileClose = () => setMobileOpen(false)
-  const onMobileOpen = () => setMobileOpen(true)
+  useEffect(() => {
+    // Initialize from localStorage
+    const stored = localStorage.getItem('am_mobile_open')
+    if (stored === 'true') {
+      setMobileOpenState(true)
+    }
+  }, [])
+
+  const setMobileOpen = (value) => {
+    setMobileOpenState(value)
+    localStorage.setItem('am_mobile_open', String(value))
+  }
+
+  const onMobileClose = () => {
+    setMobileOpen(false)
+  }
+
+  const onMobileOpen = () => {
+    setMobileOpen(true)
+  }
 
   return (
     <SidebarContext.Provider value={{ mobileOpen, setMobileOpen, onMobileClose, onMobileOpen }}>
