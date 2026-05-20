@@ -1,11 +1,10 @@
 'use client'
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
-import MonthlyChart from '@/components/MonthlyChart'
 import { formatRupiah } from '@/lib/utils'
 import { DashboardSkeleton } from '@/components/Skeleton'
 
@@ -17,10 +16,7 @@ export default function Dashboard() {
     antrean: 0, proses: 0, siap: 0, selesai: 0, omzet_hari: 0, omzet_bulan: 0, merk_populer: []
   })
   const [servisTerbaru, setServisTerbaru] = useState([])
-  const [stokMenipis, setStokMenipis] = useState([])
   const [user, setUser] = useState(null)
-  const printDropdownsRef = useRef({})
-  const waDropdownsRef = useRef({})
 
   useEffect(() => {
     const token = localStorage.getItem('ams_token') || sessionStorage.getItem('ams_token')
@@ -48,21 +44,18 @@ export default function Dashboard() {
 
   const fetchDashboard = async () => {
     try {
-      const [dashRes, servisRes, sparepartRes] = await Promise.all([
+      const [dashRes, servisRes] = await Promise.all([
         fetch('/api/dashboard', { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
         fetch('/api/servis?limit=10', { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
-        fetch('/api/sparepart?low=true&limit=10', { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
       ])
 
-      const [dashData, servisData, sparepartData] = await Promise.all([
+      const [dashData, servisData] = await Promise.all([
         dashRes.json(),
-        servisRes.json(),
-        sparepartRes.json()
+        servisRes.json()
       ])
 
       setStats(dashData || {})
       setServisTerbaru(servisData.servis || [])
-      setStokMenipis(sparepartData.sparepart || [])
     } catch (err) {
       console.error('Fetch error:', err)
     } finally {
@@ -81,15 +74,13 @@ export default function Dashboard() {
   }, [loading, initialLoad, servisTerbaru])
 
   const initDropdowns = () => {
-    // Wait for DOM to be ready
     setTimeout(() => {
-      document.querySelectorAll('.print-btn').forEach(function(btn, idx) {
+      document.querySelectorAll('.print-btn').forEach(function(btn) {
         btn.onclick = function(e) {
           e.stopPropagation()
           const dropdown = btn.nextElementSibling
           if (dropdown) {
             const isVisible = dropdown.style.display === 'block'
-            // Close all
             document.querySelectorAll('.print-dropdown').forEach(d => d.style.display = 'none')
             if (!isVisible) {
               dropdown.style.display = 'block'
@@ -268,7 +259,7 @@ export default function Dashboard() {
 
       {/* Table + Sidebar */}
       <div className="dash-row-tb fade-in" style={{ marginBottom: '20px' }}>
-        {/* Servis Table - Same style as Data Servis page */}
+        {/* Servis Table */}
         <div className="section-card">
           <div className="card-header">
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.875rem', fontWeight: '600', color: 'var(--am-text)' }}>
@@ -388,39 +379,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Sidebar Column - Stock Warning + Merk Populer */}
+        {/* Sidebar Column - Merk Populer only */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {/* Stok Menipis Widget */}
-          <div className="section-card">
-            <div className="card-header">
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.75rem', fontWeight: '600', color: 'var(--am-text)' }}>
-                <i className="bi bi-exclamation-triangle" style={{ color: '#f59e0b' }} /> Stok Menipis
-              </span>
-              <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>{stokMenipis.length} item</span>
-            </div>
-            <div style={{ padding: '8px 0' }}>
-              {stokMenipis.length > 0 ? stokMenipis.map((item) => (
-                <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 16px', borderBottom: '1px solid var(--am-border)' }}>
-                  <span style={{ fontSize: '.8rem', color: 'var(--am-text)' }}>{item.nama_sparepart}</span>
-                  <span style={{
-                    fontSize: '.68rem',
-                    fontWeight: '700',
-                    padding: '2px 8px',
-                    borderRadius: '999px',
-                    background: item.stok === 0 ? 'rgba(239,68,68,.15)' : 'rgba(245,158,11,.15)',
-                    color: item.stok === 0 ? '#dc2626' : '#d97706',
-                  }}>
-                    {item.stok} pcs
-                  </span>
-                </div>
-              )) : (
-                <div style={{ padding: '16px', textAlign: 'center', color: 'var(--am-text-muted)', fontSize: '.8rem' }}>
-                  <i className="bi bi-check-circle" style={{ color: '#10b981' }} /> Stok Aman
-                </div>
-              )}
-            </div>
-          </div>
-
           {/* Merk HP Populer */}
           <div className="section-card">
             <div className="card-header">
@@ -431,8 +391,8 @@ export default function Dashboard() {
             </div>
             <div style={{ padding: '8px 0' }}>
               {stats.merk_populer && stats.merk_populer.length > 0 ? stats.merk_populer.slice(0, 6).map((merk, i) => {
-                const maxTotal = Math.max(...stats.merk_populer.map(m => m.total))
-                const pct = maxTotal > 0 ? (merk.total / maxTotal) * 100 : 0
+                const maxTotal = Math.max(...stats.merk_populer.map(m => m.total), 1)
+                const pct = (merk.total / maxTotal) * 100
                 return (
                   <div key={i} style={{ padding: '8px 16px', borderBottom: '1px solid var(--am-border)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -454,9 +414,9 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Bottom Section - Chart only (removed duplicate Brand Stats) */}
+      {/* Bottom Section - Chart only */}
       <div className="dash-row-bot fade-in">
-        {/* Monthly Chart - Enhanced */}
+        {/* Monthly Chart */}
         <div className="section-card">
           <div className="card-header">
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.875rem', fontWeight: '600', color: 'var(--am-text)' }}>
@@ -465,114 +425,85 @@ export default function Dashboard() {
             <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>6 Bulan Terakhir - {new Date().getFullYear()}</span>
           </div>
           <div style={{ padding: '16px' }}>
-            <div style={{ height: '240px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', gap: '12px' }}>
+            {/* Simple bar chart */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'space-around',
+              gap: '8px',
+              height: '200px',
+              padding: '0 8px'
+            }}>
               {stats.monthly_data && stats.monthly_data.map((month, i) => {
                 const maxVal = Math.max(...(stats.monthly_data || []).map(m => m.value), 1)
                 const heightPct = (month.value / maxVal) * 100
                 return (
-                  <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: '100%', position: 'relative' }}>
-                      <div
-                        style={{
-                          width: '100%',
-                          height: `${heightPct}%`,
-                          minHeight: month.value > 0 ? '8px' : '4px',
-                          background: month.value > 0
-                            ? 'linear-gradient(180deg, rgba(59,130,246,.8) 0%, rgba(59,130,246,.4) 100%)'
-                            : 'rgba(255,255,255,.1)',
-                          borderRadius: '6px 6px 2px 2px',
-                          transition: 'height 0.5s ease',
-                          boxShadow: month.value > 0 ? '0 4px 12px rgba(59,130,246,.3)' : 'none',
-                        }}
-                      />
-                      <div style={{
-                        position: 'absolute',
-                        top: '-24px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        fontSize: '.7rem',
-                        fontWeight: '700',
-                        color: 'var(--am-text)',
-                        background: 'var(--am-surface)',
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        border: '1px solid var(--am-border)',
-                      }}>
-                        {month.value}
-                      </div>
+                  <div key={i} style={{
+                    flex: 1,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    height: '100%'
+                  }}>
+                    {/* Value label on top */}
+                    <div style={{
+                      fontSize: '.65rem',
+                      fontWeight: '700',
+                      color: 'var(--am-text)',
+                      marginBottom: '4px',
+                      minHeight: '16px'
+                    }}>
+                      {month.value}
                     </div>
-                    <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)', fontWeight: '600' }}>{month.label}</span>
+                    {/* Bar */}
+                    <div style={{
+                      width: '100%',
+                      height: `${heightPct}%`,
+                      minHeight: month.value > 0 ? '4px' : '2px',
+                      background: month.value > 0
+                        ? 'linear-gradient(180deg, #3b82f6, #6366f1)'
+                        : 'rgba(255,255,255,0.1)',
+                      borderRadius: '4px 4px 0 0',
+                      transition: 'height 0.5s ease',
+                      boxShadow: month.value > 0 ? '0 2px 8px rgba(59,130,246,0.4)' : 'none'
+                    }} />
+                    {/* Month label */}
+                    <div style={{
+                      fontSize: '.6rem',
+                      color: 'var(--am-text-muted)',
+                      fontWeight: '600',
+                      marginTop: '6px',
+                      textTransform: 'uppercase'
+                    }}>
+                      {month.label}
+                    </div>
                   </div>
                 )
               })}
             </div>
-            {/* Summary */}
+            {/* Total */}
             <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: '24px',
-              marginTop: '16px',
+              textAlign: 'center',
+              marginTop: '12px',
               paddingTop: '12px',
-              borderTop: '1px solid var(--am-border)'
+              borderTop: '1px solid var(--am-border)',
+              fontSize: '.75rem',
+              color: 'var(--am-text-muted)'
             }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>Total Servis</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--am-text)' }}>
-                  {stats.monthly_data?.reduce((sum, m) => sum + m.value, 0) || 0}
-                </div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>Rata-rata/Bulan</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: '800', color: '#3b82f6' }}>
-                  {stats.monthly_data?.length > 0
-                    ? Math.round(stats.monthly_data.reduce((sum, m) => sum + m.value, 0) / stats.monthly_data.length)
-                    : 0}
-                </div>
-              </div>
+              Total Servis 6 Bulan: <strong style={{ color: 'var(--am-text)', fontSize: '1rem' }}>
+                {stats.monthly_data?.reduce((sum, m) => sum + m.value, 0) || 0}
+              </strong>
             </div>
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <div className="section-card">
-          <div className="card-header">
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.875rem', fontWeight: '600', color: 'var(--am-text)' }}>
-              <i className="bi bi-lightning" style={{ color: '#10b981' }} /> Quick Stats
-            </span>
-          </div>
-          <div style={{ padding: '12px 0' }}>
-            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--am-border)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '.8rem', color: 'var(--am-text-muted)' }}>Total Servis</span>
-                <span style={{ fontWeight: '800', color: 'var(--am-text)', fontSize: '1.1rem' }}>
-                  {stats.antrean + stats.proses + stats.siap + stats.selesai}
-                </span>
-              </div>
-            </div>
-            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--am-border)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '.8rem', color: 'var(--am-text-muted)' }}>Servis Aktif</span>
-                <span style={{ fontWeight: '700', color: '#f59e0b', fontSize: '1rem' }}>
-                  {stats.proses}
-                </span>
-              </div>
-            </div>
-            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--am-border)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '.8rem', color: 'var(--am-text-muted)' }}>Merk Terdaftar</span>
-                <span style={{ fontWeight: '700', color: '#3b82f6', fontSize: '1rem' }}>
-                  {stats.merk_populer?.length || 0}
-                </span>
-              </div>
-            </div>
-            <div style={{ padding: '12px 16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '.8rem', color: 'var(--am-text-muted)' }}>Stok Rendah</span>
-                <span style={{ fontWeight: '700', color: '#ef4444', fontSize: '1rem' }}>
-                  {stokMenipis.length}
-                </span>
-              </div>
-            </div>
+        {/* Right side - Empty or can be used for other info */}
+        <div className="section-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '280px' }}>
+          <div style={{ textAlign: 'center', padding: '20px' }}>
+            <i className="bi bi-graph-up" style={{ fontSize: '3rem', color: 'var(--am-text-muted)', opacity: 0.3 }} />
+            <p style={{ color: 'var(--am-text-muted)', fontSize: '.85rem', marginTop: '12px' }}>
+              Data statistik tambahan<br />dapat ditampilkan di sini
+            </p>
           </div>
         </div>
       </div>
