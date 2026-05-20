@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -14,6 +14,14 @@ export default function Login() {
     password: '',
     remember: false
   })
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem('ams_token') || sessionStorage.getItem('ams_token')
+    if (token) {
+      router.push('/dashboard')
+    }
+  }, [router])
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target

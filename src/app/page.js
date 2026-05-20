@@ -40,6 +40,12 @@ export default function Home() {
     }
     // Fetch testimonials from API
     fetchTestimonials()
+
+    // Redirect to dashboard if already logged in
+    const token = localStorage.getItem('ams_token') || sessionStorage.getItem('ams_token')
+    if (token) {
+      window.location.href = '/dashboard'
+    }
   }, [])
 
   const toggleTheme = () => {
