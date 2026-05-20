@@ -31,105 +31,131 @@ export default function NotaPenerimaan() {
 
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString('id-ID', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
+      day: '2-digit',
+      month: '2-digit',
       year: 'numeric'
     })
   }
 
-  const formatRupiah = (str) => {
-    if (!str) return 'Rp 0'
-    const num = parseInt(String(str).replace(/\D/g, ''))
-    return 'Rp ' + num.toLocaleString('id-ID')
+  const getKeluhanBersih = (keluhan) => {
+    if (!keluhan) return '-'
+    if (keluhan.includes('Keluhan:')) {
+      const pecah = keluhan.split('Keluhan:')
+      return pecah[1] ? pecah[1].trim() : '-'
+    }
+    return keluhan
   }
 
-  // Removed auto print - user can click print button
+  const formatRupiah = (str) => {
+    if (!str) return '0'
+    const num = parseInt(String(str).replace(/\D/g, ''))
+    return num.toLocaleString('id-ID')
+  }
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-        <p>Memuat...</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fff', fontFamily: 'Courier New, monospace' }}>
+        <p style={{ fontSize: '12px' }}>Memuat...</p>
       </div>
     )
   }
 
   if (!servis) return null
 
+  const tipeBersih = servis.tipe_hp?.replace(/-/g, '').trim() || ''
+  const keluhanBersih = getKeluhanBersih(servis.keluhan)
+  const estimasi = formatRupiah(servis.estimasi_biaya)
+
   return (
     <>
       <style>{`
-        @media print {
-          @page { size: 80mm auto; margin: 0; }
-          body { font-size: 11px; }
-          .no-print { display: none !important; }
+        @page { size: 58mm auto; margin: 0; }
+        body {
+          font-family: 'Courier New', Courier, monospace;
+          font-size: 9px;
+          margin: 0;
+          padding: 4px 6px;
+          width: 46mm;
+          color: #000;
+          background: #fff;
         }
+        .center { text-align: center; }
+        .bold { font-weight: bold; }
+        .line { border-bottom: 1px dashed #000; margin: 3px 0; }
+        table { width: 100%; font-size: 9px; border-collapse: collapse; }
+        td { vertical-align: top; padding-bottom: 2px; }
+        .snk-box { border: 1px dashed #000; padding: 3px 4px; margin-top: 3px; font-size: 8px; }
+        @media print {
+          body { width: 100%; margin: 0; padding: 2px 4px; }
+        }
+        .no-print { display: none; }
       `}</style>
 
       <div style={{
-        width: '80mm',
-        padding: '10px',
-        fontFamily: 'Courier New, monospace',
-        fontSize: '12px',
-        lineHeight: 1.4
+        width: '58mm',
+        margin: '0 auto',
+        padding: '4px 6px',
+        fontFamily: 'Courier New, Courier, monospace',
+        fontSize: '9px',
+        color: '#000'
       }}>
-        <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-          <strong style={{ fontSize: '16px' }}>AM SERVICE</strong><br/>
-          Jl. Contoh No. 123, Kota<br/>
-          Telp: 0812-3456-7890
+        {/* Header */}
+        <div className="center">
+          <img src="/logo_am.png" style={{ width: '40px', height: 'auto' }} alt="Logo" />
+        </div>
+        <div className="center bold" style={{ fontSize: '11px', marginTop: '2px' }}>AM SERVICE</div>
+        <div className="center" style={{ fontSize: '8px', marginTop: '1px' }}>WA: 0856 4722 7779</div>
+
+        <div className="line"></div>
+        <div className="center bold" style={{ fontSize: '9px' }}>TANDA TERIMA SERVIS</div>
+        <div className="line"></div>
+
+        {/* Data */}
+        <table>
+          <tbody>
+            <tr>
+              <td colSpan={2}>No: {servis.no_servis} | {formatDate(servis.tanggal)}</td>
+            </tr>
+            <tr>
+              <td colSpan={2}>Nama: {servis.nama_pelanggan} ({servis.no_hp || '-'})</td>
+            </tr>
+            <tr>
+              <td colSpan={2}>Unit: <span className="bold">{servis.merk_hp} {tipeBersih}</span></td>
+            </tr>
+            <tr>
+              <td colSpan={2}>Keluhan: {keluhanBersih}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div className="line"></div>
+
+        {/* Estimasi */}
+        <div style={{ margin: '3px 0', textAlign: 'center' }}>
+          <div className="bold" style={{ fontSize: '10px' }}>ESTIMASI: Rp {estimasi}</div>
+          <div style={{ fontSize: '7px', fontStyle: 'italic' }}>(Biaya bisa berubah setelah pengecekan)</div>
         </div>
 
-        <div style={{ textAlign: 'center', borderTop: '1px dashed #000', borderBottom: '1px dashed #000', padding: '5px 0', margin: '5px 0' }}>
-          <strong>NOTA PENERIMAAN</strong><br/>
-          No: {servis.no_servis}
+        {/* SNK */}
+        <div className="snk-box">
+          1. Harap bawa nota ini saat pengambilan.<br/>
+          2. Kehilangan data bukan tanggung jawab toko.
         </div>
 
-        <div style={{ marginTop: '10px' }}>
-          <div>Tanggal: {formatDate(servis.tanggal)}</div>
-          <div style={{ marginTop: '5px' }}>
-            <strong>Pelanggan:</strong><br/>
-            {servis.nama_pelanggan}<br/>
-            {servis.no_hp || '-'}
-          </div>
-          <div style={{ marginTop: '5px' }}>
-            <strong>Unit:</strong><br/>
-            {servis.merk_hp} {servis.tipe_hp}
-          </div>
-          <div style={{ marginTop: '5px' }}>
-            <strong>Keluhan:</strong><br/>
-            {servis.keluhan || '-'}
-          </div>
-        </div>
+        <div className="line"></div>
 
-        <div style={{ marginTop: '10px', borderTop: '1px dashed #000', paddingTop: '5px' }}>
-          <strong>PERKIRAAN:</strong>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span>Biaya Servis:</span>
-            <span>{servis.estimasi_biaya || 'Rp 0'}</span>
-          </div>
-        </div>
-
-        <div style={{ marginTop: '10px', padding: '5px', background: '#f5f5f5', fontSize: '10px' }}>
-          <strong>SYARAT:</strong><br/>
-          - Ambil HP dengan nota ini<br/>
-          - Garansi sesuai ketentuan<br/>
-          - Tidak valid tanpa stiker
-        </div>
-
-        <div style={{ marginTop: '15px', display: 'flex', justifyContent: 'space-between' }}>
-          <div style={{ textAlign: 'center', borderTop: '1px solid #000', paddingTop: '3px', width: '45%' }}>
-            Pelanggan
-          </div>
-          <div style={{ textAlign: 'center', borderTop: '1px solid #000', paddingTop: '3px', width: '45%' }}>
-            Admin
-          </div>
-        </div>
-
-        <div style={{ textAlign: 'center', marginTop: '15px', fontSize: '10px' }}>
-          {new Date().toLocaleDateString('id-ID')}
+        {/* QR */}
+        <div className="center" style={{ marginTop: '4px' }}>
+          <div style={{ fontSize: '8px' }}>Scan untuk Cek Status:</div>
+          <img
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&margin=0&data=https://amservice.web.id/cek_servis.php?no=${servis.no_servis}`}
+            style={{ width: '80px', height: '80px' }}
+            alt="QR Code"
+          />
         </div>
       </div>
 
+      {/* Action Buttons */}
       <div style={{ textAlign: 'center', marginTop: '20px' }} className="no-print">
         <button onClick={() => window.print()} style={{
           padding: '8px 24px',

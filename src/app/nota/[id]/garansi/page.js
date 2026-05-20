@@ -29,158 +29,153 @@ export default function GaransiServis() {
     }
   }
 
-  const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    })
+  const getKeluhanBersih = (keluhan) => {
+    if (!keluhan) return '-'
+    if (keluhan.includes('Keluhan:')) {
+      const pecah = keluhan.split('Keluhan:')
+      return pecah[1] ? pecah[1].trim() : '-'
+    }
+    return keluhan
   }
 
-  const getExpiryDate = (tanggal) => {
-    const date = new Date(tanggal)
-    date.setMonth(date.getMonth() + 1)
-    return date.toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    })
+  const formatRupiah = (str) => {
+    if (!str) return '0'
+    const num = parseInt(String(str).replace(/\D/g, ''))
+    return num.toLocaleString('id-ID')
   }
-
-  // Removed auto print - user can click print button
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-        <p>Memuat...</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fff', fontFamily: 'Courier New, monospace' }}>
+        <p style={{ fontSize: '12px' }}>Memuat...</p>
       </div>
     )
   }
 
   if (!servis) return null
 
+  const tipeBersih = servis.tipe_hp?.replace(/-/g, '').trim() || ''
+  const keluhanBersih = getKeluhanBersih(servis.keluhan)
+  const totalBiaya = formatRupiah(servis.estimasi_biaya)
+  const masaGaransi = servis.garansi || 'Tidak Ada'
+
   return (
     <>
       <style>{`
-        @media print {
-          @page { size: A5; margin: 10mm; }
-          body { background: white; }
-          .no-print { display: none !important; }
+        @page { size: 58mm auto; margin: 0; }
+        body {
+          font-family: 'Courier New', Courier, monospace;
+          font-size: 12px;
+          margin: 0;
+          padding: 10px;
+          width: 50mm;
+          color: #000;
+          background: #fff;
         }
+        .center { text-align: center; }
+        .bold { font-weight: bold; }
+        .line { border-bottom: 1px dashed #000; margin: 5px 0; }
+        table { width: 100%; font-size: 12px; border-collapse: collapse; }
+        td { vertical-align: top; padding-bottom: 3px; }
+        .garansi-box { border: 1px dashed #000; padding: 5px; margin-top: 5px; font-size: 10px; text-align: left; }
+        @media print {
+          body { width: 100%; margin: 0; padding: 0; }
+        }
+        .no-print { display: none; }
       `}</style>
 
       <div style={{
-        maxWidth: '600px',
-        margin: '20px auto',
-        padding: '20px',
-        fontFamily: 'Arial, sans-serif'
+        width: '58mm',
+        margin: '0 auto',
+        padding: '10px',
+        fontFamily: 'Courier New, Courier, monospace',
+        fontSize: '12px',
+        color: '#000'
       }}>
-        <div style={{ textAlign: 'center', marginBottom: '20px', borderBottom: '2px solid #1e293b', paddingBottom: '15px' }}>
-          <h1 style={{ margin: 0, fontSize: '24px', color: '#1e293b' }}>KARTU GARANSI</h1>
-          <p style={{ margin: '5px 0 0', color: '#666' }}>AM Service - Repair Center</p>
+        {/* Header */}
+        <div className="center">
+          <img src="/logo_am.png" style={{ width: '60px', height: 'auto' }} alt="Logo AM Service" />
+        </div>
+        <div className="center bold" style={{ fontSize: '16px', marginTop: '3px' }}>AM SERVICE</div>
+        <div className="center" style={{ fontSize: '10px', marginTop: '2px' }}>WA: 0856 4722 7779</div>
+
+        <div className="line"></div>
+        <div className="center" style={{ fontSize: '10px' }}>NOTA GARANSI SERVIS</div>
+        <div className="line"></div>
+
+        {/* Data */}
+        <table>
+          <tbody>
+            <tr>
+              <td colSpan={2}>No: {servis.no_servis} | {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
+            </tr>
+            <tr>
+              <td colSpan={2}>Nama: {servis.nama_pelanggan} ({servis.no_hp || '-'})</td>
+            </tr>
+            <tr>
+              <td colSpan={2}>Unit: <span className="bold">{servis.merk_hp} {tipeBersih}</span></td>
+            </tr>
+            <tr>
+              <td colSpan={2}>Keluhan: {keluhanBersih}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div className="line"></div>
+
+        {/* Total Biaya */}
+        <div className="center" style={{ margin: '8px 0' }}>
+          <div style={{ fontSize: '12px' }}>TOTAL BIAYA:</div>
+          <div className="bold" style={{ fontSize: '16px' }}>Rp {totalBiaya}</div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '20px' }}>
-          <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '5px' }}>
-            <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
-              <tr>
-                <td style={{ fontWeight: 'bold', width: '35%' }}>No Servis</td>
-                <td>: {servis.no_servis}</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: 'bold' }}>Tanggal</td>
-                <td>: {formatDate(servis.tanggal)}</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: 'bold' }}>Pelanggan</td>
-                <td>: {servis.nama_pelanggan}</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: 'bold' }}>No HP</td>
-                <td>: {servis.no_hp || '-'}</td>
-              </tr>
-            </table>
+        {/* Garansi Box */}
+        <div className="garansi-box">
+          <div className="bold center" style={{ marginBottom: '4px', fontSize: '11px' }}>
+            MASA GARANSI: {masaGaransi.toUpperCase()}
           </div>
-          <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '5px' }}>
-            <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
-              <tr>
-                <td style={{ fontWeight: 'bold' }}>Unit</td>
-                <td>: {servis.merk_hp} {servis.tipe_hp}</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: 'bold' }}>IMEI</td>
-                <td>: ........................</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: 'bold' }}>Teknisi</td>
-                <td>: {servis.teknisi || '-'}</td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: 'bold' }}>Garansi</td>
-                <td>: 1 Bulan (Sparepart)</td>
-              </tr>
-            </table>
-          </div>
+          1. Garansi valid sesuai masa garansi<br/>
+          2. Garansi meliputi sparepart yang diganti<br/>
+          3. Tidak berlaku jika kerusakan akibat human error
         </div>
 
-        <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '5px', marginBottom: '20px' }}>
-          <strong style={{ fontSize: '12px' }}>Kerusakan / Perbaikan:</strong>
-          <p style={{ fontSize: '12px', margin: '5px 0 0' }}>{servis.keluhan || '-'}</p>
-        </div>
+        <div className="line"></div>
 
-        <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '5px', marginBottom: '20px' }}>
-          <strong style={{ fontSize: '12px' }}>Sparepart yang Diganti:</strong>
-          <p style={{ fontSize: '12px', margin: '5px 0 0', color: '#666' }}>Sesuai nota servis</p>
+        {/* QR Maps */}
+        <div className="center" style={{ marginTop: '10px' }}>
+          <div className="bold">Bantu Kami Berkembang!</div>
+          <div style={{ fontSize: '10px', marginTop: '3px' }}>Scan QR ini untuk ulas di Google Maps:</div>
+          <img
+            src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=0&data=https://maps.google.com"
+            style={{ width: '100px', height: '100px' }}
+            alt="QR Maps"
+          />
         </div>
+      </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '30px', fontSize: '11px' }}>
-          <div style={{ textAlign: 'center' }}>
-            <p>Pelanggan</p>
-            <div style={{ height: '40px', borderBottom: '1px solid #000', width: '150px' }}></div>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <p>Teknisi</p>
-            <div style={{ height: '40px', borderBottom: '1px solid #000', width: '150px' }}></div>
-          </div>
-        </div>
-
-        <div style={{ marginTop: '30px', padding: '10px', background: '#f5f5f5', borderRadius: '5px', fontSize: '10px' }}>
-          <strong>Syarat Garansi:</strong>
-          <ul style={{ margin: '5px 0 0', paddingLeft: '20px' }}>
-            <li>Garansi valid 1 bulan sejak tanggal nota</li>
-            <li>Garansi meliputi sparepart yang diganti</li>
-            <li>Garansi tidak berlaku jika:</li>
-            <ul style={{ margin: 0, paddingLeft: '15px' }}>
-              <li>Kerusakan akibat human error (jatuh, kena air, dll)</li>
-              <li>Stiker garansi sobek/rusak</li>
-              <li>Segel resmi dibuka oleh pihak lain</li>
-            </ul>
-          </ul>
-        </div>
-
-        <div style={{ textAlign: 'center', marginTop: '20px' }} className="no-print">
-          <button onClick={() => window.print()} style={{
-            padding: '8px 24px',
-            background: '#3b82f6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            marginRight: '10px'
-          }}>
-            Cetak
-          </button>
-          <button onClick={() => window.close()} style={{
-            padding: '8px 24px',
-            background: '#334155',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer'
-          }}>
-            Tutup
-          </button>
-        </div>
+      {/* Action Buttons */}
+      <div style={{ textAlign: 'center', marginTop: '20px' }} className="no-print">
+        <button onClick={() => window.print()} style={{
+          padding: '8px 24px',
+          background: '#3b82f6',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          marginRight: '10px'
+        }}>
+          Cetak
+        </button>
+        <button onClick={() => window.close()} style={{
+          padding: '8px 24px',
+          background: '#334155',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer'
+        }}>
+          Tutup
+        </button>
       </div>
     </>
   )

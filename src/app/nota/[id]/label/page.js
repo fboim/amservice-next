@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 
 export default function LabelServis() {
   const router = useRouter()
   const params = useParams()
   const id = params.id
-  const barcodeRef = useRef(null)
 
   const [loading, setLoading] = useState(true)
   const [servis, setServis] = useState(null)
@@ -30,106 +29,95 @@ export default function LabelServis() {
     }
   }
 
-  const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString('id-ID', {
-      day: '2-digit',
-      month: 'short',
-      year: '2-digit'
-    })
-  }
-
-  // Generate barcode using JsBarcode
-  useEffect(() => {
-    if (!loading && servis && barcodeRef.current) {
-      loadJsBarcode().then(() => {
-        if (barcodeRef.current && servis.no_servis) {
-          JsBarcode(barcodeRef.current, servis.no_servis, {
-            format: 'CODE128',
-            width: 1.5,
-            height: 40,
-            displayValue: false,
-            margin: 0
-          })
-        }
-      })
-    }
-  }, [loading, servis])
-
-  const loadJsBarcode = async () => {
-    if (window.JsBarcode) return
-    return new Promise((resolve) => {
-      const script = document.createElement('script')
-      script.src = 'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js'
-      script.onload = resolve
-      document.head.appendChild(script)
-    })
-  }
-
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-        <p>Memuat...</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fff', fontFamily: 'Courier New, monospace' }}>
+        <p style={{ fontSize: '12px' }}>Memuat...</p>
       </div>
     )
   }
 
   if (!servis) return null
 
+  const tipeBersih = servis.tipe_hp?.replace(/-/g, '').trim() || ''
+
   return (
     <>
       <style>{`
-        @media print {
-          @page { size: 80mm 40mm; margin: 0; }
-          body { margin: 0; padding: 0; }
-          .no-print { display: none !important; }
+        @page { size: 58mm auto; margin: 0; }
+        body {
+          font-family: 'Courier New', Courier, monospace;
+          font-size: 9px;
+          margin: 0;
+          padding: 4px 6px;
+          width: 46mm;
+          color: #000;
+          background: #fff;
         }
+        .center { text-align: center; }
+        .bold { font-weight: bold; }
+        .line { border-bottom: 1px dashed #000; margin: 3px 0; }
+        .label-box {
+          border: 2px solid #000;
+          padding: 5px 4px;
+          text-align: center;
+          border-radius: 4px;
+        }
+        .unit-blok {
+          background: #000;
+          color: #fff;
+          font-size: 11px;
+          font-weight: bold;
+          padding: 3px 4px;
+          margin: 4px -4px;
+          text-transform: uppercase;
+          display: block;
+        }
+        @media print {
+          body { width: 100%; margin: 0; padding: 2px 4px; }
+        }
+        .no-print { display: none; }
       `}</style>
 
       <div style={{
-        width: '80mm',
-        padding: '8px',
-        fontFamily: 'Arial, sans-serif',
-        fontSize: '11px',
-        lineHeight: 1.3
+        width: '58mm',
+        margin: '0 auto',
+        padding: '4px 6px',
+        fontFamily: 'Courier New, Courier, monospace',
+        fontSize: '9px',
+        color: '#000'
       }}>
-        <div style={{ textAlign: 'center', marginBottom: '6px', borderBottom: '1px dashed #000', paddingBottom: '6px' }}>
-          <strong style={{ fontSize: '14px' }}>AM SERVICE</strong>
-        </div>
-
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10px' }}>
-          <tr>
-            <td style={{ fontWeight: 'bold', width: '30%' }}>No</td>
-            <td>: {servis.no_servis}</td>
-          </tr>
-          <tr>
-            <td style={{ fontWeight: 'bold' }}>Tgl</td>
-            <td>: {formatDate(servis.tanggal)}</td>
-          </tr>
-          <tr>
-            <td style={{ fontWeight: 'bold' }}>Nama</td>
-            <td>: {servis.nama_pelanggan}</td>
-          </tr>
-          <tr>
-            <td style={{ fontWeight: 'bold' }}>HP</td>
-            <td>: {servis.merk_hp} {servis.tipe_hp}</td>
-          </tr>
-          <tr>
-            <td style={{ fontWeight: 'bold', verticalAlign: 'top' }}>Kerusakan</td>
-            <td>: {servis.keluhan?.substring(0, 50) || '-'}</td>
-          </tr>
-        </table>
-
-        <div style={{ textAlign: 'center', marginTop: '8px' }}>
-          <svg ref={barcodeRef}></svg>
+        {/* Label Box */}
+        <div className="label-box">
+          <div className="bold" style={{ fontSize: '10px', letterSpacing: '2px', borderBottom: '1px dashed #000', paddingBottom: '3px', marginBottom: '4px' }}>AM SERVICE</div>
+          <div className="bold" style={{ fontSize: '11px', marginBottom: '3px' }}>{servis.nama_pelanggan}</div>
+          <span className="unit-blok">{servis.merk_hp} {tipeBersih}</span>
+          <div className="bold" style={{ fontSize: '11px', marginTop: '3px' }}>{servis.no_hp || '-'}</div>
+          <div style={{ fontSize: '8px', marginTop: '3px', color: '#333' }}>{servis.no_servis}</div>
         </div>
       </div>
 
+      {/* Action Buttons */}
       <div style={{ textAlign: 'center', marginTop: '20px' }} className="no-print">
-        <button onClick={() => window.print()} style={{ padding: '8px 16px' }}>
+        <button onClick={() => window.print()} style={{
+          padding: '8px 24px',
+          background: '#3b82f6',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          marginRight: '10px'
+        }}>
           Cetak Label
         </button>
-        {' '}
-        <button onClick={() => window.close()} style={{ padding: '8px 16px' }}>
+        <button onClick={() => window.close()} style={{
+          padding: '8px 24px',
+          background: '#334155',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer'
+        }}>
           Tutup
         </button>
       </div>
