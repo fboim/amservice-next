@@ -1,37 +1,38 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+export const dynamic = 'force-dynamic'
 
 export async function GET(request) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  )
+
   try {
     const today = new Date()
     const todayStr = today.toISOString().split('T')[0]
-    const currentMonth = today.toISOString().slice(0, 7) // YYYY-MM
     const currentYear = today.getFullYear()
 
     // Get statistics
-    const { count: antrean } = await supabaseAdmin
+    const { count: antrean } = await supabase
       .from('servis')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'Antrean')
       .is('deleted_at', null)
 
-    const { count: proses } = await supabaseAdmin
+    const { count: proses } = await supabase
       .from('servis')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'Proses')
       .is('deleted_at', null)
 
-    const { count: siap } = await supabaseAdmin
+    const { count: siap } = await supabase
       .from('servis')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'Siap Diambil')
       .is('deleted_at', null)
 
-    const { count: selesai } = await supabaseAdmin
+    const { count: selesai } = await supabase
       .from('servis')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'Sudah Diambil')
@@ -39,7 +40,7 @@ export async function GET(request) {
       .is('deleted_at', null)
 
     // Get daily omzet
-    const { data: servisToday } = await supabaseAdmin
+    const { data: servisToday } = await supabase
       .from('servis')
       .select('estimasi_biaya')
       .eq('status', 'Sudah Diambil')
@@ -47,12 +48,13 @@ export async function GET(request) {
       .is('deleted_at', null)
 
     const omzetHari = servisToday?.reduce((sum, s) => {
-      const biaya = parseInt((s.estimasi_biaya || '0').replace(/\D/g, ''))
+      const biayaStr = String(s.estimasi_biaya || '0')
+      const biaya = parseInt(biayaStr.replace(/\D/g, ''))
       return sum + biaya
     }, 0) || 0
 
     // Get monthly omzet (this year)
-    const { data: servisBulanIni } = await supabaseAdmin
+    const { data: servisBulanIni } = await supabase
       .from('servis')
       .select('estimasi_biaya')
       .eq('status', 'Sudah Diambil')
@@ -61,7 +63,8 @@ export async function GET(request) {
       .is('deleted_at', null)
 
     const omzetBulan = servisBulanIni?.reduce((sum, s) => {
-      const biaya = parseInt((s.estimasi_biaya || '0').replace(/\D/g, ''))
+      const biayaStr = String(s.estimasi_biaya || '0')
+      const biaya = parseInt(biayaStr.replace(/\D/g, ''))
       return sum + biaya
     }, 0) || 0
 
@@ -79,7 +82,7 @@ export async function GET(request) {
       const firstDay = `${year}-${String(month).padStart(2, '0')}-01`
       const lastDay = new Date(year, month, 0).toISOString().split('T')[0]
 
-      const { count } = await supabaseAdmin
+      const { count } = await supabase
         .from('servis')
         .select('*', { count: 'exact', head: true })
         .gte('tanggal', firstDay)
