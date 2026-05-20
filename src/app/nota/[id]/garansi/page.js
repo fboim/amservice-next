@@ -229,20 +229,14 @@ export default function GaransiServis() {
           overflow-y: auto;
         }
         .thermal-preview {
-          width: 58mm;
+          width: 220px;
           background: #fff;
-          padding: 10px;
+          padding: 12px;
           font-family: 'Courier New', Courier, monospace;
           font-size: 12px;
           color: #000;
           box-shadow: 0 2px 8px rgba(0,0,0,0.15);
           box-sizing: border-box;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-        .thermal-preview > * {
-          width: 100%;
         }
         .center { text-align: center; }
         .bold { font-weight: bold; }
