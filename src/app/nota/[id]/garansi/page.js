@@ -148,19 +148,36 @@ export default function GaransiServis() {
     logoImg.onerror = () => { lanjutCetak() }
 
     const lanjutCetak = () => {
+      // Helper function to wrap text at specified length
+      const wrapText = (text, maxLen) => {
+        const words = text.split(' ')
+        const lines = []
+        let currentLine = ''
+        words.forEach(word => {
+          if ((currentLine + ' ' + word).trim().length > maxLen) {
+            if (currentLine) lines.push(currentLine.trim())
+            currentLine = word
+          } else {
+            currentLine = (currentLine + ' ' + word).trim()
+          }
+        })
+        if (currentLine) lines.push(currentLine.trim())
+        return lines
+      }
+
       // Header - Logo already sent before this function
       btSend('tebal', true)
       btSend('teks', tengah(namaToko))
       btSend('tebal', false)
 
-      // Alamat dan WA (font kecil + center)
+      // Alamat dan WA (font kecil + center) - format sama dengan PHP
       btSend('teks', '\x1b\x4d\x01\x1b\x61\x01')
       if (pengaturan.alamat) {
-        const alamatLines = pengaturan.alamat.split('\n')
+        // Replace newlines with spaces, then wrap at 42 chars (sama dengan PHP)
+        const al = pengaturan.alamat.replace(/[\r\n]+/g, ' ').replace(/<[^>]*>/g, '').trim()
+        const alamatLines = wrapText(al, 42)
         alamatLines.forEach(line => {
-          line = line.trim()
-          if (!line) return
-          btSend('teks', line + '\n')
+          if (line) btSend('teks', line + '\n')
         })
       }
       if (noWa) btSend('teks', 'WA: ' + noWa + '\n')
@@ -190,29 +207,19 @@ export default function GaransiServis() {
       btSend('teks', '\x1b\x61\x00')
       btSend('teks', '--------------------------------\n')
 
-      // SYK Garansi - Fixed wrapping
+      // SYK Garansi - format sama persis dengan PHP
       if (snkGaransi) {
         btSend('teks', '.------------------------------.\n')
-        const rawLines = snkGaransi.split('\n')
-        rawLines.forEach(pt => {
+        // Replace <br> with newlines, strip other HTML
+        const raw = snkGaransi.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '').trim()
+        const points = raw.split('\n')
+        points.forEach(pt => {
           pt = pt.trim()
           if (!pt) return
-          // Wrap text at 28 chars without breaking words
-          const words = pt.split(' ')
-          let currentLine = ''
-          words.forEach(word => {
-            if ((currentLine + ' ' + word).trim().length > 28) {
-              if (currentLine) {
-                btSend('teks', '| ' + currentLine.trim().padEnd(28, ' ') + ' |\n')
-              }
-              currentLine = word
-            } else {
-              currentLine = (currentLine + ' ' + word).trim()
-            }
+          const wrappedLines = wrapText(pt, 28)
+          wrappedLines.forEach(w => {
+            if (w) btSend('teks', '| ' + w.padEnd(28, ' ') + ' |\n')
           })
-          if (currentLine) {
-            btSend('teks', '| ' + currentLine.trim().padEnd(28, ' ') + ' |\n')
-          }
         })
         btSend('teks', "'------------------------------'\n")
       }
