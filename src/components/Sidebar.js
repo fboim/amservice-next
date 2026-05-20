@@ -211,7 +211,7 @@ export default function Sidebar() {
       {/* Sidebar Overlay (mobile) */}
       {mobileOpen && (
         <div
-          onClick={onMobileClose}
+          onClick={() => setMobileOpen(false)}
           style={{
             display: 'block',
             position: 'fixed',
@@ -224,7 +224,13 @@ export default function Sidebar() {
       )}
 
       {/* Sidebar */}
-      <aside className={`am-sidebar ${mobileOpen ? 'open' : ''}`}>
+      <aside
+        className="am-sidebar"
+        style={{
+          transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
+          transition: 'transform 0.3s ease',
+        }}
+      >
         {/* Brand */}
         <div style={{ padding: '1.5rem 1rem 1.25rem', textAlign: 'center', borderBottom: '1px solid rgba(255,255,255,.07)' }}>
           <div style={{

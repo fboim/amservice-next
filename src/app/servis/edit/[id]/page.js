@@ -118,7 +118,8 @@ export default function EditServis() {
     const sparepartTotal = form.sparepart_digunakan.reduce((sum, sp) => {
       return sum + (parseInt(sp.harga) * sp.qty)
     }, 0)
-    const biayaLain = parseInt(form.estimasi_biaya.replace(/\D/g, '')) || 0
+    const biayaStr = String(form.estimasi_biaya || '0')
+    const biayaLain = parseInt(biayaStr.replace(/\D/g, '')) || 0
     return sparepartTotal + biayaLain
   }
 

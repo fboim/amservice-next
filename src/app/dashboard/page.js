@@ -267,8 +267,7 @@ export default function Dashboard() {
           background: 'var(--am-surface)',
           border: '1px solid var(--am-border)',
           borderRadius: '12px',
-          overflow: 'hidden',
-          height: 'fit-content'
+          overflow: 'hidden'
         }}>
           <div style={{
             padding: '12px 16px',
