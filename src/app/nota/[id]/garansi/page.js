@@ -10,17 +10,24 @@ export default function GaransiServis() {
 
   const [loading, setLoading] = useState(true)
   const [servis, setServis] = useState(null)
+  const [pengaturan, setPengaturan] = useState(null)
 
   useEffect(() => {
-    fetchServis()
+    fetchData()
   }, [id])
 
-  const fetchServis = async () => {
+  const fetchData = async () => {
     try {
-      const res = await fetch(`/api/servis?id=${id}`)
-      const data = await res.json()
-      if (data.error) throw new Error(data.error)
-      setServis(data)
+      const [servisRes, pengaturanRes] = await Promise.all([
+        fetch(`/api/servis?id=${id}`),
+        fetch('/api/pengaturan')
+      ])
+      const servisData = await servisRes.json()
+      const pengaturanData = await pengaturanRes.json()
+
+      if (servisData.error) throw new Error(servisData.error)
+      setServis(servisData)
+      setPengaturan(pengaturanData.pengaturan)
     } catch (err) {
       alert('Gagal memuat data: ' + err.message)
       router.back()
@@ -58,8 +65,7 @@ export default function GaransiServis() {
   const keluhanBersih = getKeluhanBersih(servis.keluhan)
   const totalBiaya = formatRupiah(servis.estimasi_biaya)
   const masaGaransi = servis.garansi || 'Tidak Ada'
-
-  const snkGaransi = "1. Garansi hanya berlaku untuk sparepart yang diganti.\n2. Kerusakan akibat jatuh, kena air, atau kesalahan pemakian tidak termasuk garansi.\n3. Garansi tidak berlaku jika stiker garansi sobek atau hilang."
+  const snkGaransi = pengaturan?.snk_garansi || "1. Garansi hanya berlaku untuk sparepart yang diganti.\n2. Kerusakan akibat jatuh, kena air, atau kesalahan pemakian tidak termasuk garansi.\n3. Garansi tidak berlaku jika stiker garansi sobek atau hilang."
 
   return (
     <>
@@ -104,8 +110,9 @@ export default function GaransiServis() {
         <div className="center">
           <img src="/logo_am.png" style={{ width: '60px', height: 'auto' }} alt="Logo AM Service" />
         </div>
-        <div className="center bold" style={{ fontSize: '16px', marginTop: '3px' }}>AM SERVICE</div>
-        <div className="center" style={{ fontSize: '10px', marginBottom: '3px' }}>WA: 0856 4722 7779</div>
+        <div className="center bold" style={{ fontSize: '16px', marginTop: '3px' }}>{pengaturan?.nama_toko || 'AM SERVICE'}</div>
+        {pengaturan?.alamat && <div className="center" style={{ fontSize: '10px', marginTop: '2px' }}>{pengaturan.alamat}</div>}
+        {pengaturan?.no_wa && <div className="center" style={{ fontSize: '10px', marginBottom: '3px' }}>WA: {pengaturan.no_wa}</div>}
 
         <div className="line"></div>
         <div className="center" style={{ fontSize: '10px' }}>NOTA GARANSI SERVIS</div>
@@ -154,7 +161,7 @@ export default function GaransiServis() {
           <div className="bold">Bantu Kami Berkembang!</div>
           <div style={{ fontSize: '10px', marginTop: '3px' }}>Scan QR ini untuk ulas di Google Maps:</div>
           <img
-            src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=0&data=https://maps.google.com"
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=0&data=${encodeURIComponent(pengaturan?.link_maps || 'https://maps.google.com')}`}
             style={{ width: '100px', height: '100px' }}
             alt="QR Maps"
           />
