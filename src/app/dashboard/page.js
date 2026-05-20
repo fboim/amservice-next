@@ -261,13 +261,14 @@ export default function Dashboard() {
       </div>
 
       {/* Two Column Layout */}
-      <div className="dashboard-two-col" style={{ display: 'grid', gap: '12px', marginBottom: '16px' }}>
+      <div className="dashboard-two-col" style={{ display: 'grid', gap: '12px', marginBottom: '16px', alignItems: 'start' }}>
         {/* Left - Servis Terbaru */}
         <div style={{
           background: 'var(--am-surface)',
           border: '1px solid var(--am-border)',
           borderRadius: '12px',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          height: 'fit-content'
         }}>
           <div style={{
             padding: '12px 16px',
@@ -426,7 +427,7 @@ export default function Dashboard() {
         </div>
 
         {/* Right - Info Cards (right aligned) */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'stretch' }}>
           {/* Omzet Hari Ini */}
           <div style={{
             background: 'var(--am-surface)',
@@ -495,8 +496,7 @@ export default function Dashboard() {
             border: '1px solid var(--am-border)',
             borderRadius: '12px',
             overflow: 'hidden',
-            flex: 1,
-            maxHeight: '220px'
+            flex: 1
           }}>
             <div style={{
               padding: '12px 16px',

@@ -43,7 +43,8 @@ export default function EditServis() {
 
       if (servisData.error) throw new Error(servisData.error)
 
-      const servis = servisData.servis
+      // API returns data directly for single item, not wrapped in {servis: ...}
+      const servis = servisData
 
       // Parse sparepart if exists
       let sparepartParsed = []

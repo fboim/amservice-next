@@ -23,7 +23,7 @@ const adminMenuItems = [
 
 export default function Sidebar() {
   const pathname = usePathname()
-  const { mobileOpen, onMobileClose, onMobileOpen } = useSidebar()
+  const { mobileOpen, setMobileOpen, onMobileClose, onMobileOpen } = useSidebar()
   const [user, setUser] = useState(null)
   const [theme, setTheme] = useState('dark')
 
@@ -62,21 +62,23 @@ export default function Sidebar() {
 
   // Close mobile sidebar on route change
   useEffect(() => {
-    if (mobileOpen && onMobileClose) {
-      onMobileClose()
+    if (mobileOpen) {
+      setMobileOpen(false)
     }
-  }, [pathname, mobileOpen, onMobileClose])
+  }, [pathname, mobileOpen, setMobileOpen])
 
   // Handle window resize - close mobile sidebar on desktop
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 768 && mobileOpen) {
-        onMobileClose?.()
+      if (window.innerWidth >= 768) {
+        setMobileOpen(false)
       }
     }
     window.addEventListener('resize', handleResize)
+    // Also run on mount to set initial state
+    handleResize()
     return () => window.removeEventListener('resize', handleResize)
-  }, [mobileOpen, onMobileClose])
+  }, [setMobileOpen])
 
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark'
@@ -112,11 +114,7 @@ export default function Sidebar() {
   const isAdmin = user?.role?.toLowerCase() === 'admin'
 
   const toggleMobileSidebar = () => {
-    if (mobileOpen) {
-      onMobileClose?.()
-    } else {
-      onMobileOpen?.()
-    }
+    setMobileOpen(!mobileOpen)
   }
 
   return (

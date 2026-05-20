@@ -676,6 +676,9 @@ body {
   .dashboard-two-col {
     grid-template-columns: 1fr !important;
   }
+  .dashboard-two-col > div:first-child {
+    min-width: 0;
+  }
 }
 
 @media (min-width: 769px) {
@@ -733,13 +736,4 @@ body {
   .am-sidebar {
     width: 280px;
   }
-  .am-main {
-    padding: 16px;
-    padding-top: 72px;
-  }
-}
-
-/* Ensure sidebar closes on route change */
-.am-sidebar.open ~ * {
-  pointer-events: none;
 }
