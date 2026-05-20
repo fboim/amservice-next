@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { useSidebar } from './SidebarContext'
 
 // Menu items - matches PHP sidebar exactly
 const menuItems = [
@@ -20,8 +21,9 @@ const adminMenuItems = [
   { href: '/pengaturan', icon: 'bi-gear-fill', label: 'Pengaturan Toko' },
 ]
 
-export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose, onMobileOpen }) {
+export default function Sidebar() {
   const pathname = usePathname()
+  const { mobileOpen, onMobileClose, onMobileOpen } = useSidebar()
   const [user, setUser] = useState(null)
   const [theme, setTheme] = useState('dark')
 
@@ -58,7 +60,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
     if (mobileOpen && onMobileClose) {
       onMobileClose()
     }
-  }, [pathname])
+  }, [pathname, mobileOpen, onMobileClose])
 
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark'
@@ -87,18 +89,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
     return roleMap[user.role?.toLowerCase()] || 'Pengunjung'
   }
 
-  const getRoleClass = () => {
-    if (!user) return ''
-    const classMap = {
-      admin: 'bg-purple-500/20 text-purple-400',
-      teknisi: 'bg-blue-500/20 text-blue-400',
-      pengunjung: 'bg-gray-500/20 text-gray-400',
-    }
-    return classMap[user.role?.toLowerCase()] || classMap.pengunjung
-  }
-
   const isActive = (href) => {
-    // Handle Next.js paths (without .php extension)
     return pathname === href || pathname.startsWith(href + '/')
   }
 
@@ -172,7 +163,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
               height: '40px',
             }}
           >
-            <i className={`bi ${theme === 'dark' ? 'bi-moon-stars' : 'bi-sun'} ${theme === 'dark' ? '' : ''}`} style={{ fontSize: '1.1rem', lineHeight: 1 }} />
+            <i className={`bi ${theme === 'dark' ? 'bi-moon-stars' : 'bi-sun'}`} style={{ fontSize: '1.1rem', lineHeight: 1 }} />
           </button>
           <button
             onClick={handleLogout}

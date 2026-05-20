@@ -5,12 +5,13 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import Sidebar from './Sidebar'
+import { useSidebar } from './SidebarContext'
 
-export default function AppLayout({ children }) {
-  const router = useRouter()
-  const [mobileOpen, setMobileOpen] = useState(false)
+function SidebarWrapper({ children }) {
+  const { mobileOpen, onMobileClose, onMobileOpen } = useSidebar()
   const [user, setUser] = useState(null)
   const pathname = usePathname()
+  const router = useRouter()
 
   useEffect(() => {
     const token = localStorage.getItem('ams_token') || sessionStorage.getItem('ams_token')
@@ -45,7 +46,6 @@ export default function AppLayout({ children }) {
   }
 
   const getPageTitle = () => {
-    // Matches PHP page detection
     const page = pathname.split('/').pop() || 'dashboard'
 
     if (page.includes('dashboard')) return 'Dashboard'
@@ -62,21 +62,17 @@ export default function AppLayout({ children }) {
     return 'AM SERVICE'
   }
 
-  const isAdmin = user?.role?.toLowerCase() === 'admin'
-
   return (
     <>
       <Sidebar
         collapsed={false}
         onToggle={() => {}}
         mobileOpen={mobileOpen}
-        onMobileClose={() => setMobileOpen(false)}
-        onMobileOpen={() => setMobileOpen(true)}
+        onMobileClose={onMobileClose}
+        onMobileOpen={onMobileOpen}
       />
 
-      {/* Main Content Area - matches PHP .am-main class */}
       <div className="am-main">
-        {/* Page Header - matches PHP dashboard header exactly */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
           <div>
             <h4 style={{ fontWeight: '800', fontSize: '1.15rem', color: 'var(--am-text)', margin: '0 0 2px' }}>
@@ -114,9 +110,12 @@ export default function AppLayout({ children }) {
           </div>
         </div>
 
-        {/* Page Content */}
         {children}
       </div>
     </>
   )
+}
+
+export default function AppLayout({ children }) {
+  return <SidebarWrapper>{children}</SidebarWrapper>
 }
