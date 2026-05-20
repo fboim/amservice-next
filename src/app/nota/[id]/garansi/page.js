@@ -11,10 +11,21 @@ export default function GaransiServis() {
   const [loading, setLoading] = useState(true)
   const [servis, setServis] = useState(null)
   const [pengaturan, setPengaturan] = useState(null)
+  const [printReady, setPrintReady] = useState(false)
 
   useEffect(() => {
     fetchData()
   }, [id])
+
+  useEffect(() => {
+    if (servis && pengaturan && !printReady) {
+      setPrintReady(true)
+      // Auto execute print after data loads
+      setTimeout(() => {
+        eksekusiCetak()
+      }, 300)
+    }
+  }, [servis, pengaturan, printReady])
 
   const fetchData = async () => {
     try {
@@ -51,6 +62,130 @@ export default function GaransiServis() {
     return num.toLocaleString('id-ID')
   }
 
+  // Thermal printer integration - matches PHP version
+  const eksekusiCetak = () => {
+    if (typeof window.MesinKasir !== 'undefined') {
+      // Bluetooth thermal printer available
+      printWithMesinKasir()
+    } else {
+      // Fallback to browser print
+      window.print()
+    }
+  }
+
+  const printWithMesinKasir = () => {
+    if (!servis || !pengaturan) return
+
+    const tipeBersih = (servis.tipe_hp || '').replace(/-/g, '').trim()
+    const keluhanBersih = getKeluhanBersih(servis.keluhan)
+    const totalBiaya = formatRupiah(servis.estimasi_biaya)
+    const masaGaransi = (servis.garansi || 'Tidak Ada').toUpperCase()
+    const namaToko = (pengaturan.nama_toko || 'AM SERVICE').toUpperCase()
+    const noWa = pengaturan.no_wa || ''
+    const snkGaransi = pengaturan.snk_garansi || ''
+    const linkMaps = pengaturan.link_maps || 'https://maps.google.com'
+
+    const _btQueue = []
+    let _btBusy = false
+    const BT_DELAY = 100
+
+    const btSend = (type, data) => {
+      _btQueue.push({ type, data })
+      if (!_btBusy) _btNext()
+    }
+
+    const _btNext = () => {
+      if (_btQueue.length === 0) { _btBusy = false; return }
+      _btBusy = true
+      const cmd = _btQueue.shift()
+      try {
+        if (cmd.type === 'teks') window.MesinKasir.cetakTeks(cmd.data)
+        else if (cmd.type === 'tebal') window.MesinKasir.formatTebal(cmd.data)
+        else if (cmd.type === 'logo') window.MesinKasir.cetakLogo(cmd.data)
+        else if (cmd.type === 'qr') window.MesinKasir.cetakQR(cmd.data)
+      } catch (e) { console.warn('BT print error:', e) }
+      setTimeout(_btNext, BT_DELAY)
+    }
+
+    const tengah = (txt) => {
+      txt = String(txt)
+      if (txt.length >= 32) return txt.substring(0, 32) + '\n'
+      return ' '.repeat(Math.floor((32 - txt.length) / 2)) + txt + '\n'
+    }
+
+    // Load logo and print
+    const logoImg = new Image()
+    logoImg.crossOrigin = 'Anonymous'
+    logoImg.src = '/logo.png'
+    logoImg.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 120
+      canvas.height = Math.round((logoImg.height / logoImg.width) * 120)
+      const ctx = canvas.getContext('2d')
+      ctx.fillStyle = '#FFFFFF'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.drawImage(logoImg, 0, 0, canvas.width, canvas.height)
+      btSend('logo', canvas.toDataURL('image/png'))
+      lanjutCetak()
+    }
+    logoImg.onerror = () => { lanjutCetak() }
+
+    const lanjutCetak = () => {
+      // Header
+      btSend('tebal', true)
+      btSend('teks', tengah(namaToko))
+      btSend('tebal', false)
+
+      btSend('teks', '\x1b\x4d\x01\x1b\x61\x01')
+      if (noWa) btSend('teks', 'WA: ' + noWa + '\n')
+      btSend('teks', '\x1b\x4d\x00\x1b\x61\x00')
+
+      // Judul
+      btSend('teks', '--------------------------------\n')
+      btSend('tebal', true)
+      btSend('teks', tengah('NOTA GARANSI SERVIS'))
+      btSend('tebal', false)
+      btSend('teks', '--------------------------------\n')
+
+      // Data
+      btSend('teks', 'No: ' + servis.no_servis + ' | ' + new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' }) + '\n')
+      btSend('teks', 'Nama: ' + servis.nama_pelanggan + ' (' + (servis.no_hp || '-') + ')\n')
+      btSend('teks', 'Unit: ' + servis.merk_hp + ' ' + tipeBersih + '\n')
+      btSend('teks', '--------------------------------\n')
+      btSend('teks', 'Keluhan: ' + keluhanBersih + '\n')
+      btSend('teks', '--------------------------------\n')
+
+      // Biaya & Garansi
+      btSend('teks', '\x1b\x61\x01')
+      btSend('tebal', true)
+      btSend('teks', 'TOTAL BIAYA  : Rp ' + totalBiaya + '\n')
+      btSend('teks', 'MASA GARANSI : ' + masaGaransi + '\n')
+      btSend('tebal', false)
+      btSend('teks', '\x1b\x61\x00')
+      btSend('teks', '--------------------------------\n')
+
+      // SYK Garansi
+      if (snkGaransi) {
+        btSend('teks', '.------------------------------.\n')
+        const lines = snkGaransi.split('\n')
+        lines.forEach(pt => {
+          pt = pt.trim()
+          if (!pt) return
+          const wrapped = pt.length > 28 ? pt.substring(0, 28) + '\n' + pt.substring(28) : pt
+          btSend('teks', '| ' + wrapped.padEnd(28, ' ') + ' |\n')
+        })
+        btSend('teks', "'------------------------------'\n")
+      }
+
+      // QR Maps
+      btSend('teks', '\x1b\x61\x01')
+      btSend('teks', 'Bantu Ulas Kami Di Maps:\n')
+      btSend('qr', linkMaps)
+      btSend('teks', '\x1b\x61\x00')
+      btSend('teks', '\n\n\n')
+    }
+  }
+
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#fff', fontFamily: 'Courier New, Courier, monospace' }}>
@@ -65,7 +200,7 @@ export default function GaransiServis() {
   const keluhanBersih = getKeluhanBersih(servis.keluhan)
   const totalBiaya = formatRupiah(servis.estimasi_biaya)
   const masaGaransi = servis.garansi || 'Tidak Ada'
-  const snkGaransi = pengaturan?.snk_garansi || "1. Garansi hanya berlaku untuk sparepart yang diganti.\n2. Kerusakan akibat jatuh, kena air, atau kesalahan pemakian tidak termasuk garansi.\n3. Garansi tidak berlaku jika stiker garansi sobek atau hilang."
+  const snkGaransi = pengaturan?.snk_garansi || ''
 
   return (
     <>
@@ -76,7 +211,7 @@ export default function GaransiServis() {
           font-size: 12px;
           margin: 0;
           padding: 10px;
-          width: 50mm;
+          width: 58mm;
           color: #000;
           background: #fff;
         }
@@ -93,24 +228,28 @@ export default function GaransiServis() {
           text-align: left;
         }
         @media print {
-          body { width: 100%; margin: 0; padding: 0; }
+          body { width: 100% !important; margin: 0 !important; padding: 0 !important; }
+          .no-print { display: none !important; }
         }
-        .no-print { display: none; }
+        .no-print { display: block; margin-top: 20px; text-align: center; }
       `}</style>
 
+      {/* Visual preview for browser */}
       <div style={{
-        width: '58mm',
-        margin: '0 auto',
-        padding: '10px',
+        maxWidth: '400px',
+        margin: '20px auto',
+        padding: '20px',
         fontFamily: 'Courier New, Courier, monospace',
         fontSize: '12px',
-        color: '#000'
+        color: '#000',
+        background: '#fff',
+        border: '1px solid #ccc'
       }}>
         {/* Header dengan Logo */}
         <div className="center">
           <img src="/logo_am.png" style={{ width: '60px', height: 'auto' }} alt="Logo AM Service" />
         </div>
-        <div className="center bold" style={{ fontSize: '16px', marginTop: '3px' }}>{pengaturan?.nama_toko || 'AM SERVICE'}</div>
+        <div className="center bold" style={{ fontSize: '16px', marginTop: '3px' }}>{(pengaturan?.nama_toko || 'AM SERVICE').toUpperCase()}</div>
         {pengaturan?.alamat && <div className="center" style={{ fontSize: '10px', marginTop: '2px' }}>{pengaturan.alamat}</div>}
         {pengaturan?.no_wa && <div className="center" style={{ fontSize: '10px', marginBottom: '3px' }}>WA: {pengaturan.no_wa}</div>}
 
@@ -122,7 +261,7 @@ export default function GaransiServis() {
         <table>
           <tbody>
             <tr>
-              <td colSpan="2">No: {servis.no_servis} | {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '/')}</td>
+              <td colSpan="2">No: {servis.no_servis} | {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' })}</td>
             </tr>
             <tr>
               <td colSpan="2">Nama: {servis.nama_pelanggan} ({servis.no_hp || '-'})</td>
@@ -149,9 +288,9 @@ export default function GaransiServis() {
           <div className="bold center" style={{ marginBottom: '4px', fontSize: '11px' }}>
             MASA GARANSI: {masaGaransi.toUpperCase()}
           </div>
-          {snkGaransi.split('\n').map((line, i) => (
+          {snkGaransi ? snkGaransi.split('\n').map((line, i) => (
             <span key={i}>{line}<br/></span>
-          ))}
+          )) : '-'}
         </div>
 
         <div className="line"></div>
@@ -169,8 +308,8 @@ export default function GaransiServis() {
       </div>
 
       {/* Action Buttons */}
-      <div style={{ textAlign: 'center', marginTop: '20px' }} className="no-print">
-        <button onClick={() => window.print()} style={{
+      <div className="no-print">
+        <button onClick={() => eksekusiCetak()} style={{
           padding: '8px 24px',
           background: '#3b82f6',
           color: 'white',

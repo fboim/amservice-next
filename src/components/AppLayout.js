@@ -86,7 +86,7 @@ function SidebarWrapper({ children }) {
       />
 
       <div className="am-main">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
+        <div className="header-bar">
           <div>
             <h4 style={{ fontWeight: '800', fontSize: '1.15rem', color: 'var(--am-text)', margin: '0 0 2px' }}>
               {getPageTitle()}
@@ -97,19 +97,8 @@ function SidebarWrapper({ children }) {
               &nbsp;·&nbsp; Halo, <strong style={{ color: 'var(--am-text)' }}>{user?.nama || 'User'}</strong>
             </p>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
-              fontSize: '.72rem',
-              fontWeight: '700',
-              color: 'var(--am-text-muted)',
-              background: 'var(--am-surface-2)',
-              border: '1px solid var(--am-border)',
-              padding: '4px 10px',
-              borderRadius: '999px'
-            }}>
+          <div className="header-actions">
+            <span className="role-badge">
               <i className="bi bi-person-fill" />
               {getRoleLabel().toUpperCase()}
             </span>

@@ -149,7 +149,7 @@ export default function Dashboard() {
   return (
     <AppLayout>
       {/* Stats Row - 4 columns with icons - Responsive */}
-      <div className="dashboard-stats" style={{ display: 'grid', gap: '10px', marginBottom: '16px' }}>
+      <div className="dashboard-stats">
         <div style={{
           background: 'var(--am-surface)',
           border: '1px solid var(--am-border)',
