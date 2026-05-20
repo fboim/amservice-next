@@ -152,6 +152,12 @@ export default function Dashboard() {
     }
   }
 
+  // Calculate chart data
+  const chartData = stats.monthly_data || []
+  const maxVal = Math.max(...chartData.map(m => m.value), 1)
+  const totalServis = chartData.reduce((sum, m) => sum + m.value, 0)
+  const avgServis = chartData.length > 0 ? Math.round(totalServis / chartData.length) : 0
+
   if (initialLoad || loading) {
     return (
       <AppLayout>
@@ -162,47 +168,118 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
-      {/* Stats Row - 4 columns */}
+      {/* Stats Row - 4 columns with icons */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
         <div style={{
           background: 'var(--am-surface)',
           border: '1px solid var(--am-border)',
           borderRadius: '12px',
           padding: '16px',
-          borderLeft: '3px solid #94a3b8'
+          borderLeft: '3px solid #94a3b8',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
         }}>
-          <div style={{ fontSize: '.65rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Antrean</div>
-          <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--am-text)' }}>{stats.antrean}</div>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '12px',
+            background: 'rgba(148,163,184,.15)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <i className="bi bi-hourglass-split" style={{ fontSize: '1.3rem', color: '#94a3b8' }} />
+          </div>
+          <div>
+            <div style={{ fontSize: '.6rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.5px' }}>Antrean</div>
+            <div style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1.2 }}>{stats.antrean}</div>
+          </div>
         </div>
+
         <div style={{
           background: 'var(--am-surface)',
           border: '1px solid var(--am-border)',
           borderRadius: '12px',
           padding: '16px',
-          borderLeft: '3px solid #f59e0b'
+          borderLeft: '3px solid #f59e0b',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
         }}>
-          <div style={{ fontSize: '.65rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Dikerjakan</div>
-          <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--am-text)' }}>{stats.proses}</div>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '12px',
+            background: 'rgba(245,158,11,.15)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <i className="bi bi-tools" style={{ fontSize: '1.3rem', color: '#f59e0b' }} />
+          </div>
+          <div>
+            <div style={{ fontSize: '.6rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.5px' }}>Dikerjakan</div>
+            <div style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1.2 }}>{stats.proses}</div>
+          </div>
         </div>
+
         <div style={{
           background: 'var(--am-surface)',
           border: '1px solid var(--am-border)',
           borderRadius: '12px',
           padding: '16px',
-          borderLeft: '3px solid #06b6d4'
+          borderLeft: '3px solid #06b6d4',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
         }}>
-          <div style={{ fontSize: '.65rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Siap Diambil</div>
-          <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--am-text)' }}>{stats.siap}</div>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '12px',
+            background: 'rgba(6,182,212,.15)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <i className="bi bi-bag-check" style={{ fontSize: '1.3rem', color: '#06b6d4' }} />
+          </div>
+          <div>
+            <div style={{ fontSize: '.6rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.5px' }}>Siap Ambil</div>
+            <div style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1.2 }}>{stats.siap}</div>
+          </div>
         </div>
+
         <div style={{
           background: 'var(--am-surface)',
           border: '1px solid var(--am-border)',
           borderRadius: '12px',
           padding: '16px',
-          borderLeft: '3px solid #10b981'
+          borderLeft: '3px solid #10b981',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
         }}>
-          <div style={{ fontSize: '.65rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Selesai</div>
-          <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--am-text)' }}>{stats.selesai}</div>
+          <div style={{
+            width: '48px',
+            height: '48px',
+            borderRadius: '12px',
+            background: 'rgba(16,185,129,.15)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0
+          }}>
+            <i className="bi bi-check-circle-fill" style={{ fontSize: '1.3rem', color: '#10b981' }} />
+          </div>
+          <div>
+            <div style={{ fontSize: '.6rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.5px' }}>Selesai</div>
+            <div style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1.2 }}>{stats.selesai}</div>
+          </div>
         </div>
       </div>
 
@@ -319,7 +396,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Right - Info Cards */}
+        {/* Right - Info Cards (right aligned) */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {/* Omzet Hari Ini */}
           <div style={{
@@ -327,11 +404,28 @@ export default function Dashboard() {
             border: '1px solid var(--am-border)',
             borderRadius: '12px',
             padding: '16px',
-            borderLeft: '3px solid #8b5cf6'
+            borderLeft: '3px solid #8b5cf6',
+            textAlign: 'right'
           }}>
-            <div style={{ fontSize: '.65rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Omzet Hari Ini</div>
-            <div style={{ fontSize: '1.3rem', fontWeight: '800', color: 'var(--am-text)' }}>{formatRupiah(stats.omzet_hari)}</div>
-            <div style={{ fontSize: '.7rem', color: 'var(--am-text-muted)', marginTop: '4px' }}>{stats.selesai} transaksi selesai</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'flex-end' }}>
+              <div>
+                <div style={{ fontSize: '.6rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.5px' }}>Omzet Hari Ini</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--am-text)' }}>{formatRupiah(stats.omzet_hari)}</div>
+                <div style={{ fontSize: '.68rem', color: 'var(--am-text-muted)', marginTop: '4px' }}>{stats.selesai} transaksi</div>
+              </div>
+              <div style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '10px',
+                background: 'rgba(139,92,246,.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <i className="bi bi-cash-stack" style={{ fontSize: '1.2rem', color: '#8b5cf6' }} />
+              </div>
+            </div>
           </div>
 
           {/* Omzet Bulan Ini */}
@@ -340,12 +434,29 @@ export default function Dashboard() {
             border: '1px solid var(--am-border)',
             borderRadius: '12px',
             padding: '16px',
-            borderLeft: '3px solid #f43f5e'
+            borderLeft: '3px solid #f43f5e',
+            textAlign: 'right'
           }}>
-            <div style={{ fontSize: '.65rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Omzet Bulan Ini</div>
-            <div style={{ fontSize: '1.3rem', fontWeight: '800', color: 'var(--am-text)' }}>{formatRupiah(stats.omzet_bulan)}</div>
-            <div style={{ fontSize: '.7rem', color: 'var(--am-text-muted)', marginTop: '4px' }}>
-              {new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'flex-end' }}>
+              <div>
+                <div style={{ fontSize: '.6rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.5px' }}>Omzet Bulan Ini</div>
+                <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--am-text)' }}>{formatRupiah(stats.omzet_bulan)}</div>
+                <div style={{ fontSize: '.68rem', color: 'var(--am-text-muted)', marginTop: '4px' }}>
+                  {new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
+                </div>
+              </div>
+              <div style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '10px',
+                background: 'rgba(244,63,94,.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <i className="bi bi-graph-up-arrow" style={{ fontSize: '1.2rem', color: '#f43f5e' }} />
+              </div>
             </div>
           </div>
 
@@ -365,11 +476,11 @@ export default function Dashboard() {
               alignItems: 'center'
             }}>
               <span style={{ fontSize: '.75rem', fontWeight: '600', color: 'var(--am-text)' }}>
-                <i className="bi bi-trophy" style={{ color: '#f59e0b', marginRight: '6px' }} />Merk Populer
+                <i className="bi bi-trophy-fill" style={{ color: '#f59e0b', marginRight: '6px' }} />Merk Populer
               </span>
               <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>All Time</span>
             </div>
-            <div style={{ padding: '8px 0', maxHeight: '280px', overflowY: 'auto' }}>
+            <div style={{ padding: '8px 0', maxHeight: '240px', overflowY: 'auto' }}>
               {stats.merk_populer && stats.merk_populer.length > 0 ? stats.merk_populer.map((merk, i) => {
                 const maxTotal = Math.max(...stats.merk_populer.map(m => m.total), 1)
                 const pct = (merk.total / maxTotal) * 100
@@ -394,7 +505,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Grafik Servis - Full Width */}
+      {/* Grafik Servis - Enhanced with stats */}
       <div style={{
         background: 'var(--am-surface)',
         border: '1px solid var(--am-border)',
@@ -411,57 +522,114 @@ export default function Dashboard() {
           <span style={{ fontSize: '.875rem', fontWeight: '600', color: 'var(--am-text)' }}>
             <i className="bi bi-bar-chart-fill" style={{ color: '#3b82f6', marginRight: '8px' }} />Grafik Servis
           </span>
-          <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>6 Bulan Terakhir</span>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>
+              Total: <strong style={{ color: 'var(--am-text)' }}>{totalServis}</strong>
+            </span>
+            <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>
+              Rata-rata: <strong style={{ color: '#3b82f6' }}>{avgServis}/bln</strong>
+            </span>
+          </div>
         </div>
-        <div style={{ padding: '20px' }}>
+        <div style={{ padding: '24px 20px' }}>
+          {/* Chart Area */}
           <div style={{
             display: 'flex',
             alignItems: 'flex-end',
             justifyContent: 'space-around',
-            gap: '12px',
-            height: '180px'
+            gap: '16px',
+            height: '200px',
+            marginBottom: '20px'
           }}>
-            {stats.monthly_data && stats.monthly_data.map((month, i) => {
-              const maxVal = Math.max(...(stats.monthly_data || []).map(m => m.value), 1)
+            {chartData.map((month, i) => {
               const heightPct = (month.value / maxVal) * 100
+              const isHighest = month.value === maxVal && month.value > 0
               return (
                 <div key={i} style={{
                   flex: 1,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  height: '100%'
+                  height: '100%',
+                  position: 'relative'
                 }}>
+                  {/* Value on top */}
                   <div style={{
-                    fontSize: '.65rem',
+                    fontSize: '.7rem',
                     fontWeight: '700',
-                    color: 'var(--am-text)',
-                    marginBottom: '6px'
+                    color: isHighest ? '#3b82f6' : 'var(--am-text-muted)',
+                    marginBottom: '8px',
+                    minHeight: '20px'
                   }}>
                     {month.value}
                   </div>
+                  {/* Bar with gradient */}
                   <div style={{
                     width: '100%',
+                    maxWidth: '60px',
                     height: `${heightPct}%`,
-                    minHeight: month.value > 0 ? '4px' : '2px',
+                    minHeight: month.value > 0 ? '8px' : '4px',
                     background: month.value > 0
-                      ? 'linear-gradient(180deg, #3b82f6, #60a5fa)'
-                      : 'rgba(255,255,255,0.1)',
-                    borderRadius: '6px 6px 0 0',
-                    transition: 'height 0.5s ease'
-                  }} />
+                      ? `linear-gradient(180deg, ${isHighest ? '#3b82f6' : '#60a5fa'} 0%, ${isHighest ? '#2563eb' : '#93c5fd'} 100%)`
+                      : 'rgba(255,255,255,0.08)',
+                    borderRadius: '8px 8px 4px 4px',
+                    boxShadow: isHighest ? '0 4px 16px rgba(59,130,246,0.4)' : 'none',
+                    transition: 'all 0.4s ease',
+                    position: 'relative'
+                  }}>
+                    {/* Shine effect */}
+                    {month.value > 0 && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '4px',
+                        left: '4px',
+                        right: '4px',
+                        height: '6px',
+                        background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%)',
+                        borderRadius: '4px 4px 0 0'
+                      }} />
+                    )}
+                  </div>
+                  {/* Month label */}
                   <div style={{
-                    fontSize: '.6rem',
+                    fontSize: '.65rem',
                     color: 'var(--am-text-muted)',
                     fontWeight: '600',
-                    marginTop: '8px',
-                    textTransform: 'uppercase'
+                    marginTop: '12px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '.5px'
                   }}>
                     {month.label}
                   </div>
                 </div>
               )
             })}
+          </div>
+
+          {/* Stats Footer */}
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: '32px',
+            paddingTop: '16px',
+            borderTop: '1px solid var(--am-border)'
+          }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '.6rem', color: 'var(--am-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Total Servis</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--am-text)' }}>{totalServis}</div>
+            </div>
+            <div style={{ width: '1px', background: 'var(--am-border)' }} />
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '.6rem', color: 'var(--am-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Rata-rata/Bulan</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#3b82f6' }}>{avgServis}</div>
+            </div>
+            <div style={{ width: '1px', background: 'var(--am-border)' }} />
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '.6rem', color: 'var(--am-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Bulan Tertinggi</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#10b981' }}>
+                {chartData.length > 0 ? chartData.reduce((a, b) => a.value > b.value ? a : b).label : '-'}
+              </div>
+            </div>
           </div>
         </div>
       </div>
