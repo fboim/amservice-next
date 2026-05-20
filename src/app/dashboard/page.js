@@ -17,6 +17,8 @@ export default function Dashboard() {
   })
   const [servisTerbaru, setServisTerbaru] = useState([])
   const [user, setUser] = useState(null)
+  const [openDropdown, setOpenDropdown] = useState(null)
+  const [openWADropdown, setOpenWADropdown] = useState(null)
 
   useEffect(() => {
     const token = localStorage.getItem('ams_token') || sessionStorage.getItem('ams_token')
@@ -68,45 +70,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!loading && !initialLoad && servisTerbaru.length > 0) {
-      initDropdowns()
+      setOpenDropdown(null)
+      setOpenWADropdown(null)
     }
   }, [loading, initialLoad, servisTerbaru])
-
-  const initDropdowns = () => {
-    setTimeout(() => {
-      document.querySelectorAll('.print-btn').forEach(function(btn) {
-        btn.onclick = function(e) {
-          e.stopPropagation()
-          const dropdown = btn.nextElementSibling
-          if (dropdown) {
-            const isVisible = dropdown.style.display === 'block'
-            document.querySelectorAll('.print-dropdown').forEach(d => d.style.display = 'none')
-            if (!isVisible) {
-              dropdown.style.display = 'block'
-            }
-          }
-        }
-      })
-
-      document.querySelectorAll('.wa-drop-btn').forEach(function(btn) {
-        btn.onclick = function(e) {
-          e.stopPropagation()
-          const dropdown = btn.nextElementSibling
-          if (dropdown) {
-            const isVisible = dropdown.style.display === 'block'
-            document.querySelectorAll('.wa-dropdown').forEach(d => d.style.display = 'none')
-            if (!isVisible) {
-              dropdown.style.display = 'block'
-            }
-          }
-        }
-      })
-
-      document.onclick = function() {
-        document.querySelectorAll('.print-dropdown, .wa-dropdown').forEach(d => d.style.display = 'none')
-      }
-    }, 100)
-  }
 
   const isAdmin = user?.role?.toLowerCase() === 'admin'
   const isPengunjung = user?.role?.toLowerCase() === 'pengunjung'
@@ -152,6 +119,16 @@ export default function Dashboard() {
     }
   }
 
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setOpenDropdown(null)
+      setOpenWADropdown(null)
+    }
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [])
+
   // Calculate chart data
   const chartData = stats.monthly_data || []
   const maxVal = Math.max(...chartData.map(m => m.value), 1)
@@ -168,8 +145,8 @@ export default function Dashboard() {
 
   return (
     <AppLayout>
-      {/* Stats Row - 4 columns with icons */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
+      {/* Stats Row - 4 columns with icons - Responsive */}
+      <div className="dashboard-stats" style={{ display: 'grid', gap: '10px', marginBottom: '16px' }}>
         <div style={{
           background: 'var(--am-surface)',
           border: '1px solid var(--am-border)',
@@ -284,7 +261,7 @@ export default function Dashboard() {
       </div>
 
       {/* Two Column Layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px', marginBottom: '20px' }}>
+      <div className="dashboard-two-col" style={{ display: 'grid', gap: '12px', marginBottom: '16px' }}>
         {/* Left - Servis Terbaru */}
         <div style={{
           background: 'var(--am-surface)',
@@ -307,7 +284,7 @@ export default function Dashboard() {
             </Link>
           </div>
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <table className="dashboard-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr>
                   <th style={{ padding: '10px 12px', fontSize: '.7rem', fontWeight: '700', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', textAlign: 'left' }}>No</th>
@@ -347,30 +324,82 @@ export default function Dashboard() {
                                 <i className="bi bi-pencil-square" />
                               </Link>
                               <div style={{ position: 'relative' }}>
-                                <button type="button" className="btn-act btn-act-dark print-btn" title="Cetak">
+                                <button
+                                  type="button"
+                                  className="btn-act btn-act-dark"
+                                  title="Cetak"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setOpenDropdown(openDropdown === `${s.id}-print` ? null : `${s.id}-print`)
+                                    setOpenWADropdown(null)
+                                  }}
+                                >
                                   <i className="bi bi-printer" />
                                 </button>
-                                <div className="print-dropdown" style={{ display: 'none', position: 'absolute', right: 0, top: 'calc(100% + 4px)', zIndex: 50, width: '130px', background: 'var(--am-surface)', border: '1px solid var(--am-border)', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,.15)', overflow: 'hidden' }}>
-                                  <Link href={`/nota/${s.id}/penerimaan`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '.7rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                    <i className="bi bi-receipt-cutoff" style={{ color: 'var(--am-text-muted)', width: '12px' }} />Nota
-                                  </Link>
-                                  <Link href={`/nota/${s.id}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '.7rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                    <i className="bi bi-qr-code" style={{ color: 'var(--am-text-muted)', width: '12px' }} />QR Code
-                                  </Link>
-                                  <Link href={`/nota/${s.id}/garansi`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '.7rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                    <i className="bi bi-shield-check" style={{ color: 'var(--am-text-muted)', width: '12px' }} />Garansi
-                                  </Link>
-                                </div>
+                                {openDropdown === `${s.id}-print` && (
+                                  <div
+                                    className="print-dropdown"
+                                    onClick={(e) => e.stopPropagation()}
+                                    style={{
+                                      position: 'absolute',
+                                      right: 0,
+                                      top: 'calc(100% + 4px)',
+                                      zIndex: 50,
+                                      width: '130px',
+                                      background: 'var(--am-surface)',
+                                      border: '1px solid var(--am-border)',
+                                      borderRadius: '8px',
+                                      boxShadow: '0 4px 12px rgba(0,0,0,.15)',
+                                      overflow: 'hidden'
+                                    }}
+                                  >
+                                    <Link href={`/nota/${s.id}/penerimaan`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '.7rem', color: 'var(--am-text)', textDecoration: 'none' }}>
+                                      <i className="bi bi-receipt-cutoff" style={{ color: 'var(--am-text-muted)', width: '12px' }} />Nota
+                                    </Link>
+                                    <Link href={`/nota/${s.id}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '.7rem', color: 'var(--am-text)', textDecoration: 'none' }}>
+                                      <i className="bi bi-qr-code" style={{ color: 'var(--am-text-muted)', width: '12px' }} />QR Code
+                                    </Link>
+                                    <Link href={`/nota/${s.id}/garansi`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '.7rem', color: 'var(--am-text)', textDecoration: 'none' }}>
+                                      <i className="bi bi-shield-check" style={{ color: 'var(--am-text-muted)', width: '12px' }} />Garansi
+                                    </Link>
+                                  </div>
+                                )}
                               </div>
                               <div style={{ position: 'relative' }}>
-                                <button type="button" className="btn-act btn-act-green wa-drop-btn" title="WA">
+                                <button
+                                  type="button"
+                                  className="btn-act btn-act-green"
+                                  title="WA"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setOpenWADropdown(openWADropdown === `${s.id}-wa` ? null : `${s.id}-wa`)
+                                    setOpenDropdown(null)
+                                  }}
+                                >
                                   <i className="bi bi-whatsapp" />
                                 </button>
-                                <div className="wa-dropdown print-dropdown" style={{ display: 'none', position: 'absolute', right: 0, top: 'calc(100% + 4px)', zIndex: 50, width: '140px', background: 'var(--am-surface)', border: '1px solid var(--am-border)', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,.15)', overflow: 'hidden' }}>
-                                  <a href={`https://wa.me/${hp}?text=${encodeURIComponent(wa_msg)}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '.7rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                    <i className="bi bi-chat-dots" style={{ color: 'var(--am-text-muted)', width: '12px' }} />Notif Status
-                                  </a>
-                                </div>
+                                {openWADropdown === `${s.id}-wa` && (
+                                  <div
+                                    className="print-dropdown"
+                                    onClick={(e) => e.stopPropagation()}
+                                    style={{
+                                      position: 'absolute',
+                                      right: 0,
+                                      top: 'calc(100% + 4px)',
+                                      zIndex: 50,
+                                      width: '140px',
+                                      background: 'var(--am-surface)',
+                                      border: '1px solid var(--am-border)',
+                                      borderRadius: '8px',
+                                      boxShadow: '0 4px 12px rgba(0,0,0,.15)',
+                                      overflow: 'hidden'
+                                    }}
+                                  >
+                                    <a href={`https://wa.me/${hp}?text=${encodeURIComponent(wa_msg)}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 10px', fontSize: '.7rem', color: 'var(--am-text)', textDecoration: 'none' }}>
+                                      <i className="bi bi-chat-dots" style={{ color: 'var(--am-text-muted)', width: '12px' }} />Notif Status
+                                    </a>
+                                  </div>
+                                )}
                               </div>
                             </>
                           )}
@@ -466,7 +495,8 @@ export default function Dashboard() {
             border: '1px solid var(--am-border)',
             borderRadius: '12px',
             overflow: 'hidden',
-            flex: 1
+            flex: 1,
+            maxHeight: '220px'
           }}>
             <div style={{
               padding: '12px 16px',
@@ -480,15 +510,15 @@ export default function Dashboard() {
               </span>
               <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>All Time</span>
             </div>
-            <div style={{ padding: '8px 0', maxHeight: '240px', overflowY: 'auto' }}>
+            <div style={{ padding: '4px 0', overflowY: 'auto' }}>
               {stats.merk_populer && stats.merk_populer.length > 0 ? stats.merk_populer.map((merk, i) => {
                 const maxTotal = Math.max(...stats.merk_populer.map(m => m.total), 1)
                 const pct = (merk.total / maxTotal) * 100
                 return (
-                  <div key={i} style={{ padding: '8px 16px', borderBottom: '1px solid var(--am-border)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                      <span style={{ fontSize: '.8rem', fontWeight: '600', color: 'var(--am-text)' }}>{merk.merk_hp}</span>
-                      <span style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>{merk.total}x</span>
+                  <div key={i} style={{ padding: '6px 16px', borderBottom: '1px solid var(--am-border)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                      <span style={{ fontSize: '.78rem', fontWeight: '600', color: 'var(--am-text)' }}>{merk.merk_hp}</span>
+                      <span style={{ fontSize: '.68rem', color: 'var(--am-text-muted)' }}>{merk.total}x</span>
                     </div>
                     <div style={{ height: '3px', background: 'var(--am-border)', borderRadius: '2px', overflow: 'hidden' }}>
                       <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #3b82f6, #6366f1)', borderRadius: '2px' }} />
@@ -531,102 +561,130 @@ export default function Dashboard() {
             </span>
           </div>
         </div>
-        <div style={{ padding: '24px 20px' }}>
-          {/* Chart Area */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'space-around',
-            gap: '16px',
-            height: '200px',
-            marginBottom: '20px'
-          }}>
-            {chartData.map((month, i) => {
-              const heightPct = (month.value / maxVal) * 100
-              const isHighest = month.value === maxVal && month.value > 0
-              return (
-                <div key={i} style={{
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  height: '100%',
-                  position: 'relative'
+        <div style={{ padding: '20px 16px' }}>
+          {/* Line Chart Area */}
+          {chartData.length > 0 ? (
+            <div style={{ position: 'relative', height: '180px', marginBottom: '16px' }}>
+              <svg width="100%" height="180" viewBox={`0 0 ${chartData.length * 60 + 40} 180`} preserveAspectRatio="xMidYMid meet" style={{ overflow: 'visible' }}>
+                {/* Grid lines */}
+                {[0, 50, 100, 150].map((y) => (
+                  <line
+                    key={y}
+                    x1="20"
+                    y1={y + 10}
+                    x2={chartData.length * 60 + 20}
+                    y2={y + 10}
+                    stroke="var(--am-border)"
+                    strokeWidth="1"
+                    strokeDasharray="4,4"
+                  />
+                ))}
+
+                {/* Line path */}
+                {chartData.map((month, i) => {
+                  const x = 20 + i * 60 + 30
+                  const y = 160 - (month.value / maxVal) * 140
+                  return (
+                    <g key={i}>
+                      {/* Point */}
+                      <circle
+                        cx={x}
+                        cy={y}
+                        r="6"
+                        fill={month.value === maxVal && month.value > 0 ? '#3b82f6' : '#60a5fa'}
+                        stroke="var(--am-surface)"
+                        strokeWidth="2"
+                      />
+                      {/* Value on hover area */}
+                      <text
+                        x={x}
+                        y={y - 12}
+                        textAnchor="middle"
+                        fontSize="10"
+                        fontWeight="700"
+                        fill={month.value === maxVal && month.value > 0 ? '#3b82f6' : 'var(--am-text-muted)'}
+                      >
+                        {month.value}
+                      </text>
+                      {/* Month label */}
+                      <text
+                        x={x}
+                        y="175"
+                        textAnchor="middle"
+                        fontSize="9"
+                        fontWeight="600"
+                        fill="var(--am-text-muted)"
+                      >
+                        {month.label}
+                      </text>
+                      {/* Connect to previous point */}
+                      {i > 0 && (
+                        <line
+                          x1={20 + (i - 1) * 60 + 30}
+                          y1={160 - (chartData[i - 1].value / maxVal) * 140}
+                          x2={x}
+                          y2={y}
+                          stroke="#3b82f6"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                        />
+                      )}
+                    </g>
+                  )
+                })}
+              </svg>
+
+              {/* Highlight card for highest month */}
+              {chartData.length > 0 && (
+                <div style={{
+                  position: 'absolute',
+                  top: '8px',
+                  right: '12px',
+                  background: 'rgba(59,130,246,.1)',
+                  border: '1px solid rgba(59,130,246,.2)',
+                  borderRadius: '8px',
+                  padding: '8px 12px',
+                  textAlign: 'center'
                 }}>
-                  {/* Value on top */}
-                  <div style={{
-                    fontSize: '.7rem',
-                    fontWeight: '700',
-                    color: isHighest ? '#3b82f6' : 'var(--am-text-muted)',
-                    marginBottom: '8px',
-                    minHeight: '20px'
-                  }}>
-                    {month.value}
+                  <div style={{ fontSize: '.6rem', color: 'var(--am-text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>Tertinggi</div>
+                  <div style={{ fontSize: '.9rem', fontWeight: '800', color: '#3b82f6' }}>
+                    {chartData.reduce((a, b) => a.value > b.value ? a : b).value} servis
                   </div>
-                  {/* Bar with gradient */}
-                  <div style={{
-                    width: '100%',
-                    maxWidth: '60px',
-                    height: `${heightPct}%`,
-                    minHeight: month.value > 0 ? '8px' : '4px',
-                    background: month.value > 0
-                      ? `linear-gradient(180deg, ${isHighest ? '#3b82f6' : '#60a5fa'} 0%, ${isHighest ? '#2563eb' : '#93c5fd'} 100%)`
-                      : 'rgba(255,255,255,0.08)',
-                    borderRadius: '8px 8px 4px 4px',
-                    boxShadow: isHighest ? '0 4px 16px rgba(59,130,246,0.4)' : 'none',
-                    transition: 'all 0.4s ease',
-                    position: 'relative'
-                  }}>
-                    {/* Shine effect */}
-                    {month.value > 0 && (
-                      <div style={{
-                        position: 'absolute',
-                        top: '4px',
-                        left: '4px',
-                        right: '4px',
-                        height: '6px',
-                        background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%)',
-                        borderRadius: '4px 4px 0 0'
-                      }} />
-                    )}
-                  </div>
-                  {/* Month label */}
-                  <div style={{
-                    fontSize: '.65rem',
-                    color: 'var(--am-text-muted)',
-                    fontWeight: '600',
-                    marginTop: '12px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '.5px'
-                  }}>
-                    {month.label}
+                  <div style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>
+                    {chartData.reduce((a, b) => a.value > b.value ? a : b).label}
                   </div>
                 </div>
-              )
-            })}
-          </div>
+              )}
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '40px', color: 'var(--am-text-muted)' }}>
+              <i className="bi bi-bar-chart-line" style={{ fontSize: '2rem', opacity: 0.3 }} />
+              <p style={{ margin: '8px 0 0' }}>Belum ada data grafik</p>
+            </div>
+          )}
 
           {/* Stats Footer */}
           <div style={{
             display: 'flex',
             justifyContent: 'center',
-            gap: '32px',
+            gap: '24px',
             paddingTop: '16px',
-            borderTop: '1px solid var(--am-border)'
+            borderTop: '1px solid var(--am-border)',
+            flexWrap: 'wrap'
           }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '.6rem', color: 'var(--am-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Total Servis</div>
-              <div style={{ fontSize: '1.2rem', fontWeight: '800', color: 'var(--am-text)' }}>{totalServis}</div>
+              <div style={{ fontSize: '.6rem', color: 'var(--am-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Total</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--am-text)' }}>{totalServis}</div>
             </div>
             <div style={{ width: '1px', background: 'var(--am-border)' }} />
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '.6rem', color: 'var(--am-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Rata-rata/Bulan</div>
-              <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#3b82f6' }}>{avgServis}</div>
+              <div style={{ fontSize: '.6rem', color: 'var(--am-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Rata-rata</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: '800', color: '#3b82f6' }}>{avgServis}/bln</div>
             </div>
             <div style={{ width: '1px', background: 'var(--am-border)' }} />
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '.6rem', color: 'var(--am-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Bulan Tertinggi</div>
-              <div style={{ fontSize: '1.2rem', fontWeight: '800', color: '#10b981' }}>
+              <div style={{ fontSize: '.6rem', color: 'var(--am-text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Bulan</div>
+              <div style={{ fontSize: '1.1rem', fontWeight: '800', color: '#10b981' }}>
                 {chartData.length > 0 ? chartData.reduce((a, b) => a.value > b.value ? a : b).label : '-'}
               </div>
             </div>

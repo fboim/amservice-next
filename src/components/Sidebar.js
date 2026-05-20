@@ -67,6 +67,17 @@ export default function Sidebar() {
     }
   }, [pathname, mobileOpen, onMobileClose])
 
+  // Handle window resize - close mobile sidebar on desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768 && mobileOpen) {
+        onMobileClose?.()
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [mobileOpen, onMobileClose])
+
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark'
     setTheme(newTheme)
