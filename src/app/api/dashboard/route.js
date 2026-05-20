@@ -12,8 +12,9 @@ export async function GET(request) {
     const today = new Date()
     const todayStr = today.toISOString().split('T')[0]
     const currentYear = today.getFullYear()
+    const currentMonth = String(today.getMonth() + 1).padStart(2, '0')
 
-    // Get statistics
+    // Get statistics - all time counts
     const { count: antrean } = await supabase
       .from('servis')
       .select('*', { count: 'exact', head: true })
@@ -32,6 +33,7 @@ export async function GET(request) {
       .eq('status', 'Siap Diambil')
       .is('deleted_at', null)
 
+    // Selesai = unit yang sudah selesai diambil hari ini
     const { count: selesai } = await supabase
       .from('servis')
       .select('*', { count: 'exact', head: true })
@@ -39,7 +41,7 @@ export async function GET(request) {
       .eq('tanggal', todayStr)
       .is('deleted_at', null)
 
-    // Get daily omzet
+    // Get daily omzet (hari ini - transaksi selesai)
     const { data: servisToday } = await supabase
       .from('servis')
       .select('estimasi_biaya')
@@ -53,13 +55,13 @@ export async function GET(request) {
       return sum + biaya
     }, 0) || 0
 
-    // Get monthly omzet (this year)
+    // Get monthly omzet (bulan ini saja, bukan tahun ini)
+    const monthStart = `${currentYear}-${currentMonth}-01`
     const { data: servisBulanIni } = await supabase
       .from('servis')
       .select('estimasi_biaya')
       .eq('status', 'Sudah Diambil')
-      .gte('tanggal', `${currentYear}-01-01`)
-      .lte('tanggal', `${currentYear}-12-31`)
+      .gte('tanggal', monthStart)
       .is('deleted_at', null)
 
     const omzetBulan = servisBulanIni?.reduce((sum, s) => {
@@ -67,6 +69,27 @@ export async function GET(request) {
       const biaya = parseInt(biayaStr.replace(/\D/g, ''))
       return sum + biaya
     }, 0) || 0
+
+    // Get merk populer from ALL servis (not just latest)
+    const { data: allServis } = await supabase
+      .from('servis')
+      .select('merk_hp')
+      .is('deleted_at', null)
+
+    const merkCount = {}
+    if (allServis && allServis.length > 0) {
+      allServis.forEach(s => {
+        const merk = s.merk_hp?.trim() || 'Lainnya'
+        if (merk) {
+          merkCount[merk] = (merkCount[merk] || 0) + 1
+        }
+      })
+    }
+
+    const merkPopuler = Object.entries(merkCount)
+      .map(([merk_hp, total]) => ({ merk_hp, total }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 10)
 
     // Get monthly data for chart (last 6 months)
     const monthsData = []
@@ -78,7 +101,6 @@ export async function GET(request) {
       const month = d.getMonth() + 1
       const monthLabel = monthNames[d.getMonth()]
 
-      // First day and last day of the month
       const firstDay = `${year}-${String(month).padStart(2, '0')}-01`
       const lastDay = new Date(year, month, 0).toISOString().split('T')[0]
 
@@ -103,6 +125,7 @@ export async function GET(request) {
       omzet_hari: omzetHari,
       omzet_bulan: omzetBulan,
       monthly_data: monthsData,
+      merk_populer: merkPopuler,
     })
   } catch (error) {
     console.error('Dashboard API error:', error)

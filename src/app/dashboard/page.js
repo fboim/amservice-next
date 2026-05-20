@@ -1,7 +1,7 @@
 'use client'
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
@@ -14,12 +14,13 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [initialLoad, setInitialLoad] = useState(true)
   const [stats, setStats] = useState({
-    antrean: 0, proses: 0, siap: 0, selesai: 0, omzet_hari: 0, omzet_bulan: 0
+    antrean: 0, proses: 0, siap: 0, selesai: 0, omzet_hari: 0, omzet_bulan: 0, merk_populer: []
   })
   const [servisTerbaru, setServisTerbaru] = useState([])
   const [stokMenipis, setStokMenipis] = useState([])
-  const [merkPopuler, setMerkPopuler] = useState([])
   const [user, setUser] = useState(null)
+  const printDropdownsRef = useRef({})
+  const waDropdownsRef = useRef({})
 
   useEffect(() => {
     const token = localStorage.getItem('ams_token') || sessionStorage.getItem('ams_token')
@@ -38,7 +39,6 @@ export default function Dashboard() {
       }
     }
 
-    // Small delay for smooth transition
     const timer = setTimeout(() => {
       fetchDashboard()
     }, 100)
@@ -48,20 +48,10 @@ export default function Dashboard() {
 
   const fetchDashboard = async () => {
     try {
-      // Parallel fetch all data at once
       const [dashRes, servisRes, sparepartRes] = await Promise.all([
-        fetch('/api/dashboard', {
-          cache: 'no-store',
-          headers: { 'Cache-Control': 'no-cache' }
-        }),
-        fetch('/api/servis?limit=10', {
-          cache: 'no-store',
-          headers: { 'Cache-Control': 'no-cache' }
-        }),
-        fetch('/api/sparepart?low=true&limit=5', {
-          cache: 'no-store',
-          headers: { 'Cache-Control': 'no-cache' }
-        }),
+        fetch('/api/dashboard', { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
+        fetch('/api/servis?limit=10', { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
+        fetch('/api/sparepart?low=true&limit=10', { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
       ])
 
       const [dashData, servisData, sparepartData] = await Promise.all([
@@ -73,29 +63,59 @@ export default function Dashboard() {
       setStats(dashData || {})
       setServisTerbaru(servisData.servis || [])
       setStokMenipis(sparepartData.sparepart || [])
-
-      // Calculate merk populer from servis
-      if (servisData.servis && servisData.servis.length > 0) {
-        const merkCount = {}
-        servisData.servis.forEach(s => {
-          const merk = s.merk_hp || 'Lainnya'
-          merkCount[merk] = (merkCount[merk] || 0) + 1
-        })
-        setMerkPopuler(
-          Object.entries(merkCount)
-            .map(([merk_hp, total]) => ({ merk_hp, total }))
-            .sort((a, b) => b.total - a.total)
-        )
-      }
     } catch (err) {
       console.error('Fetch error:', err)
     } finally {
-      // Smooth fade out
       setTimeout(() => {
         setLoading(false)
         setInitialLoad(false)
       }, 300)
     }
+  }
+
+  // Initialize dropdown handlers after data loads
+  useEffect(() => {
+    if (!loading && !initialLoad && servisTerbaru.length > 0) {
+      initDropdowns()
+    }
+  }, [loading, initialLoad, servisTerbaru])
+
+  const initDropdowns = () => {
+    // Wait for DOM to be ready
+    setTimeout(() => {
+      document.querySelectorAll('.print-btn').forEach(function(btn, idx) {
+        btn.onclick = function(e) {
+          e.stopPropagation()
+          const dropdown = btn.nextElementSibling
+          if (dropdown) {
+            const isVisible = dropdown.style.display === 'block'
+            // Close all
+            document.querySelectorAll('.print-dropdown').forEach(d => d.style.display = 'none')
+            if (!isVisible) {
+              dropdown.style.display = 'block'
+            }
+          }
+        }
+      })
+
+      document.querySelectorAll('.wa-drop-btn').forEach(function(btn) {
+        btn.onclick = function(e) {
+          e.stopPropagation()
+          const dropdown = btn.nextElementSibling
+          if (dropdown) {
+            const isVisible = dropdown.style.display === 'block'
+            document.querySelectorAll('.wa-dropdown').forEach(d => d.style.display = 'none')
+            if (!isVisible) {
+              dropdown.style.display = 'block'
+            }
+          }
+        }
+      })
+
+      document.onclick = function() {
+        document.querySelectorAll('.print-dropdown, .wa-dropdown').forEach(d => d.style.display = 'none')
+      }
+    }, 100)
   }
 
   const isAdmin = user?.role?.toLowerCase() === 'admin'
@@ -132,6 +152,18 @@ export default function Dashboard() {
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+  }
+
+  const handleDelete = async (id) => {
+    if (!confirm('Yakin ingin menghapus servis ini?')) return
+    try {
+      const res = await fetch(`/api/servis?id=${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        fetchDashboard()
+      }
+    } catch (err) {
+      console.error('Delete error:', err)
+    }
   }
 
   if (initialLoad || loading) {
@@ -171,7 +203,7 @@ export default function Dashboard() {
           <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ fontSize: '.68rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.4px' }}>Antrean</div>
             <div style={{ fontSize: '1.55rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1, margin: '2px 0' }}>{stats.antrean}</div>
-            <div style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>Unit hari ini</div>
+            <div style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>Unit antre</div>
           </div>
         </div>
 
@@ -182,7 +214,7 @@ export default function Dashboard() {
           <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ fontSize: '.68rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.4px' }}>Dikerjakan</div>
             <div style={{ fontSize: '1.55rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1, margin: '2px 0' }}>{stats.proses}</div>
-            <div style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>Sedang diproses</div>
+            <div style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>Sedang proses</div>
           </div>
         </div>
 
@@ -236,7 +268,7 @@ export default function Dashboard() {
 
       {/* Table + Sidebar */}
       <div className="dash-row-tb fade-in" style={{ marginBottom: '20px' }}>
-        {/* Servis Table */}
+        {/* Servis Table - Same style as Data Servis page */}
         <div className="section-card">
           <div className="card-header">
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.875rem', fontWeight: '600', color: 'var(--am-text)' }}>
@@ -249,17 +281,15 @@ export default function Dashboard() {
               Lihat Semua <i className="bi bi-arrow-right" />
             </Link>
           </div>
-          <div className="table-wrapper">
-            <table className="ds-table">
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr>
-                  <th>No</th>
-                  <th>Pelanggan</th>
-                  <th>Unit HP</th>
-                  <th>Keluhan</th>
-                  <th>Status</th>
-                  <th>Biaya</th>
-                  <th>Aksi</th>
+                  <th style={{ width: '28px', textAlign: 'center', padding: '10px 8px', fontSize: '.7rem', fontWeight: '700', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', whiteSpace: 'nowrap' }}>#</th>
+                  <th style={{ padding: '10px 8px', fontSize: '.7rem', fontWeight: '700', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', textAlign: 'left', whiteSpace: 'nowrap' }}>Kode / Tgl</th>
+                  <th style={{ padding: '10px 8px', fontSize: '.7rem', fontWeight: '700', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', textAlign: 'center', whiteSpace: 'nowrap' }}>Pelanggan & Unit</th>
+                  <th style={{ width: '68px', textAlign: 'center', padding: '10px 8px', fontSize: '.7rem', fontWeight: '700', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', whiteSpace: 'nowrap' }}>Status</th>
+                  <th style={{ width: '110px', textAlign: 'center', padding: '10px 8px', fontSize: '.7rem', fontWeight: '700', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', whiteSpace: 'nowrap' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -268,46 +298,78 @@ export default function Dashboard() {
                   const wa_msg = `Halo *${s.nama_pelanggan}*, perangkat *${s.merk_hp} ${s.tipe_hp}* (nota: *${s.no_servis}*) statusnya: *${s.status.toUpperCase()}*\n\nhttps://amservice.web.id/cek_servis.php?no=${s.no_servis}`
 
                   return (
-                    <tr key={s.id}>
-                      <td style={{ color: 'var(--am-text-muted)', fontSize: '.75rem' }}>{i + 1}</td>
-                      <td style={{ textAlign: 'left' }}>
-                        <div style={{ lineHeight: 1.3 }}>
-                          <div style={{ fontWeight: '600', color: 'var(--am-text)', fontSize: '.82rem' }}>{s.nama_pelanggan}</div>
-                          <div style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>{s.no_servis}</div>
+                    <tr key={s.id} style={{ borderBottom: '1px solid var(--am-border)' }}>
+                      <td style={{ textAlign: 'center', fontSize: '.75rem', color: 'var(--am-text-muted)', fontWeight: '700', padding: '12px 8px' }}>
+                        {i + 1}
+                      </td>
+                      <td style={{ padding: '12px 8px' }}>
+                        <div style={{ fontWeight: '700', color: '#3b82f6', fontSize: '.79rem' }}>{s.no_servis}</div>
+                        <div style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>
+                          {new Date(s.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                         </div>
                       </td>
-                      <td style={{ textAlign: 'left' }}>
-                        <div style={{ lineHeight: 1.3 }}>
-                          <div style={{ fontWeight: '600', color: 'var(--am-text)', fontSize: '.82rem' }}>{s.merk_hp} {s.tipe_hp}</div>
-                          <div style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>{formatDate(s.tanggal)}</div>
+                      <td style={{ textAlign: 'center', padding: '12px 8px' }}>
+                        <div style={{ fontWeight: '600', color: 'var(--am-text)', fontSize: '.8rem', lineHeight: 1.3 }}>
+                          {s.nama_pelanggan}
                         </div>
-                      </td>
-                      <td style={{ textAlign: 'left', maxWidth: '160px' }}>
-                        {s.keluhan ? (
-                          <div style={{ fontSize: '.8rem', color: 'var(--am-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '160px' }} title={s.keluhan}>
-                            {s.keluhan.length > 30 ? s.keluhan.slice(0, 30) + '...' : s.keluhan}
+                        <div style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>{s.merk_hp} {s.tipe_hp}</div>
+                        {s.keluhan && (
+                          <div style={{ fontSize: '.68rem', color: 'var(--am-text-muted)', fontStyle: 'italic', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={s.keluhan}>
+                            {s.keluhan.length > 25 ? s.keluhan.slice(0, 25) + '…' : s.keluhan}
                           </div>
-                        ) : (
-                          <span style={{ fontSize: '.8rem', color: 'var(--am-text-muted)' }}>-</span>
                         )}
                       </td>
-                      <td>
-                        <span className={`badge-soft ${getBadgeClass(s.status)}`}>{getBadgeText(s.status)}</span>
+                      <td style={{ textAlign: 'center', padding: '12px 8px' }}>
+                        <span className={`badge-soft ${getBadgeClass(s.status)}`} style={{ fontSize: '.67rem' }}>
+                          {getBadgeText(s.status)}
+                        </span>
                       </td>
-                      <td style={{ fontWeight: '600', color: 'var(--am-text)', fontSize: '.82rem' }}>
-                        {s.estimasi_biaya ? formatRupiah(s.estimasi_biaya) : '-'}
-                      </td>
-                      <td>
+                      <td style={{ padding: '12px 8px' }}>
                         <div className="btn-group-act">
                           {!isPengunjung && (
                             <>
                               <Link href={`/servis/edit/${s.id}`} className="btn-act btn-act-blue" title="Edit">
                                 <i className="bi bi-pencil-square" />
                               </Link>
-                              <a href={`https://wa.me/${hp}?text=${encodeURIComponent(wa_msg)}`} target="_blank" className="btn-act btn-act-green" title="Kirim WA">
-                                <i className="bi bi-whatsapp" />
-                              </a>
+                              {/* Print Dropdown */}
+                              <div style={{ position: 'relative' }}>
+                                <button type="button" className="btn-act btn-act-dark print-btn" title="Cetak">
+                                  <i className="bi bi-printer" />
+                                  <i className="bi bi-chevron-down" style={{ fontSize: '5px', marginLeft: '1px' }} />
+                                </button>
+                                <div className="print-dropdown" style={{ display: 'none', position: 'absolute', right: 0, top: 'calc(100% + 4px)', zIndex: 50, width: '148px', background: 'var(--am-surface)', border: '1px solid var(--am-border)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,.15)', overflow: 'hidden' }}>
+                                  <Link href={`/nota/${s.id}/penerimaan`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '7px 10px', fontSize: '.76rem', color: 'var(--am-text)', textDecoration: 'none' }}>
+                                    <i className="bi bi-receipt-cutoff" style={{ color: 'var(--am-text-muted)', width: '13px', textAlign: 'center' }} />Nota Offline
+                                  </Link>
+                                  <Link href={`/nota/${s.id}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '7px 10px', fontSize: '.76rem', color: 'var(--am-text)', textDecoration: 'none' }}>
+                                    <i className="bi bi-qr-code" style={{ color: 'var(--am-text-muted)', width: '13px', textAlign: 'center' }} />QR Code
+                                  </Link>
+                                  <Link href={`/nota/${s.id}/garansi`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '7px 10px', fontSize: '.76rem', color: 'var(--am-text)', textDecoration: 'none' }}>
+                                    <i className="bi bi-shield-check" style={{ color: 'var(--am-text-muted)', width: '13px', textAlign: 'center' }} />Nota Garansi
+                                  </Link>
+                                  <Link href={`/nota/${s.id}/label`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '7px 10px', fontSize: '.76rem', color: 'var(--am-text)', textDecoration: 'none' }}>
+                                    <i className="bi bi-tag-fill" style={{ color: 'var(--am-text-muted)', width: '13px', textAlign: 'center' }} />Label
+                                  </Link>
+                                </div>
+                              </div>
+                              {/* WA Dropdown */}
+                              <div style={{ position: 'relative' }}>
+                                <button type="button" className="btn-act btn-act-green wa-drop-btn" title="Kirim WA">
+                                  <i className="bi bi-whatsapp" />
+                                  <i className="bi bi-chevron-down" style={{ fontSize: '5px', marginLeft: '1px' }} />
+                                </button>
+                                <div className="wa-dropdown print-dropdown" style={{ display: 'none', position: 'absolute', right: 0, top: 'calc(100% + 4px)', zIndex: 60, width: '172px', background: 'var(--am-surface)', border: '1px solid var(--am-border)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,.15)', overflow: 'hidden' }}>
+                                  <a href={`https://wa.me/${hp}?text=${encodeURIComponent(wa_msg)}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '7px 10px', fontSize: '.76rem', color: 'var(--am-text)', textDecoration: 'none' }}>
+                                    <i className="bi bi-chat-dots" style={{ color: 'var(--am-text-muted)', width: '13px', textAlign: 'center' }} />Notif Status
+                                  </a>
+                                </div>
+                              </div>
                             </>
+                          )}
+                          {isAdmin && (
+                            <button onClick={() => handleDelete(s.id)} className="btn-act btn-act-red" title="Hapus">
+                              <i className="bi bi-trash" />
+                            </button>
                           )}
                         </div>
                       </td>
@@ -315,7 +377,7 @@ export default function Dashboard() {
                   )
                 }) : (
                   <tr>
-                    <td colSpan="7" style={{ textAlign: 'center', padding: '24px', color: 'var(--am-text-muted)' }}>
+                    <td colSpan="5" style={{ textAlign: 'center', padding: '24px', color: 'var(--am-text-muted)' }}>
                       <i className="bi bi-inbox" style={{ fontSize: '2rem', opacity: 0.3 }} />
                       <p style={{ margin: '8px 0 0' }}>Belum ada data servis</p>
                     </td>
@@ -334,14 +396,12 @@ export default function Dashboard() {
               <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.75rem', fontWeight: '600', color: 'var(--am-text)' }}>
                 <i className="bi bi-exclamation-triangle" style={{ color: '#f59e0b' }} /> Stok Menipis
               </span>
-              {stokMenipis.length > 0 && (
-                <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>{stokMenipis.length} item</span>
-              )}
+              <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>{stokMenipis.length} item</span>
             </div>
             <div style={{ padding: '8px 0' }}>
               {stokMenipis.length > 0 ? stokMenipis.map((item) => (
                 <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 16px', borderBottom: '1px solid var(--am-border)' }}>
-                  <span style={{ fontSize: '.8rem', color: 'var(--am-text)' }}>{item.nama_sparepart || item.nama}</span>
+                  <span style={{ fontSize: '.8rem', color: 'var(--am-text)' }}>{item.nama_sparepart}</span>
                   <span style={{
                     fontSize: '.68rem',
                     fontWeight: '700',
@@ -350,7 +410,7 @@ export default function Dashboard() {
                     background: item.stok === 0 ? 'rgba(239,68,68,.15)' : 'rgba(245,158,11,.15)',
                     color: item.stok === 0 ? '#dc2626' : '#d97706',
                   }}>
-                    {item.stok}
+                    {item.stok} pcs
                   </span>
                 </div>
               )) : (
@@ -365,16 +425,26 @@ export default function Dashboard() {
           <div className="section-card">
             <div className="card-header">
               <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.75rem', fontWeight: '600', color: 'var(--am-text)' }}>
-                <i className="bi bi-phone" style={{ color: '#3b82f6' }} /> Merk Populer
+                <i className="bi bi-trophy" style={{ color: '#f59e0b' }} /> Merk Populer
               </span>
+              <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>All Time</span>
             </div>
-            <div>
-              {merkPopuler.length > 0 ? merkPopuler.map((merk, i) => (
-                <div key={i} className="merk-item">
-                  <span style={{ fontSize: '.8rem', color: 'var(--am-text)' }}>{merk.merk_hp}</span>
-                  <span style={{ fontSize: '.7rem', fontWeight: '600', color: 'var(--am-text-muted)' }}>{merk.total}x</span>
-                </div>
-              )) : (
+            <div style={{ padding: '8px 0' }}>
+              {stats.merk_populer && stats.merk_populer.length > 0 ? stats.merk_populer.slice(0, 6).map((merk, i) => {
+                const maxTotal = Math.max(...stats.merk_populer.map(m => m.total))
+                const pct = maxTotal > 0 ? (merk.total / maxTotal) * 100 : 0
+                return (
+                  <div key={i} style={{ padding: '8px 16px', borderBottom: '1px solid var(--am-border)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '.8rem', fontWeight: '600', color: 'var(--am-text)' }}>{merk.merk_hp}</span>
+                      <span style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>{merk.total}x</span>
+                    </div>
+                    <div style={{ height: '3px', background: 'var(--am-border)', borderRadius: '2px', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #3b82f6, #6366f1)', borderRadius: '2px', transition: 'width 0.5s ease' }} />
+                    </div>
+                  </div>
+                )
+              }) : (
                 <div style={{ padding: '16px', textAlign: 'center', color: 'var(--am-text-muted)', fontSize: '.8rem' }}>
                   Belum ada data
                 </div>
@@ -384,51 +454,125 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Bottom Section - Chart + Popular Brands */}
+      {/* Bottom Section - Chart only (removed duplicate Brand Stats) */}
       <div className="dash-row-bot fade-in">
-        {/* Monthly Chart */}
+        {/* Monthly Chart - Enhanced */}
         <div className="section-card">
           <div className="card-header">
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.875rem', fontWeight: '600', color: 'var(--am-text)' }}>
-              <i className="bi bi-bar-chart" style={{ color: '#3b82f6' }} /> Grafik Servis
+              <i className="bi bi-bar-chart-fill" style={{ color: '#3b82f6' }} /> Grafik Servis
             </span>
-            <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>{new Date().getFullYear()}</span>
+            <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>6 Bulan Terakhir - {new Date().getFullYear()}</span>
           </div>
           <div style={{ padding: '16px' }}>
-            <div style={{ height: '220px' }}>
-              <MonthlyChart data={stats.monthly_data} />
+            <div style={{ height: '240px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', gap: '12px' }}>
+              {stats.monthly_data && stats.monthly_data.map((month, i) => {
+                const maxVal = Math.max(...(stats.monthly_data || []).map(m => m.value), 1)
+                const heightPct = (month.value / maxVal) * 100
+                return (
+                  <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ width: '100%', position: 'relative' }}>
+                      <div
+                        style={{
+                          width: '100%',
+                          height: `${heightPct}%`,
+                          minHeight: month.value > 0 ? '8px' : '4px',
+                          background: month.value > 0
+                            ? 'linear-gradient(180deg, rgba(59,130,246,.8) 0%, rgba(59,130,246,.4) 100%)'
+                            : 'rgba(255,255,255,.1)',
+                          borderRadius: '6px 6px 2px 2px',
+                          transition: 'height 0.5s ease',
+                          boxShadow: month.value > 0 ? '0 4px 12px rgba(59,130,246,.3)' : 'none',
+                        }}
+                      />
+                      <div style={{
+                        position: 'absolute',
+                        top: '-24px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        fontSize: '.7rem',
+                        fontWeight: '700',
+                        color: 'var(--am-text)',
+                        background: 'var(--am-surface)',
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        border: '1px solid var(--am-border)',
+                      }}>
+                        {month.value}
+                      </div>
+                    </div>
+                    <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)', fontWeight: '600' }}>{month.label}</span>
+                  </div>
+                )
+              })}
+            </div>
+            {/* Summary */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              gap: '24px',
+              marginTop: '16px',
+              paddingTop: '12px',
+              borderTop: '1px solid var(--am-border)'
+            }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>Total Servis</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--am-text)' }}>
+                  {stats.monthly_data?.reduce((sum, m) => sum + m.value, 0) || 0}
+                </div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>Rata-rata/Bulan</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: '800', color: '#3b82f6' }}>
+                  {stats.monthly_data?.length > 0
+                    ? Math.round(stats.monthly_data.reduce((sum, m) => sum + m.value, 0) / stats.monthly_data.length)
+                    : 0}
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Popular Brands Stats */}
+        {/* Quick Stats */}
         <div className="section-card">
           <div className="card-header">
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.875rem', fontWeight: '600', color: 'var(--am-text)' }}>
-              <i className="bi bi-trophy" style={{ color: '#f59e0b' }} /> Brand Stats
+              <i className="bi bi-lightning" style={{ color: '#10b981' }} /> Quick Stats
             </span>
           </div>
-          <div style={{ padding: '8px 0' }}>
-            {merkPopuler.length > 0 ? merkPopuler.slice(0, 5).map((merk, i) => {
-              const maxTotal = Math.max(...merkPopuler.map(m => m.total))
-              const percentage = (merk.total / maxTotal) * 100
-
-              return (
-                <div key={i} style={{ padding: '10px 16px', borderBottom: '1px solid var(--am-border)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '.8rem', fontWeight: '600', color: 'var(--am-text)' }}>{merk.merk_hp}</span>
-                    <span style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>{merk.total} unit</span>
-                  </div>
-                  <div style={{ height: '4px', background: 'var(--am-border)', borderRadius: '2px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${percentage}%`, background: 'linear-gradient(90deg, #3b82f6, #6366f1)', borderRadius: '2px' }} />
-                  </div>
-                </div>
-              )
-            }) : (
-              <div style={{ padding: '16px', textAlign: 'center', color: 'var(--am-text-muted)', fontSize: '.8rem' }}>
-                Belum ada data
+          <div style={{ padding: '12px 0' }}>
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--am-border)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '.8rem', color: 'var(--am-text-muted)' }}>Total Servis</span>
+                <span style={{ fontWeight: '800', color: 'var(--am-text)', fontSize: '1.1rem' }}>
+                  {stats.antrean + stats.proses + stats.siap + stats.selesai}
+                </span>
               </div>
-            )}
+            </div>
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--am-border)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '.8rem', color: 'var(--am-text-muted)' }}>Servis Aktif</span>
+                <span style={{ fontWeight: '700', color: '#f59e0b', fontSize: '1rem' }}>
+                  {stats.proses}
+                </span>
+              </div>
+            </div>
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--am-border)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '.8rem', color: 'var(--am-text-muted)' }}>Merk Terdaftar</span>
+                <span style={{ fontWeight: '700', color: '#3b82f6', fontSize: '1rem' }}>
+                  {stats.merk_populer?.length || 0}
+                </span>
+              </div>
+            </div>
+            <div style={{ padding: '12px 16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '.8rem', color: 'var(--am-text-muted)' }}>Stok Rendah</span>
+                <span style={{ fontWeight: '700', color: '#ef4444', fontSize: '1rem' }}>
+                  {stokMenipis.length}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
