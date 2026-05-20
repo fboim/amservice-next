@@ -10,7 +10,13 @@ export default function GaransiServis() {
 
   const [loading, setLoading] = useState(true)
   const [servis, setServis] = useState(null)
-  const [pengaturan, setPengaturan] = useState(null)
+  const [pengaturan, setPengaturan] = useState({
+    nama_toko: 'AM SERVICE',
+    alamat: '',
+    no_wa: '0856 4722 7779',
+    link_maps: 'https://maps.google.com',
+    snk_garansi: '1. Garansi hanya berlaku untuk sparepart yang diganti.\n2. Kerusakan akibat jatuh, kena air, atau kesalahan pemakian tidak termasuk garansi.\n3. Garansi tidak berlaku jika stiker garansi sobek atau hilang.'
+  })
   const [printReady, setPrintReady] = useState(false)
 
   useEffect(() => {
@@ -18,32 +24,40 @@ export default function GaransiServis() {
   }, [id])
 
   useEffect(() => {
-    if (servis && pengaturan && !printReady) {
+    if (servis && !printReady) {
       setPrintReady(true)
       // Auto execute print after data loads
       setTimeout(() => {
         eksekusiCetak()
       }, 300)
     }
-  }, [servis, pengaturan, printReady])
+  }, [servis, printReady])
 
   const fetchData = async () => {
     try {
-      const servisRes = await fetch(`/api/servis?id=${id}`)
+      // Use absolute URLs for pages opened in new tab
+      const baseUrl = window.location.origin
+
+      // Fetch servis first
+      const servisRes = await fetch(`${baseUrl}/api/servis?id=${id}`)
+      if (!servisRes.ok) throw new Error('Gagal memuat data servis')
       const servisData = await servisRes.json()
-
-      let pengaturanData = { pengaturan: null }
-      try {
-        const pengaturanRes = await fetch('/api/pengaturan')
-        if (pengaturanRes.ok) {
-          pengaturanData = await pengaturanRes.json()
-        }
-      } catch (e) {
-        console.warn('Gagal mengambil pengaturan, menggunakan default')
-      }
-
       if (servisData.error) throw new Error(servisData.error)
       setServis(servisData)
+
+      // Fetch pengaturan
+      let pengaturanData = { pengaturan: null }
+      try {
+        const pengaturanRes = await fetch(`${baseUrl}/api/pengaturan`)
+        if (pengaturanRes.ok) {
+          const text = await pengaturanRes.text()
+          if (text) {
+            pengaturanData = JSON.parse(text)
+          }
+        }
+      } catch (e) {
+        console.warn('Pengaturan tidak tersedia, menggunakan default')
+      }
       setPengaturan(pengaturanData.pengaturan)
     } catch (err) {
       alert('Gagal memuat data: ' + err.message)
