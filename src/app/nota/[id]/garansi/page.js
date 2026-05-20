@@ -238,9 +238,20 @@ export default function GaransiServis() {
           color: #000;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
           box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        .thermal-preview > * {
+          width: 100%;
         }
         .center { text-align: center; }
         .bold { font-weight: bold; }
+        .thermal-preview img {
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+        }
 
         .action-bar {
           position: fixed;
