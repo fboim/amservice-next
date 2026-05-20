@@ -20,7 +20,7 @@ export default function NotaPenerimaan() {
       const res = await fetch(`/api/servis?id=${id}`)
       const data = await res.json()
       if (data.error) throw new Error(data.error)
-      setServis(data.servis)
+      setServis(data)
     } catch (err) {
       alert('Gagal memuat data: ' + err.message)
       router.back()
