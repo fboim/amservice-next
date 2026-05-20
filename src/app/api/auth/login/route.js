@@ -38,7 +38,7 @@ export async function POST(request) {
 
     return Response.json({
       success: true,
-      user: { id: admin.id, username: admin.username, role: admin.role },
+      user: { id: admin.id, username: admin.username, role: admin.role, nama: admin.username },
       token,
     })
   } catch (error) {
