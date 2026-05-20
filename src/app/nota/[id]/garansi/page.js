@@ -195,7 +195,7 @@ export default function GaransiServis() {
       {/* Download Button */}
       <div className="action-bar">
         <button
-          onClick={() => router.back()}
+          onClick={() => window.history.back()}
           className="btn-back"
         >
           <i className="bi bi-arrow-left" />
@@ -303,7 +303,6 @@ export default function GaransiServis() {
           .preview-wrapper {
             padding: 8px;
             padding-bottom: 80px;
-            justify-content: flex-start;
           }
         }
       `}</style>
