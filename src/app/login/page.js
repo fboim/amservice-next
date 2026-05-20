@@ -54,9 +54,11 @@ export default function Login() {
 
       if (formData.remember) {
         localStorage.setItem('ams_token', data.token)
+        localStorage.setItem('ams_user', JSON.stringify(data.user))
+      } else {
+        sessionStorage.setItem('ams_token', data.token)
+        sessionStorage.setItem('ams_user', JSON.stringify(data.user))
       }
-      sessionStorage.setItem('ams_token', data.token)
-      sessionStorage.setItem('ams_user', JSON.stringify(data.user))
 
       router.push('/dashboard')
     } catch (err) {

@@ -27,6 +27,21 @@ export default function Sidebar() {
   const [user, setUser] = useState(null)
   const [theme, setTheme] = useState('dark')
 
+  // Load user data on mount and pathname change
+  useEffect(() => {
+    const userData = localStorage.getItem('ams_user') || sessionStorage.getItem('ams_user')
+    if (userData) {
+      try {
+        setUser(JSON.parse(userData))
+      } catch (e) {
+        console.error('Failed to parse user data')
+        setUser(null)
+      }
+    } else {
+      setUser(null)
+    }
+  }, [pathname])
+
   useEffect(() => {
     // Load theme from localStorage or system preference
     const savedTheme = localStorage.getItem('am_theme')
@@ -39,16 +54,6 @@ export default function Sidebar() {
 
     // Apply theme to document
     document.documentElement.setAttribute('data-theme', theme)
-
-    // Load user
-    const userData = localStorage.getItem('ams_user') || sessionStorage.getItem('ams_user')
-    if (userData) {
-      try {
-        setUser(JSON.parse(userData))
-      } catch (e) {
-        console.error('Failed to parse user data')
-      }
-    }
   }, [theme])
 
   useEffect(() => {
