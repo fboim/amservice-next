@@ -111,9 +111,15 @@ export default function Sidebar() {
   return (
     <>
       {/* Mobile Topbar */}
-      <div className="am-mobile-topbar">
+      <div
+        className="am-mobile-topbar"
+        style={{ pointerEvents: 'auto' }}
+      >
         <button
-          onClick={toggleMobileSidebar}
+          onClick={(e) => {
+            e.stopPropagation()
+            toggleMobileSidebar()
+          }}
           style={{
             position: 'relative',
             background: 'transparent',

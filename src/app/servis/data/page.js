@@ -62,6 +62,39 @@ function DataServisContent() {
     }
   }
 
+  // Handle dropdown toggles
+  useEffect(() => {
+    const initDropdowns = () => {
+      document.querySelectorAll('.print-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation()
+          const dropdown = btn.nextElementSibling
+          if (dropdown) {
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none'
+          }
+        })
+      })
+
+      document.querySelectorAll('.wa-drop-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation()
+          const dropdown = btn.nextElementSibling
+          if (dropdown) {
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none'
+          }
+        })
+      })
+
+      document.addEventListener('click', function() {
+        document.querySelectorAll('.print-dropdown').forEach(function(d) {
+          d.style.display = 'none'
+        })
+      })
+    }
+
+    initDropdowns()
+  }, [])
+
   const totalPages = Math.ceil(total / 12)
   const isAdmin = user?.role?.toLowerCase() === 'admin'
   const isPengunjung = user?.role?.toLowerCase() === 'pengunjung'
@@ -567,44 +600,6 @@ function DataServisContent() {
           </div>
         </div>
       </div>
-
-      {/* Dropdown Toggle Script */}
-      <script dangerouslySetInnerHTML={{
-        __html: `
-          document.addEventListener('DOMContentLoaded', function() {
-            // Print dropdown toggle
-            document.querySelectorAll('.print-btn').forEach(function(btn) {
-              btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                var id = this.getAttribute('data-id') || this.nextElementSibling?.id;
-                var dropdown = document.getElementById(id);
-                if (dropdown) {
-                  dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-                }
-              });
-            });
-
-            // WA dropdown toggle
-            document.querySelectorAll('.wa-drop-btn').forEach(function(btn) {
-              btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                var id = this.getAttribute('data-id') || this.nextElementSibling?.id;
-                var dropdown = document.getElementById(id);
-                if (dropdown) {
-                  dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-                }
-              });
-            });
-
-            // Close dropdowns on outside click
-            document.addEventListener('click', function() {
-              document.querySelectorAll('.print-dropdown').forEach(function(d) {
-                d.style.display = 'none';
-              });
-            });
-          });
-        `
-      }} />
     </AppLayout>
   )
 }

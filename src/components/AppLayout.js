@@ -10,13 +10,16 @@ import { useSidebar } from './SidebarContext'
 function SidebarWrapper({ children }) {
   const { mobileOpen, onMobileClose, onMobileOpen } = useSidebar()
   const [user, setUser] = useState(null)
+  const [isChecking, setIsChecking] = useState(true)
   const pathname = usePathname()
   const router = useRouter()
 
+  // Check auth on mount and pathname change
   useEffect(() => {
     const token = localStorage.getItem('ams_token') || sessionStorage.getItem('ams_token')
     if (!token) {
       router.push('/login')
+      setIsChecking(false)
       return
     }
     const userData = localStorage.getItem('ams_user') || sessionStorage.getItem('ams_user')
@@ -25,9 +28,19 @@ function SidebarWrapper({ children }) {
         setUser(JSON.parse(userData))
       } catch (e) {
         console.error('Failed to parse user data')
+        setUser(null)
       }
     }
-  }, [router])
+    setIsChecking(false)
+  }, [pathname, router])
+
+  if (isChecking) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
+      </div>
+    )
+  }
 
   const handleLogout = () => {
     if (confirm('Yakin ingin keluar dari sistem?')) {
