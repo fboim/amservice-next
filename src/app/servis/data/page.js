@@ -17,30 +17,16 @@ function DataServisContent() {
   const [search, setSearch] = useState(searchParams.get('cari') || '')
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '')
   const [showTrash, setShowTrash] = useState(false)
-  const [user, setUser] = useState(null)
 
   useEffect(() => {
-    const token = localStorage.getItem('ams_token') || sessionStorage.getItem('ams_token')
     const userData = localStorage.getItem('ams_user') || sessionStorage.getItem('ams_user')
-
-    if (!token) {
-      router.push('/login')
-      return
-    }
-
     if (userData) {
-      try {
-        setUser(JSON.parse(userData))
-      } catch (e) {
-        console.error('Failed to parse user')
+      const user = JSON.parse(userData)
+      if (user?.role?.toLowerCase() === 'admin') {
+        setShowTrash(searchParams.get('trash') === '1')
       }
     }
-
-    // Check if admin for trash mode
-    if (user?.role?.toLowerCase() === 'admin') {
-      setShowTrash(searchParams.get('trash') === '1')
-    }
-  }, [router, searchParams, user])
+  }, [searchParams])
 
   useEffect(() => {
     fetchServis()
@@ -96,8 +82,20 @@ function DataServisContent() {
   }, [])
 
   const totalPages = Math.ceil(total / 12)
-  const isAdmin = user?.role?.toLowerCase() === 'admin'
-  const isPengunjung = user?.role?.toLowerCase() === 'pengunjung'
+  const isAdmin = (() => {
+    const userData = localStorage.getItem('ams_user') || sessionStorage.getItem('ams_user')
+    try {
+      const user = JSON.parse(userData)
+      return user?.role?.toLowerCase() === 'admin'
+    } catch { return false }
+    })()
+  const isPengunjung = (() => {
+    const userData = localStorage.getItem('ams_user') || sessionStorage.getItem('ams_user')
+    try {
+      const user = JSON.parse(userData)
+      return user?.role?.toLowerCase() === 'pengunjung'
+    } catch { return false }
+    })()
 
   const getBadgeClass = (status) => {
     const map = {

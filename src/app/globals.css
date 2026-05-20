@@ -149,6 +149,8 @@ body {
   padding: 20px;
   min-height: 100vh;
   transition: margin-left 0.3s ease;
+  position: relative;
+  z-index: 1;
 }
 
 @media (max-width: 767px) {
