@@ -13,6 +13,7 @@ export default function GaransiServis() {
   const [servisData, setServisData] = useState(null)
   const [pengaturanData, setPengaturanData] = useState(null)
   const [allReady, setAllReady] = useState(false)
+  const [downloading, setDownloading] = useState(false)
 
   useEffect(() => {
     fetchAllData()
@@ -22,18 +23,15 @@ export default function GaransiServis() {
     try {
       const baseUrl = window.location.origin
 
-      // Fetch both at the same time
       const [servisRes, pengaturanRes] = await Promise.all([
         fetch(`${baseUrl}/api/servis?id=${id}`),
         fetch(`${baseUrl}/api/pengaturan`)
       ])
 
-      // Parse servis
       const servisJson = await servisRes.json()
       if (servisJson.error) throw new Error(servisJson.error)
       setServisData(servisJson)
 
-      // Parse pengaturan
       if (pengaturanRes.ok) {
         const pengaturanJson = await pengaturanRes.json()
         if (pengaturanJson.pengaturan) {
@@ -50,15 +48,6 @@ export default function GaransiServis() {
     }
   }
 
-  // Auto print when all data is ready
-  useEffect(() => {
-    if (allReady && servisData) {
-      setTimeout(() => {
-        eksekusiCetak()
-      }, 500)
-    }
-  }, [allReady])
-
   const getKeluhanBersih = (keluhan) => {
     if (!keluhan) return '-'
     if (keluhan.includes('Keluhan:')) {
@@ -74,160 +63,53 @@ export default function GaransiServis() {
     return num.toLocaleString('id-ID')
   }
 
-  const wrapText = (text, maxLen) => {
-    if (!text) return []
-    const words = text.split(' ')
-    const lines = []
-    let currentLine = ''
-    words.forEach(word => {
-      if ((currentLine + ' ' + word).trim().length > maxLen) {
-        if (currentLine) lines.push(currentLine.trim())
-        currentLine = word
-      } else {
-        currentLine = (currentLine + ' ' + word).trim()
-      }
+  const handleDownloadPDF = async () => {
+    if (!printRef.current || downloading) return
+    setDownloading(true)
+
+    try {
+      // Dynamic import html2canvas and jspdf
+      const html2canvas = await loadHtml2Canvas()
+      const { jsPDF } = await loadJsPDF()
+
+      const content = printRef.current
+      const canvas = await html2canvas(content, { scale: 2, useCORS: true, width: content.scrollWidth })
+      const imgData = canvas.toDataURL('image/png')
+
+      const pdf = new jsPDF('p', 'mm', [58, content.scrollHeight / 2 + 20])
+      const pageWidth = pdf.internal.pageSize.getWidth()
+      const imgWidth = canvas.width
+      const imgHeight = canvas.height
+      const ratio = pageWidth / imgWidth * 2
+      const scaledHeight = imgHeight * ratio
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, scaledHeight)
+      pdf.save(`GARANSI-${servisData.no_servis}.pdf`)
+    } catch (err) {
+      alert('Gagal download PDF: ' + err.message)
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  const loadHtml2Canvas = () => {
+    if (window.html2canvas) return Promise.resolve(window.html2canvas)
+    return new Promise((resolve) => {
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js'
+      script.onload = () => resolve(window.html2canvas)
+      document.head.appendChild(script)
     })
-    if (currentLine) lines.push(currentLine.trim())
-    return lines
   }
 
-  const tengah = (txt) => {
-    txt = String(txt)
-    if (txt.length >= 32) return txt.substring(0, 32) + '\n'
-    return ' '.repeat(Math.floor((32 - txt.length) / 2)) + txt + '\n'
-  }
-
-  const eksekusiCetak = () => {
-    if (typeof window.MesinKasir !== 'undefined') {
-      printWithMesinKasir()
-    } else {
-      window.print()
-    }
-  }
-
-  const printWithMesinKasir = () => {
-    if (!servisData) return
-
-    // Get data from state
-    const p = pengaturanData || {}
-    const servis = servisData
-
-    const tipeBersih = (servis.tipe_hp || '').replace(/-/g, '').trim()
-    const keluhanBersih = getKeluhanBersih(servis.keluhan)
-    const totalBiaya = formatRupiah(servis.estimasi_biaya)
-    const masaGaransi = (servis.garansi || 'Tidak Ada').toUpperCase()
-    const namaToko = (p.nama_toko || 'AM SERVICE').toUpperCase()
-    const noWa = p.no_wa || ''
-    const alamat = p.alamat || ''
-    const snkGaransi = p.snk_garansi || ''
-    const linkMaps = p.link_maps || 'https://maps.google.com'
-
-    console.log('PRINT DATA:', { namaToko, alamat, noWa, snkGaransi })
-
-    const _btQueue = []
-    let _btBusy = false
-    const BT_DELAY = 100
-
-    const btSend = (type, data) => {
-      _btQueue.push({ type, data })
-      if (!_btBusy) _btNext()
-    }
-
-    const _btNext = () => {
-      if (_btQueue.length === 0) { _btBusy = false; return }
-      _btBusy = true
-      const cmd = _btQueue.shift()
-      try {
-        if (cmd.type === 'teks') window.MesinKasir.cetakTeks(cmd.data)
-        else if (cmd.type === 'tebal') window.MesinKasir.formatTebal(cmd.data)
-        else if (cmd.type === 'logo') window.MesinKasir.cetakLogo(cmd.data)
-        else if (cmd.type === 'qr') window.MesinKasir.cetakQR(cmd.data)
-      } catch (e) { console.warn('BT print error:', e) }
-      setTimeout(_btNext, BT_DELAY)
-    }
-
-    // Load logo
-    const logoImg = new Image()
-    logoImg.crossOrigin = 'Anonymous'
-    logoImg.src = '/logo_am.png'
-    logoImg.onload = () => {
-      const canvas = document.createElement('canvas')
-      canvas.width = 120
-      canvas.height = Math.round((logoImg.height / logoImg.width) * 120)
-      const ctx = canvas.getContext('2d')
-      ctx.fillStyle = '#FFFFFF'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(logoImg, 0, 0, canvas.width, canvas.height)
-      btSend('logo', canvas.toDataURL('image/png'))
-      lanjutCetak()
-    }
-    logoImg.onerror = () => { lanjutCetak() }
-
-    const lanjutCetak = () => {
-      // Header - Nama Toko
-      btSend('tebal', true)
-      btSend('teks', tengah(namaToko))
-      btSend('tebal', false)
-
-      // Alamat dan WA
-      btSend('teks', '\x1b\x4d\x01\x1b\x61\x01')
-      if (alamat) {
-        const al = alamat.replace(/[\r\n]+/g, ' ').replace(/<[^>]*>/g, '').trim()
-        const alamatLines = wrapText(al, 42)
-        alamatLines.forEach(line => {
-          if (line) btSend('teks', line + '\n')
-        })
-      }
-      if (noWa) btSend('teks', 'WA: ' + noWa + '\n')
-      btSend('teks', '\x1b\x4d\x00\x1b\x61\x00')
-
-      // Judul
-      btSend('teks', '--------------------------------\n')
-      btSend('tebal', true)
-      btSend('teks', tengah('NOTA GARANSI SERVIS'))
-      btSend('tebal', false)
-      btSend('teks', '--------------------------------\n')
-
-      // Data Servis
-      btSend('teks', 'No: ' + servis.no_servis + ' | ' + new Date(servis.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' }) + '\n')
-      btSend('teks', 'Nama: ' + servis.nama_pelanggan + ' (' + (servis.no_hp || '-') + ')\n')
-      btSend('teks', 'Unit: ' + servis.merk_hp + ' ' + tipeBersih + '\n')
-      btSend('teks', '--------------------------------\n')
-      btSend('teks', 'Keluhan: ' + keluhanBersih + '\n')
-      btSend('teks', '--------------------------------\n')
-
-      // Total & Garansi
-      btSend('teks', '\x1b\x61\x01')
-      btSend('tebal', true)
-      btSend('teks', 'TOTAL BIAYA  : Rp ' + totalBiaya + '\n')
-      btSend('teks', 'MASA GARANSI : ' + masaGaransi + '\n')
-      btSend('tebal', false)
-      btSend('teks', '\x1b\x61\x00')
-      btSend('teks', '--------------------------------\n')
-
-      // SYK Garansi
-      if (snkGaransi) {
-        btSend('teks', '.------------------------------.\n')
-        const raw = snkGaransi.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]*>/g, '').trim()
-        const points = raw.split('\n')
-        points.forEach(pt => {
-          pt = pt.trim()
-          if (!pt) return
-          const wrappedLines = wrapText(pt, 28)
-          wrappedLines.forEach(w => {
-            if (w) btSend('teks', '| ' + w.padEnd(28, ' ') + ' |\n')
-          })
-        })
-        btSend('teks', "'------------------------------'\n")
-      }
-
-      // QR Maps
-      btSend('teks', '\x1b\x61\x01')
-      btSend('teks', 'Bantu Ulas Kami Di Maps:\n')
-      btSend('qr', linkMaps)
-      btSend('teks', '\x1b\x61\x00')
-      btSend('teks', '\n\n\n')
-    }
+  const loadJsPDF = () => {
+    if (window.jspdf) return Promise.resolve({ jsPDF: window.jspdf.jsPDF })
+    return new Promise((resolve) => {
+      const script = document.createElement('script')
+      script.src = 'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js'
+      script.onload = () => resolve({ jsPDF: window.jspdf.jsPDF })
+      document.head.appendChild(script)
+    })
   }
 
   if (loading) {
@@ -250,183 +132,169 @@ export default function GaransiServis() {
 
   return (
     <>
-      <style>{`
-        @page { size: 58mm auto; margin: 0; }
-        body {
-          font-family: 'Courier New', Courier, monospace;
-          font-size: 12px;
-          margin: 0;
-          padding: 10px;
-          width: 58mm;
-          color: #000;
-          background: #fff;
-        }
-        .center { text-align: center; }
-        .bold { font-weight: bold; }
-        .line { border-bottom: 1px dashed #000; }
-        table { width: 100%; font-size: 12px; border-collapse: collapse; }
-        td { vertical-align: top; padding-bottom: 3px; }
-        .garansi-box {
-          border: 1px dashed #000;
-          padding: 8px;
-          margin-top: 8px;
-          font-size: 11px;
-          text-align: left;
-          line-height: 1.5;
-        }
-        @media print {
-          body { width: 100% !important; margin: 0 !important; padding: 0 !important; }
-          .no-print { display: none !important; }
-        }
-        .no-print { display: block; margin-top: 20px; text-align: center; }
-      `}</style>
-
-      {/* Print Preview - scaled to 58mm thermal paper ratio */}
-      <div className="print-preview-container">
-        <div ref={printRef} className="print-preview">
+      {/* Print Preview - thermal paper style */}
+      <div className="preview-wrapper">
+        <div ref={printRef} className="thermal-preview">
           {/* Header dengan Logo */}
-          <div className="center" style={{ marginBottom: '12px' }}>
-            <img src="/logo_am.png" style={{ width: '70px', height: 'auto' }} alt="Logo" />
+          <div className="center" style={{ marginBottom: '8px' }}>
+            <img src="/logo_am.png" style={{ width: '50px', height: 'auto' }} alt="Logo" />
           </div>
-          <div className="center bold" style={{ fontSize: '18px', marginTop: '4px' }}>{(p.nama_toko || 'AM SERVICE').toUpperCase()}</div>
+          <div className="center bold" style={{ fontSize: '14px' }}>{(p.nama_toko || 'AM SERVICE').toUpperCase()}</div>
           {p.alamat && (
-            <div className="center" style={{ fontSize: '11px', marginTop: '4px', lineHeight: 1.4 }}>{p.alamat}</div>
+            <div className="center" style={{ fontSize: '10px', marginTop: '2px', lineHeight: 1.3 }}>{p.alamat}</div>
           )}
           {p.no_wa && (
-            <div className="center" style={{ fontSize: '11px', marginTop: '4px' }}>WA: {p.no_wa}</div>
+            <div className="center" style={{ fontSize: '10px', marginTop: '2px' }}>WA: {p.no_wa}</div>
           )}
 
-          <div className="line" style={{ margin: '10px 0' }}></div>
-          <div className="center bold" style={{ fontSize: '12px' }}>NOTA GARANSI SERVIS</div>
-          <div className="line" style={{ margin: '10px 0' }}></div>
+          <div style={{ borderBottom: '1px dashed #000', margin: '8px 0' }}></div>
+          <div className="center" style={{ fontSize: '10px' }}>NOTA GARANSI SERVIS</div>
+          <div style={{ borderBottom: '1px dashed #000', margin: '8px 0' }}></div>
 
           {/* Data */}
-          <table style={{ fontSize: '11px' }}>
-            <tbody>
-              <tr>
-                <td style={{ padding: '3px 0', whiteSpace: 'nowrap' }}>No:</td>
-                <td style={{ padding: '3px 0' }}><strong>{servis.no_servis}</strong> | {new Date(servis.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' })}</td>
-              </tr>
-              <tr>
-                <td style={{ padding: '3px 0', whiteSpace: 'nowrap' }}>Nama:</td>
-                <td style={{ padding: '3px 0' }}>{servis.nama_pelanggan} ({servis.no_hp || '-'})</td>
-              </tr>
-              <tr>
-                <td style={{ padding: '3px 0', whiteSpace: 'nowrap' }}>Unit:</td>
-                <td style={{ padding: '3px 0' }}><strong>{servis.merk_hp} {tipeBersih}</strong></td>
-              </tr>
-              <tr>
-                <td style={{ padding: '3px 0', verticalAlign: 'top', whiteSpace: 'nowrap' }}>Keluhan:</td>
-                <td style={{ padding: '3px 0' }}>{keluhanBersih}</td>
-              </tr>
-            </tbody>
-          </table>
+          <div style={{ fontSize: '10px', lineHeight: 1.4 }}>
+            <div><span style={{ fontWeight: 'bold' }}>No:</span> {servis.no_servis} | {new Date(servis.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' })}</div>
+            <div><span style={{ fontWeight: 'bold' }}>Nama:</span> {servis.nama_pelanggan} ({servis.no_hp || '-'})</div>
+            <div><span style={{ fontWeight: 'bold' }}>Unit:</span> {servis.merk_hp} {tipeBersih}</div>
+            <div><span style={{ fontWeight: 'bold' }}>Keluhan:</span> {keluhanBersih}</div>
+          </div>
 
-          <div className="line" style={{ margin: '10px 0' }}></div>
+          <div style={{ borderBottom: '1px dashed #000', margin: '8px 0' }}></div>
 
           {/* Total */}
-          <div className="center" style={{ margin: '8px 0' }}>
-            <div style={{ fontSize: '12px' }}>TOTAL BIAYA:</div>
-            <div className="bold" style={{ fontSize: '18px', color: '#dc2626' }}>Rp {totalBiaya}</div>
+          <div className="center" style={{ margin: '6px 0' }}>
+            <div style={{ fontSize: '10px' }}>TOTAL BIAYA:</div>
+            <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#dc2626' }}>Rp {totalBiaya}</div>
           </div>
 
           {/* Garansi */}
-          <div className="garansi-box">
-            <div className="bold center" style={{ marginBottom: '6px', fontSize: '12px' }}>
+          <div style={{ border: '1px dashed #000', padding: '6px', marginTop: '6px', fontSize: '10px', lineHeight: 1.4 }}>
+            <div className="center" style={{ fontWeight: 'bold', marginBottom: '4px', fontSize: '11px' }}>
               MASA GARANSI: {masaGaransi.toUpperCase()}
             </div>
-            <div style={{ lineHeight: 1.5 }}>
-              {snkGaransi ? snkGaransi.split('\n').map((line, i) => (
-                line.trim() ? <div key={i}>{line.trim()}</div> : null
-              )) : <div>-</div>}
-            </div>
+            {snkGaransi ? snkGaransi.split('\n').map((line, i) => (
+              line.trim() ? <div key={i}>{line.trim()}</div> : null
+            )) : <div>-</div>}
           </div>
 
-          <div className="line" style={{ margin: '10px 0' }}></div>
+          <div style={{ borderBottom: '1px dashed #000', margin: '8px 0' }}></div>
 
           {/* QR */}
-          <div className="center" style={{ marginTop: '12px' }}>
-            <div className="bold" style={{ fontSize: '11px' }}>Bantu Kami Berkembang!</div>
-            <div style={{ fontSize: '10px', marginTop: '4px' }}>Scan untuk review di Google Maps:</div>
+          <div className="center" style={{ marginTop: '8px' }}>
+            <div style={{ fontWeight: 'bold', fontSize: '10px' }}>Bantu Kami Berkembang!</div>
+            <div style={{ fontSize: '9px', marginTop: '2px' }}>Scan untuk review:</div>
             <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&margin=3&data=${encodeURIComponent(p.link_maps || 'https://maps.google.com')}`}
-              style={{ width: '100px', height: '100px', marginTop: '6px' }}
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&margin=2&data=${encodeURIComponent(p.link_maps || 'https://maps.google.com')}`}
+              style={{ width: '80px', height: '80px', marginTop: '4px' }}
               alt="QR Maps"
             />
           </div>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="no-print">
-        <button onClick={() => eksekusiCetak()} style={{
-          padding: '10px 24px',
-          background: '#3b82f6',
-          color: 'white',
-          border: 'none',
-          borderRadius: '6px',
-          cursor: 'pointer',
-          marginRight: '10px',
-          fontSize: '14px'
-        }}>
-          <i className="bi bi-printer" style={{ marginRight: '6px' }} />
-          Cetak
+      {/* Download Button */}
+      <div className="action-bar">
+        <button
+          onClick={() => router.back()}
+          className="btn-back"
+        >
+          <i className="bi bi-arrow-left" />
         </button>
-        <button onClick={() => window.close()} style={{
-          padding: '10px 24px',
-          background: '#64748b',
-          color: 'white',
-          border: 'none',
-          borderRadius: '6px',
-          cursor: 'pointer',
-          fontSize: '14px'
-        }}>
-          Tutup
+        <button
+          onClick={handleDownloadPDF}
+          disabled={downloading}
+          className="btn-download"
+        >
+          {downloading ? (
+            <>
+              <span className="spinner" style={{ width: 16, height: 16 }} />
+              Memproses...
+            </>
+          ) : (
+            <>
+              <i className="bi bi-file-earmark-pdf" />
+              Download PDF
+            </>
+          )}
         </button>
       </div>
 
       <style jsx>{`
-        .print-preview-container {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          padding: 16px;
+        .preview-wrapper {
           background: #e2e8f0;
-          min-height: calc(100vh - 80px);
-          box-sizing: border-box;
+          min-height: calc(100vh - 70px);
+          padding: 16px;
+          display: flex;
+          justify-content: center;
+          overflow-y: auto;
         }
-        .print-preview {
+        .thermal-preview {
           width: 58mm;
           max-width: 58mm;
           background: #fff;
-          padding: 10px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          padding: 8px;
           font-family: 'Courier New', Courier, monospace;
-          font-size: 12px;
+          font-size: 10px;
           color: #000;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
           box-sizing: border-box;
         }
+        .center { text-align: center; }
+        .bold { font-weight: bold; }
+
+        .action-bar {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          display: flex;
+          gap: 8px;
+          padding: 12px 16px;
+          background: #fff;
+          box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+        .btn-back {
+          width: 44px;
+          height: 44px;
+          border-radius: 8px;
+          border: none;
+          background: #e2e8f0;
+          color: #64748b;
+          font-size: 18px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .btn-download {
+          flex: 1;
+          height: 44px;
+          border-radius: 8px;
+          border: none;
+          background: #dc2626;
+          color: #fff;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+        .btn-download:disabled {
+          opacity: 0.7;
+          cursor: wait;
+        }
+
         @media (max-width: 480px) {
-          .print-preview-container {
-            padding: 8px;
-            min-height: auto;
-          }
-          .print-preview {
-            width: calc(100vw - 32px);
-            max-width: calc(100vw - 32px);
-            box-shadow: 0 1px 4px rgba(0,0,0,0.12);
-          }
-          .no-print {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: center;
-            gap: 8px;
+          .preview-wrapper {
             padding: 12px;
-            background: #fff;
-            box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+            padding-bottom: 80px;
+          }
+          .thermal-preview {
+            width: 100%;
+            max-width: 100%;
+            box-shadow: none;
           }
         }
       `}</style>
