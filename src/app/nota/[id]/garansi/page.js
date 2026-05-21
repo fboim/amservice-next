@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { getPrinter, checkBluetoothSupport } from '@/lib/bluetooth-printer'
 
 export default function GaransiServis() {
   const router = useRouter()
@@ -13,10 +14,86 @@ export default function GaransiServis() {
   const [servisData, setServisData] = useState(null)
   const [pengaturanData, setPengaturanData] = useState(null)
   const [downloading, setDownloading] = useState(false)
+  const [bluetoothSupported, setBluetoothSupported] = useState(false)
+  const [bluetoothConnected, setBluetoothConnected] = useState(false)
+  const [connecting, setConnecting] = useState(false)
 
   useEffect(() => {
     fetchAllData()
+    checkBluetoothSupport().then(supported => setBluetoothSupported(supported))
   }, [id])
+
+  // Connect Bluetooth printer
+  const handleConnectBluetooth = async () => {
+    setConnecting(true)
+    try {
+      const printer = getPrinter()
+      await printer.connect()
+      setBluetoothConnected(true)
+    } catch (err) {
+      console.error('BT connect failed:', err)
+      alert('Gagal terhubung ke printer Bluetooth')
+    } finally {
+      setConnecting(false)
+    }
+  }
+
+  // Disconnect Bluetooth printer
+  const handleDisconnectBluetooth = async () => {
+    try {
+      const printer = getPrinter()
+      await printer.disconnect()
+      setBluetoothConnected(false)
+    } catch (err) {
+      console.error('BT disconnect failed:', err)
+    }
+  }
+
+  // Print via Bluetooth
+  const handlePrintBluetooth = async () => {
+    if (!servisData) return
+
+    try {
+      const printer = getPrinter()
+
+      // Get logo as base64 if exists
+      let logoBase64 = null
+      const logoImg = document.querySelector('.thermal-preview img')
+      if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
+        const canvas = document.createElement('canvas')
+        canvas.width = 50
+        canvas.height = 50
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(logoImg, 0, 0, 50, 50)
+        logoBase64 = canvas.toDataURL('image/png')
+      }
+
+      const linkMaps = pengaturanData?.link_maps || 'https://maps.google.com'
+      const linkCek = `https://amservice.web.id/cek_servis.php?no=${servisData.no_servis}`
+
+      await printer.printReceipt({
+        logoBase64,
+        storeName: (pengaturanData?.nama_toko || 'AM SERVICE').toUpperCase(),
+        address: pengaturanData?.alamat || '',
+        whatsapp: pengaturanData?.no_wa || '',
+        title: 'NOTA GARANSI SERVIS',
+        noServis: servisData.no_servis,
+        date: new Date(servisData.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' }),
+        customer: servisData.nama_pelanggan,
+        phone: servisData.no_hp || '-',
+        unit: `${servisData.merk_hp} ${servisData.tipe_hp?.replace(/-/g, '').trim() || ''}`,
+        problem: getKeluhanBersih(servisData.keluhan),
+        total: formatRupiah(servisData.estimasi_biaya),
+        terms: [servisData.garansi ? `GARANSI: ${servisData.garansi}` : ''],
+        qrUrl: linkMaps
+      })
+
+      alert('Cetak berhasil!')
+    } catch (err) {
+      console.error('Print failed:', err)
+      alert('Gagal mencetak: ' + err.message)
+    }
+  }
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -253,6 +330,19 @@ export default function GaransiServis() {
           <i className="bi bi-printer" />
           Cetak
         </button>
+        {bluetoothSupported && (
+          bluetoothConnected ? (
+            <button onClick={handlePrintBluetooth} className="btn-bluetooth" title="Cetak via Bluetooth">
+              <i className="bi bi-bluetooth" />
+              BT
+            </button>
+          ) : (
+            <button onClick={handleConnectBluetooth} disabled={connecting} className="btn-bluetooth-disconnect" title="Hubungkan Bluetooth">
+              <i className={`bi ${connecting ? 'bi-hourglass-split' : 'bi-bluetooth'}`} />
+              {connecting ? '...' : 'BT'}
+            </button>
+          )
+        )}
         <button
           onClick={handleDownloadPDF}
           disabled={downloading}
@@ -266,7 +356,7 @@ export default function GaransiServis() {
           ) : (
             <>
               <i className="bi bi-file-earmark-pdf" />
-              Download PDF
+              PDF
             </>
           )}
         </button>
@@ -412,6 +502,40 @@ export default function GaransiServis() {
           gap: 8px;
         }
         .btn-download:disabled {
+          opacity: 0.7;
+          cursor: wait;
+        }
+        .btn-bluetooth {
+          height: 44px;
+          padding: 0 16px;
+          border-radius: 8px;
+          border: none;
+          background: #8b5cf6;
+          color: #fff;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+        }
+        .btn-bluetooth-disconnect {
+          height: 44px;
+          padding: 0 16px;
+          border-radius: 8px;
+          border: none;
+          background: #64748b;
+          color: #fff;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+        }
+        .btn-bluetooth-disconnect:disabled {
           opacity: 0.7;
           cursor: wait;
         }

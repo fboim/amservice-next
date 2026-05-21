@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { getPrinter, checkBluetoothSupport } from '@/lib/bluetooth-printer'
 
 export default function NotaPenerimaan() {
   const router = useRouter()
@@ -13,10 +14,88 @@ export default function NotaPenerimaan() {
   const [servis, setServis] = useState(null)
   const [pengaturan, setPengaturan] = useState(null)
   const [downloading, setDownloading] = useState(false)
+  const [bluetoothSupported, setBluetoothSupported] = useState(false)
+  const [bluetoothConnected, setBluetoothConnected] = useState(false)
+  const [connecting, setConnecting] = useState(false)
 
   useEffect(() => {
     fetchAllData()
+    checkBluetoothSupport().then(supported => setBluetoothSupported(supported))
   }, [id])
+
+  // Connect Bluetooth printer
+  const handleConnectBluetooth = async () => {
+    setConnecting(true)
+    try {
+      const printer = getPrinter()
+      await printer.connect()
+      setBluetoothConnected(true)
+    } catch (err) {
+      console.error('BT connect failed:', err)
+      alert('Gagal terhubung ke printer Bluetooth')
+    } finally {
+      setConnecting(false)
+    }
+  }
+
+  // Disconnect Bluetooth printer
+  const handleDisconnectBluetooth = async () => {
+    try {
+      const printer = getPrinter()
+      await printer.disconnect()
+      setBluetoothConnected(false)
+    } catch (err) {
+      console.error('BT disconnect failed:', err)
+    }
+  }
+
+  // Print via Bluetooth
+  const handlePrintBluetooth = async () => {
+    if (!servis) return
+
+    try {
+      const printer = getPrinter()
+
+      // Get logo as base64 if exists
+      let logoBase64 = null
+      const logoImg = document.querySelector('.thermal-preview img')
+      if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
+        const canvas = document.createElement('canvas')
+        canvas.width = 50
+        canvas.height = 50
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(logoImg, 0, 0, 50, 50)
+        logoBase64 = canvas.toDataURL('image/png')
+      }
+
+      const linkCek = `https://amservice.web.id/cek_servis.php?no=${servis.no_servis}`
+
+      await printer.printReceipt({
+        logoBase64,
+        storeName: (pengaturan?.nama_toko || 'AM SERVICE').toUpperCase(),
+        address: pengaturan?.alamat || '',
+        whatsapp: pengaturan?.no_wa || '',
+        title: 'TANDA TERIMA SERVIS',
+        noServis: servis.no_servis,
+        date: formatDate(servis.tanggal),
+        customer: servis.nama_pelanggan,
+        phone: servis.no_hp || '-',
+        unit: `${servis.merk_hp} ${servis.tipe_hp?.replace(/-/g, '').trim() || ''}`,
+        problem: getKeluhanBersih(servis.keluhan),
+        total: formatRupiah(servis.estimasi_biaya),
+        terms: [
+          '1. Harap bawa nota ini saat pengambilan.',
+          '2. Kehilangan data bukan tanggung jawab toko.'
+        ],
+        qrUrl: linkCek
+      })
+
+      alert('Cetak berhasil!')
+    } catch (err) {
+      console.error('Print failed:', err)
+      alert('Gagal mencetak: ' + err.message)
+    }
+  }
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -264,6 +343,19 @@ export default function NotaPenerimaan() {
           <i className="bi bi-printer" />
           Cetak
         </button>
+        {bluetoothSupported && (
+          bluetoothConnected ? (
+            <button onClick={handlePrintBluetooth} className="btn-bluetooth" title="Cetak via Bluetooth">
+              <i className="bi bi-bluetooth" />
+              BT
+            </button>
+          ) : (
+            <button onClick={handleConnectBluetooth} disabled={connecting} className="btn-bluetooth-disconnect" title="Hubungkan Bluetooth">
+              <i className={`bi ${connecting ? 'bi-hourglass-split' : 'bi-bluetooth'}`} />
+              {connecting ? '...' : 'BT'}
+            </button>
+          )
+        )}
         <button
           onClick={handleDownloadPDF}
           disabled={downloading}
@@ -277,7 +369,7 @@ export default function NotaPenerimaan() {
           ) : (
             <>
               <i className="bi bi-file-earmark-pdf" />
-              Download PDF
+              PDF
             </>
           )}
         </button>
@@ -415,6 +507,40 @@ export default function NotaPenerimaan() {
           gap: 8px;
         }
         .btn-download:disabled {
+          opacity: 0.7;
+          cursor: wait;
+        }
+        .btn-bluetooth {
+          height: 44px;
+          padding: 0 16px;
+          border-radius: 8px;
+          border: none;
+          background: #8b5cf6;
+          color: #fff;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+        }
+        .btn-bluetooth-disconnect {
+          height: 44px;
+          padding: 0 16px;
+          border-radius: 8px;
+          border: none;
+          background: #64748b;
+          color: #fff;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+        }
+        .btn-bluetooth-disconnect:disabled {
           opacity: 0.7;
           cursor: wait;
         }

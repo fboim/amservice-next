@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { getPrinter, checkBluetoothSupport } from '@/lib/bluetooth-printer'
 
 export default function NotaServis() {
   const router = useRouter()
@@ -13,10 +14,75 @@ export default function NotaServis() {
   const [servis, setServis] = useState(null)
   const [sparepart, setSparepart] = useState([])
   const [downloading, setDownloading] = useState(false)
+  const [bluetoothSupported, setBluetoothSupported] = useState(false)
+  const [bluetoothConnected, setBluetoothConnected] = useState(false)
+  const [connecting, setConnecting] = useState(false)
 
   useEffect(() => {
     fetchServis()
+    checkBluetoothSupport().then(supported => setBluetoothSupported(supported))
   }, [id])
+
+  // Connect Bluetooth printer
+  const handleConnectBluetooth = async () => {
+    setConnecting(true)
+    try {
+      const printer = getPrinter()
+      await printer.connect()
+      setBluetoothConnected(true)
+    } catch (err) {
+      console.error('BT connect failed:', err)
+      alert('Gagal terhubung ke printer Bluetooth')
+    } finally {
+      setConnecting(false)
+    }
+  }
+
+  // Disconnect Bluetooth printer
+  const handleDisconnectBluetooth = async () => {
+    try {
+      const printer = getPrinter()
+      await printer.disconnect()
+      setBluetoothConnected(false)
+    } catch (err) {
+      console.error('BT disconnect failed:', err)
+    }
+  }
+
+  // Print via Bluetooth
+  const handlePrintBluetooth = async () => {
+    if (!servis) return
+
+    try {
+      const printer = getPrinter()
+      const linkCek = `https://amservice.web.id/cek_servis.php?no=${servis.no_servis}`
+      const totalBiaya = parseInt((servis.estimasi_biaya || '0').replace(/\D/g, ''))
+
+      await printer.printReceipt({
+        storeName: 'AM SERVICE',
+        address: 'Jl. Contoh No. 123, Kota\nTelp: 0812-3456-7890',
+        whatsapp: '0856 4722 7779',
+        title: 'NOTA LUNAS / PENGAMBILAN',
+        noServis: servis.no_servis,
+        date: formatDate(servis.tanggal),
+        customer: servis.nama_pelanggan,
+        phone: servis.no_hp || '-',
+        unit: `${servis.merk_hp} ${servis.tipe_hp || ''}`,
+        problem: servis.keluhan || '-',
+        total: servis.estimasi_biaya,
+        terms: [
+          'Terima kasih atas',
+          'kepercayaan Anda'
+        ],
+        qrUrl: linkCek
+      })
+
+      alert('Cetak berhasil!')
+    } catch (err) {
+      console.error('Print failed:', err)
+      alert('Gagal mencetak: ' + err.message)
+    }
+  }
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -424,6 +490,48 @@ export default function NotaServis() {
               <i className="bi bi-file-earmark-pdf" />
               {downloading ? 'Memproses...' : 'Download PDF'}
             </button>
+            {bluetoothSupported && (
+              bluetoothConnected ? (
+                <button
+                  onClick={handlePrintBluetooth}
+                  style={{
+                    padding: '10px 20px',
+                    background: '#8b5cf6',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 8,
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8
+                  }}
+                >
+                  <i className="bi bi-bluetooth" /> Cetak BT
+                </button>
+              ) : (
+                <button
+                  onClick={handleConnectBluetooth}
+                  disabled={connecting}
+                  style={{
+                    padding: '10px 20px',
+                    background: '#64748b',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 8,
+                    cursor: connecting ? 'wait' : 'pointer',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    opacity: connecting ? 0.7 : 1
+                  }}
+                >
+                  <i className={`bi ${connecting ? 'bi-hourglass-split' : 'bi-bluetooth'}`} />
+                  {connecting ? 'Menghub...' : 'BT'}
+                </button>
+              )
+            )}
             <button
               onClick={() => window.print()}
               style={{
