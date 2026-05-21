@@ -124,8 +124,7 @@ function SidebarWrapper({ children }) {
       />
 
       <div className="am-main">
-        {/* Desktop Header - Only show on dashboard */}
-        {pathname === '/dashboard' && (
+        {/* Desktop Header */}
         <div className="header-bar">
           {/* Left - Page Title & User Info */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -174,7 +173,6 @@ function SidebarWrapper({ children }) {
             </Link>
           </div>
         </div>
-        )}
 
         {children}
       </div>

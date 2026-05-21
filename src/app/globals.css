@@ -812,9 +812,19 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Header bar - shown only on dashboard */
+/* Header bar - visible on all pages */
 .header-bar {
-  display: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: var(--am-surface);
+  border-radius: var(--am-radius-lg);
+  border: 1px solid var(--am-border);
+  box-shadow: var(--am-shadow);
 }
 
 /* Mobile header bar - hidden (using sidebar mobile topbar instead) */
