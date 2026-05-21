@@ -10,7 +10,6 @@ const menuItems = [
   { href: '/servis/data', icon: 'bi-tools', label: 'Data Servis', roles: ['admin', 'teknisi', 'pengunjung'] },
   { href: '/sparepart', icon: 'bi-box-seam', label: 'Sparepart', roles: ['admin', 'teknisi', 'pengunjung'] },
   { href: '/pelanggan', icon: 'bi-person-lines-fill', label: 'Data Pelanggan', roles: ['admin', 'teknisi', 'pengunjung'] },
-  { href: '/trash', icon: 'bi-clock-history', label: 'Riwayat Servis', roles: ['admin', 'teknisi', 'pengunjung'] },
 ]
 
 const adminMenuItems = [
