@@ -89,8 +89,11 @@ export default function LabelServis() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [router])
 
-  // Auto-print after content loads
+  // Auto-print after content loads (disabled for WebView - causes freeze)
   useEffect(() => {
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+    if (isMobile) return
+
     if (!loading && servis) {
       const timer = setTimeout(() => {
         window.print()
