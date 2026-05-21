@@ -94,21 +94,33 @@ export default function NotaPenerimaan() {
       btSend('tebal', false)
       btSend('teks', '\x1b\x61\x00')
 
-      // Terms (from pengaturan)
+      // Terms (from pengaturan) - format like PHP
       btSend('teks', '--------------------------------\n')
       btSend('teks', '.------------------------------.\n')
       const raw = snkPenerimaan.replace(/<br\s*\/?>/gi, '\n')
       const lines = raw.split('\n')
       for (let i = 0; i < lines.length; i++) {
-        let trimmed = lines[i].trim()
-        if (!trimmed) continue
-        // Word wrap at 28 chars - properly truncate
-        while (trimmed.length > 28) {
-          btSend('teks', '| ' + trimmed.substring(0, 28) + ' |\n')
-          trimmed = trimmed.substring(28)
-        }
-        if (trimmed.length > 0) {
-          btSend('teks', '| ' + trimmed.padEnd(28) + ' |\n')
+        const line = lines[i].trim()
+        if (!line) continue
+        // Word wrap - break at space, max 28 chars
+        let remaining = line
+        while (remaining.length > 0) {
+          if (remaining.length <= 28) {
+            const padded = remaining.padEnd(28, ' ')
+            btSend('teks', '| ' + padded + ' |\n')
+            break
+          }
+          // Find last space before or at position 28
+          let cut = 28
+          for (let j = 27; j >= 0; j--) {
+            if (remaining[j] === ' ') {
+              cut = j
+              break
+            }
+          }
+          const text = remaining.substring(0, cut).padEnd(28, ' ')
+          btSend('teks', '| ' + text + ' |\n')
+          remaining = remaining.substring(cut).trim()
         }
       }
       btSend('teks', "'------------------------------'\n")
@@ -139,14 +151,14 @@ export default function NotaPenerimaan() {
         lanjutCetak()
       }
       logoImg.onerror = () => {
-        if (src === '/logo.png') {
-          loadLogo('/logo_am.png')
+        if (src === '/logo_am.png') {
+          loadLogo('/logo.png')
         } else {
           lanjutCetak()
         }
       }
     }
-    loadLogo('/logo.png')
+    loadLogo('/logo_am.png')
   }
 
   // Keyboard shortcuts (print disabled in WebView)

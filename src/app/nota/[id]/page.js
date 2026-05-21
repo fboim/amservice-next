@@ -131,14 +131,14 @@ export default function NotaServis() {
         lanjutCetak()
       }
       logoImg.onerror = () => {
-        if (src === '/logo.png') {
-          loadLogo('/logo_am.png')
+        if (src === '/logo_am.png') {
+          loadLogo('/logo.png')
         } else {
           lanjutCetak()
         }
       }
     }
-    loadLogo('/logo.png')
+    loadLogo('/logo_am.png')
   }
 
   // Keyboard shortcuts (print disabled in WebView)

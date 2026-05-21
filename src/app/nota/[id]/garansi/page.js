@@ -95,34 +95,36 @@ export default function GaransiServis() {
       btSend('tebal', false)
       btSend('teks', '\x1b\x61\x00')
 
-      // Garansi box
+      // Garansi box - format like PHP version
       btSend('teks', '.------------------------------.\n')
       btSend('tebal', true)
-      btSend('teks', center('MASA GARANSI: ' + masaGaransi.toUpperCase()))
+      btSend('teks', '|         MASA GARANSI         |\n')
       btSend('tebal', false)
       if (snkGaransi) {
-        // Split SNK into lines
+        // Split SNK into lines, word wrap at 28 chars
         const raw = snkGaransi.replace(/<br\s*\/?>/gi, '\n')
         const lines = raw.split('\n')
         for (let i = 0; i < lines.length; i++) {
           const line = lines[i].trim()
           if (!line) continue
-          // Word wrap at 28 chars - break at space, not middle of word
+          // Word wrap - break at space, max 28 chars
           let remaining = line
           while (remaining.length > 0) {
             if (remaining.length <= 28) {
-              btSend('teks', '| ' + remaining.padEnd(28) + ' |\n')
+              const padded = remaining.padEnd(28, ' ')
+              btSend('teks', '| ' + padded + ' |\n')
               break
             }
-            // Find last space before 28 chars
+            // Find last space before or at position 28
             let cut = 28
-            for (let j = 27; j > 20; j--) {
+            for (let j = 27; j >= 0; j--) {
               if (remaining[j] === ' ') {
                 cut = j
                 break
               }
             }
-            btSend('teks', '| ' + remaining.substring(0, cut).padEnd(28) + ' |\n')
+            const text = remaining.substring(0, cut).padEnd(28, ' ')
+            btSend('teks', '| ' + text + ' |\n')
             remaining = remaining.substring(cut).trim()
           }
         }
@@ -140,8 +142,7 @@ export default function GaransiServis() {
       btSend('teks', '\n\n\n')
     }
 
-    // Load logo and start printing
-    // Try /logo.png first, then /logo_am.png
+    // Load logo - try logo_am.png first (the only logo file)
     const loadLogo = (src) => {
       const logoImg = new Image()
       logoImg.crossOrigin = 'Anonymous'
@@ -159,14 +160,14 @@ export default function GaransiServis() {
         lanjutCetak()
       }
       logoImg.onerror = () => {
-        if (src === '/logo.png') {
-          loadLogo('/logo_am.png')
+        if (src === '/logo_am.png') {
+          loadLogo('/logo.png')
         } else {
           lanjutCetak()
         }
       }
     }
-    loadLogo('/logo.png')
+    loadLogo('/logo_am.png')
   }
 
   // Keyboard shortcuts
