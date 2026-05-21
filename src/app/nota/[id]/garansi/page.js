@@ -69,6 +69,7 @@ export default function GaransiServis() {
     const keluhanBersih = getKeluhanBersih(servis.keluhan)
     const totalBiaya = formatRupiah(servis.estimasi_biaya)
     const masaGaransi = servis.garansi || 'Tidak Ada'
+    const snkGaransi = p.snk_garansi || ''
     const linkMaps = p.link_maps || 'https://maps.google.com'
 
     const center = (t) => {
@@ -77,23 +78,6 @@ export default function GaransiServis() {
       return ' '.repeat(Math.floor((32 - t.length) / 2)) + t + '\n'
     }
 
-    // Load logo and start printing
-    const logoImg = new Image()
-    logoImg.crossOrigin = 'Anonymous'
-    logoImg.src = '/logo.png'
-    logoImg.onload = () => {
-      const cv = document.createElement('canvas')
-      cv.width = 120
-      cv.height = Math.round((logoImg.height / logoImg.width) * 120)
-      const ctx = cv.getContext('2d')
-      ctx.fillStyle = '#FFF'
-      ctx.fillRect(0, 0, cv.width, cv.height)
-      ctx.drawImage(logoImg, 0, 0, cv.width, cv.height)
-      btSend('logo', cv.toDataURL('image/png'))
-      lanjutCetak()
-    }
-    logoImg.onerror = () => { lanjutCetak() }
-
     const lanjutCetak = () => {
       // Store name
       btSend('tebal', true)
@@ -101,12 +85,10 @@ export default function GaransiServis() {
       btSend('tebal', false)
       btSend('teks', '\x1b\x4d\x01\x1b\x61\x01')
 
-      // Address & WA
+      // Address (melebar - satu baris panjang)
       if (p.alamat) {
         const al = p.alamat.replace(/\n/g, ' ')
-        for (const line of al.split(' ').filter(l => l.trim())) {
-          btSend('teks', line + '\n')
-        }
+        btSend('teks', al + '\n')
       }
       if (p.no_wa) btSend('teks', 'WA: ' + p.no_wa + '\n')
 
@@ -131,12 +113,29 @@ export default function GaransiServis() {
       btSend('tebal', false)
       btSend('teks', '\x1b\x61\x00')
 
-      // Garansi
+      // Garansi box
       btSend('teks', '--------------------------------\n')
       btSend('tebal', true)
-      btSend('teks', center('GARANSI: ' + masaGaransi.toUpperCase()))
+      btSend('teks', center('MASA GARANSI: ' + masaGaransi.toUpperCase()))
       btSend('tebal', false)
-      btSend('teks', '--------------------------------\n')
+      if (snkGaransi) {
+        // Split SNK into lines (max 28 chars per line with padding)
+        const raw = snkGaransi.replace(/<br\s*\/?>/gi, '\n')
+        for (const line of raw.split('\n')) {
+          const trimmed = line.trim()
+          if (!trimmed) continue
+          // Word wrap at 28 chars
+          while (trimmed.length > 28) {
+            btSend('teks', '| ' + trimmed.substring(0, 28) + ' |\n')
+          }
+          if (trimmed.length > 0) {
+            btSend('teks', '| ' + trimmed.padEnd(28) + ' |\n')
+          }
+        }
+      } else {
+        btSend('teks', '| -                            |\n')
+      }
+      btSend('teks', "'------------------------------'\n")
 
       // QR Maps
       btSend('teks', '\x1b\x61\x01')
@@ -146,6 +145,23 @@ export default function GaransiServis() {
       btSend('teks', '\x1b\x61\x00')
       btSend('teks', '\n\n\n')
     }
+
+    // Load logo and start printing
+    const logoImg = new Image()
+    logoImg.crossOrigin = 'Anonymous'
+    logoImg.src = '/logo.png'
+    logoImg.onload = () => {
+      const cv = document.createElement('canvas')
+      cv.width = 120
+      cv.height = Math.round((logoImg.height / logoImg.width) * 120)
+      const ctx = cv.getContext('2d')
+      ctx.fillStyle = '#FFF'
+      ctx.fillRect(0, 0, cv.width, cv.height)
+      ctx.drawImage(logoImg, 0, 0, cv.width, cv.height)
+      btSend('logo', cv.toDataURL('image/png'))
+      lanjutCetak()
+    }
+    logoImg.onerror = () => { lanjutCetak() }
   }
 
   // Keyboard shortcuts

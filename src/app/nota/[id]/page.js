@@ -12,11 +12,12 @@ export default function NotaServis() {
   const [loading, setLoading] = useState(true)
   const [servis, setServis] = useState(null)
   const [sparepart, setSparepart] = useState([])
+  const [pengaturan, setPengaturan] = useState(null)
   const [downloading, setDownloading] = useState(false)
   const [printerReady, setPrinterReady] = useState(false)
 
   useEffect(() => {
-    fetchServis()
+    fetchAllData()
     // Check if MesinKasir plugin is available
     const checkPrinter = setInterval(() => {
       if (window.MesinKasir) {
@@ -63,6 +64,7 @@ export default function NotaServis() {
       return
     }
 
+    const p = pengaturan || {}
     const linkCek = `https://amservice.web.id/cek_servis.php?no=${servis.no_servis}`
     const totalBiaya = servis.estimasi_biaya || 'Rp 0'
 
@@ -72,34 +74,21 @@ export default function NotaServis() {
       return ' '.repeat(Math.floor((32 - t.length) / 2)) + t + '\n'
     }
 
-    // Load logo and start printing
-    const logoImg = new Image()
-    logoImg.crossOrigin = 'Anonymous'
-    logoImg.src = '/logo.png'
-    logoImg.onload = () => {
-      const cv = document.createElement('canvas')
-      cv.width = 120
-      cv.height = Math.round((logoImg.height / logoImg.width) * 120)
-      const ctx = cv.getContext('2d')
-      ctx.fillStyle = '#FFF'
-      ctx.fillRect(0, 0, cv.width, cv.height)
-      ctx.drawImage(logoImg, 0, 0, cv.width, cv.height)
-      btSend('logo', cv.toDataURL('image/png'))
-      lanjutCetak()
-    }
-    logoImg.onerror = () => { lanjutCetak() }
-
     const lanjutCetak = () => {
       // Store name
       btSend('tebal', true)
-      btSend('teks', center('AM SERVICE'))
+      btSend('teks', center((p.nama_toko || 'AM SERVICE').toUpperCase()))
       btSend('tebal', false)
       btSend('teks', '\x1b\x4d\x01\x1b\x61\x01')
-      btSend('teks', 'Jl. Contoh No. 123, Kota\n')
-      btSend('teks', 'Telp: 0812-3456-7890\n')
-      btSend('teks', 'WA: 0856 4722 7779\n')
-      btSend('teks', '\x1b\x4d\x00\x1b\x61\x00')
 
+      // Address (melebar)
+      if (p.alamat) {
+        const al = p.alamat.replace(/\n/g, ' ')
+        btSend('teks', al + '\n')
+      }
+      if (p.no_wa) btSend('teks', 'WA: ' + p.no_wa + '\n')
+
+      btSend('teks', '\x1b\x4d\x00\x1b\x61\x00')
       btSend('teks', '--------------------------------\n')
       btSend('tebal', true)
       btSend('teks', center('NOTA LUNAS / PENGAMBILAN'))
@@ -141,6 +130,23 @@ export default function NotaServis() {
       btSend('teks', '\x1b\x61\x00')
       btSend('teks', '\n\n\n')
     }
+
+    // Load logo and start printing
+    const logoImg = new Image()
+    logoImg.crossOrigin = 'Anonymous'
+    logoImg.src = '/logo.png'
+    logoImg.onload = () => {
+      const cv = document.createElement('canvas')
+      cv.width = 120
+      cv.height = Math.round((logoImg.height / logoImg.width) * 120)
+      const ctx = cv.getContext('2d')
+      ctx.fillStyle = '#FFF'
+      ctx.fillRect(0, 0, cv.width, cv.height)
+      ctx.drawImage(logoImg, 0, 0, cv.width, cv.height)
+      btSend('logo', cv.toDataURL('image/png'))
+      lanjutCetak()
+    }
+    logoImg.onerror = () => { lanjutCetak() }
   }
 
   // Keyboard shortcuts
@@ -167,21 +173,31 @@ export default function NotaServis() {
     }
   }, [loading, servis])
 
-  const fetchServis = async () => {
+  const fetchAllData = async () => {
     try {
-      const res = await fetch(`/api/servis?id=${id}`)
-      const data = await res.json()
+      const baseUrl = window.location.origin
+      const [servisRes, pengaturanRes] = await Promise.all([
+        fetch(`${baseUrl}/api/servis?id=${id}`),
+        fetch(`${baseUrl}/api/pengaturan`)
+      ])
 
-      if (data.error) throw new Error(data.error)
-
-      setServis(data.servis)
+      const servisData = await servisRes.json()
+      if (servisData.error) throw new Error(servisData.error)
+      setServis(servisData.servis)
 
       // Parse sparepart
       try {
-        const parsed = JSON.parse(data.servis.sparepart_json || '[]')
+        const parsed = JSON.parse(servisData.servis.sparepart_json || '[]')
         setSparepart(parsed)
       } catch (e) {
         setSparepart([])
+      }
+
+      if (pengaturanRes.ok) {
+        const pengaturanData = await pengaturanRes.json()
+        if (pengaturanData.pengaturan) {
+          setPengaturan(pengaturanData.pengaturan)
+        }
       }
     } catch (err) {
       alert('Gagal memuat data: ' + err.message)

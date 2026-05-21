@@ -68,29 +68,13 @@ export default function NotaPenerimaan() {
     const keluhanBersih = getKeluhanBersih(servis.keluhan)
     const estimasi = formatRupiah(servis.estimasi_biaya)
     const linkCek = `https://amservice.web.id/cek_servis.php?no=${servis.no_servis}`
+    const snkPenerimaan = p.snk_penerimaan || 'Harap bawa nota ini saat pengambilan.\nData bukan tanggung jawab toko.'
 
     const center = (t) => {
       t = String(t)
       if (t.length >= 32) return t.substring(0, 32) + '\n'
       return ' '.repeat(Math.floor((32 - t.length) / 2)) + t + '\n'
     }
-
-    // Load logo and start printing
-    const logoImg = new Image()
-    logoImg.crossOrigin = 'Anonymous'
-    logoImg.src = '/logo.png'
-    logoImg.onload = () => {
-      const cv = document.createElement('canvas')
-      cv.width = 120
-      cv.height = Math.round((logoImg.height / logoImg.width) * 120)
-      const ctx = cv.getContext('2d')
-      ctx.fillStyle = '#FFF'
-      ctx.fillRect(0, 0, cv.width, cv.height)
-      ctx.drawImage(logoImg, 0, 0, cv.width, cv.height)
-      btSend('logo', cv.toDataURL('image/png'))
-      lanjutCetak()
-    }
-    logoImg.onerror = () => { lanjutCetak() }
 
     const lanjutCetak = () => {
       // Store name
@@ -99,12 +83,10 @@ export default function NotaPenerimaan() {
       btSend('tebal', false)
       btSend('teks', '\x1b\x4d\x01\x1b\x61\x01')
 
-      // Address & WA
+      // Address (melebar - satu baris panjang)
       if (p.alamat) {
         const al = p.alamat.replace(/\n/g, ' ')
-        for (const line of al.split(' ').filter(l => l.trim())) {
-          btSend('teks', line + '\n')
-        }
+        btSend('teks', al + '\n')
       }
       if (p.no_wa) btSend('teks', 'WA: ' + p.no_wa + '\n')
 
@@ -130,11 +112,20 @@ export default function NotaPenerimaan() {
       btSend('tebal', false)
       btSend('teks', '\x1b\x61\x00')
 
-      // Terms
+      // Terms (from pengaturan)
       btSend('teks', '--------------------------------\n')
       btSend('teks', '.------------------------------.\n')
-      btSend('teks', '| 1. Bawa nota saat pengambilan |\n')
-      btSend('teks', '| 2. Data bukan tanggung jawab |\n')
+      const raw = snkPenerimaan.replace(/<br\s*\/?>/gi, '\n')
+      for (const line of raw.split('\n')) {
+        const trimmed = line.trim()
+        if (!trimmed) continue
+        while (trimmed.length > 28) {
+          btSend('teks', '| ' + trimmed.substring(0, 28) + ' |\n')
+        }
+        if (trimmed.length > 0) {
+          btSend('teks', '| ' + trimmed.padEnd(28) + ' |\n')
+        }
+      }
       btSend('teks', "'------------------------------'\n")
 
       // QR
@@ -144,6 +135,23 @@ export default function NotaPenerimaan() {
       btSend('teks', '\x1b\x61\x00')
       btSend('teks', '\n\n\n')
     }
+
+    // Load logo and start printing
+    const logoImg = new Image()
+    logoImg.crossOrigin = 'Anonymous'
+    logoImg.src = '/logo.png'
+    logoImg.onload = () => {
+      const cv = document.createElement('canvas')
+      cv.width = 120
+      cv.height = Math.round((logoImg.height / logoImg.width) * 120)
+      const ctx = cv.getContext('2d')
+      ctx.fillStyle = '#FFF'
+      ctx.fillRect(0, 0, cv.width, cv.height)
+      ctx.drawImage(logoImg, 0, 0, cv.width, cv.height)
+      btSend('logo', cv.toDataURL('image/png'))
+      lanjutCetak()
+    }
+    logoImg.onerror = () => { lanjutCetak() }
   }
 
   // Keyboard shortcuts
