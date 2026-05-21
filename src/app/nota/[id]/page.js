@@ -47,7 +47,7 @@ export default function NotaServis() {
     }
 
     const p = pengaturan || {}
-    const linkCek = `https://amservice.web.id/cek_servis.php?no=${servis.no_servis}`
+    const linkCek = `https://amservice.web.id/?no=${servis.no_servis}`
     const totalBiaya = servis.estimasi_biaya || 'Rp 0'
 
     const center = (t) => {

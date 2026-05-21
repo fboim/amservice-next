@@ -49,7 +49,7 @@ export default function NotaPenerimaan() {
     const tipeBersih = servis.tipe_hp?.replace(/-/g, '').trim() || ''
     const keluhanBersih = getKeluhanBersih(servis.keluhan)
     const estimasi = formatRupiah(servis.estimasi_biaya)
-    const linkCek = `https://amservice.web.id/cek_servis.php?no=${servis.no_servis}`
+    const linkCek = `https://amservice.web.id/?no=${servis.no_servis}`
     const snkPenerimaan = p.snk_penerimaan || 'Harap bawa nota ini saat pengambilan.\nData bukan tanggung jawab toko.'
 
     const center = (t) => {
@@ -389,7 +389,7 @@ export default function NotaPenerimaan() {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10px' }}>
             <div style={{ fontSize: '9px' }}>Scan untuk Cek Status:</div>
             <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&margin=4&data=https://amservice.web.id/cek_servis.php?no=${servis.no_servis}`}
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&margin=4&data=https://amservice.web.id/?no=${servis.no_servis}`}
               style={{ width: '80px', height: '80px', marginTop: '6px' }}
               alt="QR Code"
             />
