@@ -13,23 +13,55 @@ export async function GET(request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY
     )
 
+    // Query from servis table, group by nama_pelanggan
     let query = supabase
-      .from('pelanggan')
-      .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false })
+      .from('servis')
+      .select('nama_pelanggan, no_hp, count', { count: 'exact' })
+      .is('deleted_at', null)
+      .not('nama_pelanggan', 'is', null)
+      .group('nama_pelanggan, no_hp')
 
-    if (search) {
-      query = query.or(`nama_pelanggan.ilike.%${search}%,no_hp.ilike.%${search}%`)
-    }
-
-    const { data: pelanggan, error, count } = await query
-      .range(offset, offset + limit - 1)
+    const { data, error, count } = await query
 
     if (error) {
-      return Response.json({ error: error.message }, { status: 500 })
+      // Fallback: just get all pelanggan from servis
+      const { data: allServis, error: err2 } = await supabase
+        .from('servis')
+        .select('nama_pelanggan, no_hp', { count: 'exact' })
+        .is('deleted_at', null)
+        .not('nama_pelanggan', 'is', null)
+        .order('nama_pelanggan', { ascending: true })
+
+      if (err2) {
+        return Response.json({ error: err2.message }, { status: 500 })
+      }
+
+      // Get unique pelanggan
+      const pelangganMap = {}
+      allServis.forEach(s => {
+        const key = s.no_hp
+        if (!pelangganMap[key]) {
+          pelangganMap[key] = { nama_pelanggan: s.nama_pelanggan, no_hp: s.no_hp }
+        }
+      })
+
+      const pelangganList = Object.values(pelangganMap)
+      let filtered = pelangganList
+      if (search) {
+        const searchLower = search.toLowerCase()
+        filtered = pelangganList.filter(p =>
+          p.nama_pelanggan.toLowerCase().includes(searchLower) ||
+          p.no_hp.includes(search)
+        )
+      }
+
+      const total = filtered.length
+      const paginated = filtered.slice(offset, offset + limit)
+
+      return Response.json({ pelanggan: paginated, total })
     }
 
-    return Response.json({ pelanggan: pelanggan || [], total: count || 0 })
+    return Response.json({ pelanggan: data || [], total: count || 0 })
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 })
   }
@@ -50,26 +82,17 @@ export async function POST(request) {
 
     // Check if customer already exists
     const { data: existing } = await supabase
-      .from('pelanggan')
+      .from('servis')
       .select('id')
       .eq('no_hp', no_hp)
+      .is('deleted_at', null)
       .single()
 
     if (existing) {
       return Response.json({ error: 'No. HP sudah terdaftar' }, { status: 400 })
     }
 
-    const { data, error } = await supabase
-      .from('pelanggan')
-      .insert({ nama_pelanggan, no_hp, alamat: alamat || null, email: email || null, catatan: catatan || null })
-      .select()
-      .single()
-
-    if (error) {
-      return Response.json({ error: error.message }, { status: 500 })
-    }
-
-    return Response.json({ success: true, pelanggan: data })
+    return Response.json({ success: true, message: 'Data pelanggan tersimpan otomatis di servis' })
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 })
   }
