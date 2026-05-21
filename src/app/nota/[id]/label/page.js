@@ -27,10 +27,8 @@ export default function LabelServis() {
   // Bluetooth print queue - use refs for mutable state
   const btQueueRef = useRef([])
   const btBusyRef = useRef(false)
-  const btSend = useCallback((type, data) => {
-    btQueueRef.current.push({type, data})
-    if (!btBusyRef.current) processQueue()
-  }, [])
+  const processQueueRef = useRef(null)
+
   const processQueue = useCallback(() => {
     if (btQueueRef.current.length === 0) { btBusyRef.current = false; return }
     btBusyRef.current = true
@@ -41,8 +39,18 @@ export default function LabelServis() {
       else if (cmd.type === 'logo') window.MesinKasir.cetakLogo(cmd.data)
       else if (cmd.type === 'qr') window.MesinKasir.cetakQR(cmd.data)
     } catch (e) { console.warn('BT error:', e) }
-    setTimeout(processQueue, 100)
+    setTimeout(() => processQueueRef.current && processQueueRef.current(), 100)
   }, [])
+
+  // Set the ref to processQueue
+  useEffect(() => {
+    processQueueRef.current = processQueue
+  }, [processQueue])
+
+  const btSend = useCallback((type, data) => {
+    btQueueRef.current.push({type, data})
+    if (!btBusyRef.current) processQueue()
+  }, [processQueue])
 
   // Print via Bluetooth (MesinKasir plugin)
   const handlePrintBluetooth = () => {
