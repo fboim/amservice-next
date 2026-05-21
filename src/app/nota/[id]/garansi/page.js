@@ -96,24 +96,34 @@ export default function GaransiServis() {
       btSend('teks', '\x1b\x61\x00')
 
       // Garansi box
-      btSend('teks', '--------------------------------\n')
+      btSend('teks', '.------------------------------.\n')
       btSend('tebal', true)
       btSend('teks', center('MASA GARANSI: ' + masaGaransi.toUpperCase()))
       btSend('tebal', false)
       if (snkGaransi) {
-        // Split SNK into lines (max 28 chars per line with padding)
+        // Split SNK into lines
         const raw = snkGaransi.replace(/<br\s*\/?>/gi, '\n')
         const lines = raw.split('\n')
         for (let i = 0; i < lines.length; i++) {
-          let trimmed = lines[i].trim()
-          if (!trimmed) continue
-          // Word wrap at 28 chars - properly truncate
-          while (trimmed.length > 28) {
-            btSend('teks', '| ' + trimmed.substring(0, 28) + ' |\n')
-            trimmed = trimmed.substring(28)
-          }
-          if (trimmed.length > 0) {
-            btSend('teks', '| ' + trimmed.padEnd(28) + ' |\n')
+          const line = lines[i].trim()
+          if (!line) continue
+          // Word wrap at 28 chars - break at space, not middle of word
+          let remaining = line
+          while (remaining.length > 0) {
+            if (remaining.length <= 28) {
+              btSend('teks', '| ' + remaining.padEnd(28) + ' |\n')
+              break
+            }
+            // Find last space before 28 chars
+            let cut = 28
+            for (let j = 27; j > 20; j--) {
+              if (remaining[j] === ' ') {
+                cut = j
+                break
+              }
+            }
+            btSend('teks', '| ' + remaining.substring(0, cut).padEnd(28) + ' |\n')
+            remaining = remaining.substring(cut).trim()
           }
         }
       } else {
@@ -130,25 +140,33 @@ export default function GaransiServis() {
       btSend('teks', '\n\n\n')
     }
 
-    // Load logo and start printing (smaller size)
-    const logoImg = new Image()
-    logoImg.crossOrigin = 'Anonymous'
-    logoImg.src = '/logo.png'
-    logoImg.onload = () => {
-      // Create smaller logo for thermal printer
-      const cv = document.createElement('canvas')
-      cv.width = 80
-      cv.height = Math.round((logoImg.height / logoImg.width) * 80)
-      if (cv.height > 80) cv.height = 80 // Max height 80px
-      const ctx = cv.getContext('2d')
-      ctx.fillStyle = '#FFF'
-      ctx.fillRect(0, 0, cv.width, cv.height)
-      ctx.drawImage(logoImg, 0, 0, cv.width, cv.height)
-      const logoData = cv.toDataURL('image/png')
-      btSend('logo', logoData)
-      lanjutCetak()
+    // Load logo and start printing
+    // Try /logo.png first, then /logo_am.png
+    const loadLogo = (src) => {
+      const logoImg = new Image()
+      logoImg.crossOrigin = 'Anonymous'
+      logoImg.src = src
+      logoImg.onload = () => {
+        const cv = document.createElement('canvas')
+        cv.width = 80
+        cv.height = Math.round((logoImg.height / logoImg.width) * 80)
+        if (cv.height > 80) cv.height = 80
+        const ctx = cv.getContext('2d')
+        ctx.fillStyle = '#FFF'
+        ctx.fillRect(0, 0, cv.width, cv.height)
+        ctx.drawImage(logoImg, 0, 0, cv.width, cv.height)
+        btSend('logo', cv.toDataURL('image/png'))
+        lanjutCetak()
+      }
+      logoImg.onerror = () => {
+        if (src === '/logo.png') {
+          loadLogo('/logo_am.png')
+        } else {
+          lanjutCetak()
+        }
+      }
     }
-    logoImg.onerror = () => { lanjutCetak() }
+    loadLogo('/logo.png')
   }
 
   // Keyboard shortcuts

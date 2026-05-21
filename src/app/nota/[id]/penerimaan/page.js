@@ -121,23 +121,32 @@ export default function NotaPenerimaan() {
       btSend('teks', '\n\n\n')
     }
 
-    // Load logo and start printing (smaller size)
-    const logoImg = new Image()
-    logoImg.crossOrigin = 'Anonymous'
-    logoImg.src = '/logo.png'
-    logoImg.onload = () => {
-      const cv = document.createElement('canvas')
-      cv.width = 80
-      cv.height = Math.round((logoImg.height / logoImg.width) * 80)
-      if (cv.height > 80) cv.height = 80
-      const ctx = cv.getContext('2d')
-      ctx.fillStyle = '#FFF'
-      ctx.fillRect(0, 0, cv.width, cv.height)
-      ctx.drawImage(logoImg, 0, 0, cv.width, cv.height)
-      btSend('logo', cv.toDataURL('image/png'))
-      lanjutCetak()
+    // Load logo and start printing
+    const loadLogo = (src) => {
+      const logoImg = new Image()
+      logoImg.crossOrigin = 'Anonymous'
+      logoImg.src = src
+      logoImg.onload = () => {
+        const cv = document.createElement('canvas')
+        cv.width = 80
+        cv.height = Math.round((logoImg.height / logoImg.width) * 80)
+        if (cv.height > 80) cv.height = 80
+        const ctx = cv.getContext('2d')
+        ctx.fillStyle = '#FFF'
+        ctx.fillRect(0, 0, cv.width, cv.height)
+        ctx.drawImage(logoImg, 0, 0, cv.width, cv.height)
+        btSend('logo', cv.toDataURL('image/png'))
+        lanjutCetak()
+      }
+      logoImg.onerror = () => {
+        if (src === '/logo.png') {
+          loadLogo('/logo_am.png')
+        } else {
+          lanjutCetak()
+        }
+      }
     }
-    logoImg.onerror = () => { lanjutCetak() }
+    loadLogo('/logo.png')
   }
 
   // Keyboard shortcuts (print disabled in WebView)
