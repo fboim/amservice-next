@@ -103,12 +103,14 @@ export default function GaransiServis() {
       if (snkGaransi) {
         // Split SNK into lines (max 28 chars per line with padding)
         const raw = snkGaransi.replace(/<br\s*\/?>/gi, '\n')
-        for (const line of raw.split('\n')) {
-          const trimmed = line.trim()
+        const lines = raw.split('\n')
+        for (let i = 0; i < lines.length; i++) {
+          let trimmed = lines[i].trim()
           if (!trimmed) continue
-          // Word wrap at 28 chars
+          // Word wrap at 28 chars - properly truncate
           while (trimmed.length > 28) {
             btSend('teks', '| ' + trimmed.substring(0, 28) + ' |\n')
+            trimmed = trimmed.substring(28)
           }
           if (trimmed.length > 0) {
             btSend('teks', '| ' + trimmed.padEnd(28) + ' |\n')
@@ -128,19 +130,22 @@ export default function GaransiServis() {
       btSend('teks', '\n\n\n')
     }
 
-    // Load logo and start printing
+    // Load logo and start printing (smaller size)
     const logoImg = new Image()
     logoImg.crossOrigin = 'Anonymous'
     logoImg.src = '/logo.png'
     logoImg.onload = () => {
+      // Create smaller logo for thermal printer
       const cv = document.createElement('canvas')
-      cv.width = 120
-      cv.height = Math.round((logoImg.height / logoImg.width) * 120)
+      cv.width = 80
+      cv.height = Math.round((logoImg.height / logoImg.width) * 80)
+      if (cv.height > 80) cv.height = 80 // Max height 80px
       const ctx = cv.getContext('2d')
       ctx.fillStyle = '#FFF'
       ctx.fillRect(0, 0, cv.width, cv.height)
       ctx.drawImage(logoImg, 0, 0, cv.width, cv.height)
-      btSend('logo', cv.toDataURL('image/png'))
+      const logoData = cv.toDataURL('image/png')
+      btSend('logo', logoData)
       lanjutCetak()
     }
     logoImg.onerror = () => { lanjutCetak() }

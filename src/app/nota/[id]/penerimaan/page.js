@@ -98,11 +98,14 @@ export default function NotaPenerimaan() {
       btSend('teks', '--------------------------------\n')
       btSend('teks', '.------------------------------.\n')
       const raw = snkPenerimaan.replace(/<br\s*\/?>/gi, '\n')
-      for (const line of raw.split('\n')) {
-        const trimmed = line.trim()
+      const lines = raw.split('\n')
+      for (let i = 0; i < lines.length; i++) {
+        let trimmed = lines[i].trim()
         if (!trimmed) continue
+        // Word wrap at 28 chars - properly truncate
         while (trimmed.length > 28) {
           btSend('teks', '| ' + trimmed.substring(0, 28) + ' |\n')
+          trimmed = trimmed.substring(28)
         }
         if (trimmed.length > 0) {
           btSend('teks', '| ' + trimmed.padEnd(28) + ' |\n')
@@ -118,14 +121,15 @@ export default function NotaPenerimaan() {
       btSend('teks', '\n\n\n')
     }
 
-    // Load logo and start printing
+    // Load logo and start printing (smaller size)
     const logoImg = new Image()
     logoImg.crossOrigin = 'Anonymous'
     logoImg.src = '/logo.png'
     logoImg.onload = () => {
       const cv = document.createElement('canvas')
-      cv.width = 120
-      cv.height = Math.round((logoImg.height / logoImg.width) * 120)
+      cv.width = 80
+      cv.height = Math.round((logoImg.height / logoImg.width) * 80)
+      if (cv.height > 80) cv.height = 80
       const ctx = cv.getContext('2d')
       ctx.fillStyle = '#FFF'
       ctx.fillRect(0, 0, cv.width, cv.height)

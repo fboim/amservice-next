@@ -113,14 +113,15 @@ export default function NotaServis() {
       btSend('teks', '\n\n\n')
     }
 
-    // Load logo and start printing
+    // Load logo and start printing (smaller size)
     const logoImg = new Image()
     logoImg.crossOrigin = 'Anonymous'
     logoImg.src = '/logo.png'
     logoImg.onload = () => {
       const cv = document.createElement('canvas')
-      cv.width = 120
-      cv.height = Math.round((logoImg.height / logoImg.width) * 120)
+      cv.width = 80
+      cv.height = Math.round((logoImg.height / logoImg.width) * 80)
+      if (cv.height > 80) cv.height = 80
       const ctx = cv.getContext('2d')
       ctx.fillStyle = '#FFF'
       ctx.fillRect(0, 0, cv.width, cv.height)
