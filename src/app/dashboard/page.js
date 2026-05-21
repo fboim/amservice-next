@@ -153,136 +153,147 @@ export default function Dashboard() {
         <div style={{
           background: 'var(--am-surface)',
           border: '1px solid var(--am-border)',
-          borderRadius: '12px',
-          padding: '16px',
-          borderLeft: '3px solid #94a3b8',
+          borderRadius: '16px',
+          padding: '20px',
+          borderLeft: '4px solid #94a3b8',
           display: 'flex',
           alignItems: 'center',
-          gap: '12px'
+          gap: '16px',
+          boxShadow: 'var(--am-shadow)',
+          transition: 'all 0.2s ease'
         }}>
           <div style={{
-            width: '48px',
-            height: '48px',
-            borderRadius: '12px',
-            background: 'rgba(148,163,184,.15)',
+            width: '52px',
+            height: '52px',
+            borderRadius: '14px',
+            background: 'rgba(148,163,184,.12)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0
           }}>
-            <i className="bi bi-hourglass-split" style={{ fontSize: '1.3rem', color: '#94a3b8' }} />
+            <i className="bi bi-hourglass-split" style={{ fontSize: '1.4rem', color: '#94a3b8' }} />
           </div>
           <div>
-            <div style={{ fontSize: '.6rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.5px' }}>Antrean</div>
-            <div style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1.2 }}>{stats.antrean}</div>
+            <div style={{ fontSize: '.65rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.6px', marginBottom: '4px' }}>Antrean</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1.1, letterSpacing: '-0.02em' }}>{stats.antrean}</div>
           </div>
         </div>
 
         <div style={{
           background: 'var(--am-surface)',
           border: '1px solid var(--am-border)',
-          borderRadius: '12px',
-          padding: '16px',
-          borderLeft: '3px solid #f59e0b',
+          borderRadius: '16px',
+          padding: '20px',
+          borderLeft: '4px solid #f59e0b',
           display: 'flex',
           alignItems: 'center',
-          gap: '12px'
+          gap: '16px',
+          boxShadow: 'var(--am-shadow)',
+          transition: 'all 0.2s ease'
         }}>
           <div style={{
-            width: '48px',
-            height: '48px',
-            borderRadius: '12px',
-            background: 'rgba(245,158,11,.15)',
+            width: '52px',
+            height: '52px',
+            borderRadius: '14px',
+            background: 'rgba(245,158,11,.12)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0
           }}>
-            <i className="bi bi-tools" style={{ fontSize: '1.3rem', color: '#f59e0b' }} />
+            <i className="bi bi-tools" style={{ fontSize: '1.4rem', color: '#f59e0b' }} />
           </div>
           <div>
-            <div style={{ fontSize: '.6rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.5px' }}>Dikerjakan</div>
-            <div style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1.2 }}>{stats.proses}</div>
+            <div style={{ fontSize: '.65rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.6px', marginBottom: '4px' }}>Dikerjakan</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1.1, letterSpacing: '-0.02em' }}>{stats.proses}</div>
           </div>
         </div>
 
         <div style={{
           background: 'var(--am-surface)',
           border: '1px solid var(--am-border)',
-          borderRadius: '12px',
-          padding: '16px',
-          borderLeft: '3px solid #06b6d4',
+          borderRadius: '16px',
+          padding: '20px',
+          borderLeft: '4px solid #06b6d4',
           display: 'flex',
           alignItems: 'center',
-          gap: '12px'
+          gap: '16px',
+          boxShadow: 'var(--am-shadow)',
+          transition: 'all 0.2s ease'
         }}>
           <div style={{
-            width: '48px',
-            height: '48px',
-            borderRadius: '12px',
-            background: 'rgba(6,182,212,.15)',
+            width: '52px',
+            height: '52px',
+            borderRadius: '14px',
+            background: 'rgba(6,182,212,.12)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0
           }}>
-            <i className="bi bi-bag-check" style={{ fontSize: '1.3rem', color: '#06b6d4' }} />
+            <i className="bi bi-bag-check" style={{ fontSize: '1.4rem', color: '#06b6d4' }} />
           </div>
           <div>
-            <div style={{ fontSize: '.6rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.5px' }}>Siap Ambil</div>
-            <div style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1.2 }}>{stats.siap}</div>
+            <div style={{ fontSize: '.65rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.6px', marginBottom: '4px' }}>Siap Ambil</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1.1, letterSpacing: '-0.02em' }}>{stats.siap}</div>
           </div>
         </div>
 
         <div style={{
           background: 'var(--am-surface)',
           border: '1px solid var(--am-border)',
-          borderRadius: '12px',
-          padding: '16px',
-          borderLeft: '3px solid #10b981',
+          borderRadius: '16px',
+          padding: '20px',
+          borderLeft: '4px solid #10b981',
           display: 'flex',
           alignItems: 'center',
-          gap: '12px'
+          gap: '16px',
+          boxShadow: 'var(--am-shadow)',
+          transition: 'all 0.2s ease'
         }}>
           <div style={{
-            width: '48px',
-            height: '48px',
-            borderRadius: '12px',
-            background: 'rgba(16,185,129,.15)',
+            width: '52px',
+            height: '52px',
+            borderRadius: '14px',
+            background: 'rgba(16,185,129,.12)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             flexShrink: 0
           }}>
-            <i className="bi bi-check-circle-fill" style={{ fontSize: '1.3rem', color: '#10b981' }} />
+            <i className="bi bi-check-circle-fill" style={{ fontSize: '1.4rem', color: '#10b981' }} />
           </div>
           <div>
-            <div style={{ fontSize: '.6rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.5px' }}>Selesai</div>
-            <div style={{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1.2 }}>{stats.selesai}</div>
+            <div style={{ fontSize: '.65rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.6px', marginBottom: '4px' }}>Selesai</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1.1, letterSpacing: '-0.02em' }}>{stats.selesai}</div>
           </div>
         </div>
       </div>
 
       {/* Two Column Layout */}
-      <div className="dashboard-two-col" style={{ display: 'grid', gap: '12px', marginBottom: '16px', alignItems: 'start' }}>
+      <div className="dashboard-two-col" style={{ display: 'grid', gap: '16px', marginBottom: '24px', alignItems: 'start' }}>
         {/* Left - Servis Terbaru */}
         <div style={{
           background: 'var(--am-surface)',
           border: '1px solid var(--am-border)',
-          borderRadius: '12px',
-          overflow: 'hidden'
+          borderRadius: '16px',
+          overflow: 'hidden',
+          boxShadow: 'var(--am-shadow)'
         }}>
           <div style={{
-            padding: '12px 16px',
+            padding: '16px 20px',
             borderBottom: '1px solid var(--am-border)',
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'center'
+            alignItems: 'center',
+            background: 'var(--am-surface-2)'
           }}>
-            <span style={{ fontSize: '.875rem', fontWeight: '600', color: 'var(--am-text)' }}>
-              <i className="bi bi-clock-history" style={{ color: '#3b82f6', marginRight: '8px' }} />Servis Terbaru
+            <span style={{ fontSize: '.9rem', fontWeight: '700', color: 'var(--am-text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <i className="bi bi-clock-history" style={{ color: '#3b82f6', fontSize: '1.1rem' }} />
+              Servis Terbaru
             </span>
-            <Link href="/servis/data" style={{ fontSize: '.75rem', color: 'var(--am-primary)', textDecoration: 'none', fontWeight: '600' }}>
+            <Link href="/servis/data" style={{ fontSize: '.75rem', color: 'var(--am-primary)', textDecoration: 'none', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
               Lihat Semua <i className="bi bi-arrow-right" />
             </Link>
           </div>
@@ -438,33 +449,34 @@ export default function Dashboard() {
         </div>
 
         {/* Right - Info Cards (right aligned) */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'stretch' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'stretch' }}>
           {/* Omzet Hari Ini */}
           <div style={{
             background: 'var(--am-surface)',
             border: '1px solid var(--am-border)',
-            borderRadius: '12px',
-            padding: '16px',
-            borderLeft: '3px solid #8b5cf6',
-            textAlign: 'right'
+            borderRadius: '16px',
+            padding: '20px',
+            borderLeft: '4px solid #8b5cf6',
+            textAlign: 'right',
+            boxShadow: 'var(--am-shadow)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', justifyContent: 'flex-end' }}>
               <div>
-                <div style={{ fontSize: '.6rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.5px' }}>Omzet Hari Ini</div>
-                <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--am-text)' }}>{formatRupiah(stats.omzet_hari)}</div>
-                <div style={{ fontSize: '.68rem', color: 'var(--am-text-muted)', marginTop: '4px' }}>{stats.selesai} transaksi</div>
+                <div style={{ fontSize: '.65rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.6px', marginBottom: '4px' }}>Omzet Hari Ini</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1.1, letterSpacing: '-0.02em' }}>{formatRupiah(stats.omzet_hari)}</div>
+                <div style={{ fontSize: '.68rem', color: 'var(--am-text-muted)', marginTop: '6px' }}>{stats.selesai} transaksi</div>
               </div>
               <div style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '10px',
-                background: 'rgba(139,92,246,.15)',
+                width: '48px',
+                height: '48px',
+                borderRadius: '14px',
+                background: 'rgba(139,92,246,.12)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0
               }}>
-                <i className="bi bi-cash-stack" style={{ fontSize: '1.2rem', color: '#8b5cf6' }} />
+                <i className="bi bi-cash-stack" style={{ fontSize: '1.3rem', color: '#8b5cf6' }} />
               </div>
             </div>
           </div>
@@ -473,30 +485,31 @@ export default function Dashboard() {
           <div style={{
             background: 'var(--am-surface)',
             border: '1px solid var(--am-border)',
-            borderRadius: '12px',
-            padding: '16px',
-            borderLeft: '3px solid #f43f5e',
-            textAlign: 'right'
+            borderRadius: '16px',
+            padding: '20px',
+            borderLeft: '4px solid #f43f5e',
+            textAlign: 'right',
+            boxShadow: 'var(--am-shadow)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', justifyContent: 'flex-end' }}>
               <div>
-                <div style={{ fontSize: '.6rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.5px' }}>Omzet Bulan Ini</div>
-                <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--am-text)' }}>{formatRupiah(stats.omzet_bulan)}</div>
-                <div style={{ fontSize: '.68rem', color: 'var(--am-text-muted)', marginTop: '4px' }}>
+                <div style={{ fontSize: '.65rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.6px', marginBottom: '4px' }}>Omzet Bulan Ini</div>
+                <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1.1, letterSpacing: '-0.02em' }}>{formatRupiah(stats.omzet_bulan)}</div>
+                <div style={{ fontSize: '.68rem', color: 'var(--am-text-muted)', marginTop: '6px' }}>
                   {new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
                 </div>
               </div>
               <div style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '10px',
-                background: 'rgba(244,63,94,.15)',
+                width: '48px',
+                height: '48px',
+                borderRadius: '14px',
+                background: 'rgba(244,63,94,.12)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 flexShrink: 0
               }}>
-                <i className="bi bi-graph-up-arrow" style={{ fontSize: '1.2rem', color: '#f43f5e' }} />
+                <i className="bi bi-graph-up-arrow" style={{ fontSize: '1.3rem', color: '#f43f5e' }} />
               </div>
             </div>
           </div>
@@ -505,39 +518,41 @@ export default function Dashboard() {
           <div style={{
             background: 'var(--am-surface)',
             border: '1px solid var(--am-border)',
-            borderRadius: '12px',
+            borderRadius: '16px',
             overflow: 'hidden',
-            flex: 1
+            flex: 1,
+            boxShadow: 'var(--am-shadow)'
           }}>
             <div style={{
-              padding: '12px 16px',
+              padding: '16px 20px',
               borderBottom: '1px solid var(--am-border)',
               display: 'flex',
               justifyContent: 'space-between',
-              alignItems: 'center'
+              alignItems: 'center',
+              background: 'var(--am-surface-2)'
             }}>
-              <span style={{ fontSize: '.75rem', fontWeight: '600', color: 'var(--am-text)' }}>
-                <i className="bi bi-trophy-fill" style={{ color: '#f59e0b', marginRight: '6px' }} />Merk Populer
+              <span style={{ fontSize: '.8rem', fontWeight: '700', color: 'var(--am-text)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <i className="bi bi-trophy-fill" style={{ color: '#f59e0b', fontSize: '1rem' }} />Merk Populer
               </span>
               <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>All Time</span>
             </div>
-            <div style={{ padding: '4px 0' }}>
+            <div style={{ padding: '6px 0' }}>
               {stats.merk_populer && stats.merk_populer.length > 0 ? stats.merk_populer.slice(0, 7).map((merk, i) => {
                 const maxTotal = Math.max(...stats.merk_populer.map(m => m.total), 1)
                 const pct = (merk.total / maxTotal) * 100
                 return (
-                  <div key={i} style={{ padding: '6px 16px', borderBottom: '1px solid var(--am-border)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                  <div key={i} style={{ padding: '8px 20px', borderBottom: '1px solid var(--am-border)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                       <span style={{ fontSize: '.78rem', fontWeight: '600', color: 'var(--am-text)' }}>{merk.merk_hp}</span>
-                      <span style={{ fontSize: '.68rem', color: 'var(--am-text-muted)' }}>{merk.total}x</span>
+                      <span style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>{merk.total}x</span>
                     </div>
-                    <div style={{ height: '3px', background: 'var(--am-border)', borderRadius: '2px', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #3b82f6, #6366f1)', borderRadius: '2px' }} />
+                    <div style={{ height: '4px', background: 'var(--am-border)', borderRadius: '3px', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #3b82f6, #6366f1)', borderRadius: '3px' }} />
                     </div>
                   </div>
                 )
               }) : (
-                <div style={{ padding: '16px', textAlign: 'center', color: 'var(--am-text-muted)', fontSize: '.8rem' }}>
+                <div style={{ padding: '20px', textAlign: 'center', color: 'var(--am-text-muted)', fontSize: '.8rem' }}>
                   Belum ada data
                 </div>
               )}
@@ -550,29 +565,31 @@ export default function Dashboard() {
       <div style={{
         background: 'var(--am-surface)',
         border: '1px solid var(--am-border)',
-        borderRadius: '12px',
-        overflow: 'hidden'
+        borderRadius: '16px',
+        overflow: 'hidden',
+        boxShadow: 'var(--am-shadow)'
       }}>
         <div style={{
-          padding: '12px 16px',
+          padding: '16px 20px',
           borderBottom: '1px solid var(--am-border)',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          background: 'var(--am-surface-2)'
         }}>
-          <span style={{ fontSize: '.875rem', fontWeight: '600', color: 'var(--am-text)' }}>
-            <i className="bi bi-bar-chart-fill" style={{ color: '#3b82f6', marginRight: '8px' }} />Grafik Servis
+          <span style={{ fontSize: '.9rem', fontWeight: '700', color: 'var(--am-text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <i className="bi bi-bar-chart-fill" style={{ color: '#3b82f6', fontSize: '1.1rem' }} />Grafik Servis
           </span>
-          <div style={{ display: 'flex', gap: '16px' }}>
-            <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>
-              Total: <strong style={{ color: 'var(--am-text)' }}>{totalServis}</strong>
+          <div style={{ display: 'flex', gap: '20px' }}>
+            <span style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>
+              Total: <strong style={{ color: 'var(--am-text)', fontWeight: '700' }}>{totalServis}</strong>
             </span>
-            <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>
-              Rata-rata: <strong style={{ color: '#3b82f6' }}>{avgServis}/bln</strong>
+            <span style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>
+              Rata-rata: <strong style={{ color: '#3b82f6', fontWeight: '700' }}>{avgServis}/bln</strong>
             </span>
           </div>
         </div>
-        <div style={{ padding: '20px 16px' }}>
+        <div style={{ padding: '24px 20px' }}>
           {/* Line Chart Area */}
           {chartData.length > 0 ? (
             <div style={{ position: 'relative', height: '180px', marginBottom: '16px' }}>

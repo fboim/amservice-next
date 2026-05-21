@@ -124,54 +124,36 @@ function SidebarWrapper({ children }) {
       />
 
       <div className="am-main">
+        {/* Desktop Header - Clean and focused */}
         <div className="header-bar">
           {/* Left - Page Title & User Info */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             {/* Page Icon */}
             <div style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: '12px',
+              width: '44px',
+              height: '44px',
+              borderRadius: '14px',
               background: 'linear-gradient(135deg, var(--am-primary), #6366f1)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 14px rgba(59,130,246,.35)',
+              boxShadow: '0 4px 16px rgba(59,130,246,.4)',
               flexShrink: 0
             }}>
-              <i className={`bi ${getPageIcon()}`} style={{ color: '#fff', fontSize: '1.15rem' }} />
+              <i className={`bi ${getPageIcon()}`} style={{ color: '#fff', fontSize: '1.2rem' }} />
             </div>
             <div>
-              <h4 style={{ fontWeight: '800', fontSize: '1.1rem', color: 'var(--am-text)', margin: '0 0 2px' }}>
+              <h4 style={{ fontWeight: '800', fontSize: '1.15rem', color: 'var(--am-text)', margin: '0 0 3px', letterSpacing: '-0.02em' }}>
                 {getPageTitle()}
               </h4>
-              <p style={{ fontSize: '.72rem', color: 'var(--am-text-muted)', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <i className="bi bi-calendar3" style={{ fontSize: '.65rem' }} />
-                <span>{new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                <span style={{ color: 'var(--am-border)' }}>|</span>
-                <span>Halo, <strong style={{ color: 'var(--am-primary)', fontWeight: '700' }}>{user?.nama || 'User'}</strong></span>
+              <p style={{ fontSize: '.72rem', color: 'var(--am-text-muted)', margin: 0 }}>
+                Halo, <strong style={{ color: 'var(--am-primary)', fontWeight: '700' }}>{user?.nama || 'User'}</strong>
               </p>
             </div>
           </div>
 
           {/* Right - Actions */}
           <div className="header-actions">
-            {/* Quick Stats Pills */}
-            <div className="header-stats">
-              <span className="stat-pill stat-antrean" title="Antrean">
-                <i className="bi bi-hourglass-split" />
-                <span>{stats.antrean}</span>
-              </span>
-              <span className="stat-pill stat-proses" title="Dikerjakan">
-                <i className="bi bi-tools" />
-                <span>{stats.proses}</span>
-              </span>
-              <span className="stat-pill stat-siap" title="Siap">
-                <i className="bi bi-bag-check" />
-                <span>{stats.siap}</span>
-              </span>
-            </div>
-
             {/* Role Badge */}
             <span className="role-badge">
               <i className="bi bi-shield-fill" />
@@ -183,7 +165,8 @@ function SidebarWrapper({ children }) {
               href="/servis/tambah"
               className="am-btn am-btn-primary am-btn-pill am-btn-sm"
               style={{
-                boxShadow: '0 4px 16px rgba(59,130,246,.35)'
+                boxShadow: '0 4px 16px rgba(59,130,246,.4)',
+                fontWeight: '700'
               }}
             >
               <i className="bi bi-plus-circle-fill" /> Servis Baru
@@ -191,12 +174,28 @@ function SidebarWrapper({ children }) {
           </div>
         </div>
 
-        {/* Stats Mobile Bar */}
-        <div className="header-stats-mobile">
-          <span className="stat-pill stat-antrean"><i className="bi bi-hourglass-split" /> {stats.antrean}</span>
-          <span className="stat-pill stat-proses"><i className="bi bi-tools" /> {stats.proses}</span>
-          <span className="stat-pill stat-siap"><i className="bi bi-bag-check" /> {stats.siap}</span>
-          <span className="stat-pill stat-selesai"><i className="bi bi-check-circle-fill" /> {stats.selesai}</span>
+        {/* Mobile Header - Simple logo centered */}
+        <div className="mobile-header-bar">
+          <button className="topbar-btn" onClick={onMobileOpen}>
+            <i className="bi bi-list" />
+          </button>
+          <div className="mobile-header-logo">
+            <i className="bi bi-lightning-charge-fill" style={{ color: '#fbbf24' }} />
+            AM SERVICE
+          </div>
+          <button
+            className="topbar-btn"
+            onClick={() => {
+              localStorage.removeItem('ams_token')
+              localStorage.removeItem('ams_user')
+              sessionStorage.removeItem('ams_token')
+              sessionStorage.removeItem('ams_user')
+              router.push('/login')
+            }}
+            style={{ color: '#f87171' }}
+          >
+            <i className="bi bi-box-arrow-right" />
+          </button>
         </div>
 
         {children}
