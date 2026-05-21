@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Toast, ToastContainer, useToast } from '@/components/Toast'
+import AppLayout from '@/components/AppLayout'
+import { ToastContainer, useToast } from '@/components/Toast'
 
 export default function TestimoniPage() {
   const [testimonials, setTestimonials] = useState([])
@@ -100,204 +101,217 @@ export default function TestimoniPage() {
   }
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <div className="pg-header">
-        <div>
-          <h1 className="pg-title">Testimoni</h1>
-          <p className="pg-subtitle">Kelola testimoni pelanggan yang ditampilkan di landing page</p>
-        </div>
-        <button
-          onClick={() => { resetForm(); setShowModal(true) }}
-          className="am-btn am-btn-primary"
-        >
-          <i className="bi bi-plus-lg" /> Tambah Testimoni
-        </button>
-      </div>
-
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '3rem', color: '#64748b' }}>
-          Memuat...
-        </div>
-      ) : testimonials.length === 0 ? (
-        <div className="am-card" style={{ textAlign: 'center', padding: '3rem' }}>
-          <i className="bi bi-chat-quote" style={{ fontSize: '3rem', color: '#334155', marginBottom: '1rem' }} />
-          <p style={{ color: '#64748b' }}>Belum ada testimoni. Tambahkan yang pertama!</p>
-        </div>
-      ) : (
-        <div className="testimonials-list">
-          {testimonials.map((item) => (
-            <div key={item.id} className="testimonial-item" style={{
-              background: '#1e293b',
-              border: '1px solid #334155',
-              borderRadius: 12,
-              padding: '1.25rem',
-              marginBottom: '1rem',
-              opacity: item.is_active ? 1 : 0.5
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div style={{ display: 'flex', gap: 12 }}>
-                  <div style={{
-                    width: 48, height: 48, borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: '#fff', fontWeight: 700, fontSize: '1.2rem', flexShrink: 0
-                  }}>
-                    {item.name.charAt(0)}
-                  </div>
-                  <div>
-                    <h4 style={{ margin: '0 0 4px', color: '#e2e8f0', fontWeight: 600 }}>
-                      {item.name}
-                      {!item.is_active && (
-                        <span style={{
-                          marginLeft: 8, fontSize: '.65rem', fontWeight: 500,
-                          padding: '2px 8px', background: '#475569', borderRadius: 999
-                        }}>
-                          Nonaktif
-                        </span>
-                      )}
-                    </h4>
-                    <div style={{ display: 'flex', gap: 2, marginBottom: 8 }}>
-                      {[...Array(5)].map((_, i) => (
-                        <i key={i} className={`bi ${i < item.rating ? 'bi-star-fill' : 'bi-star'}`}
-                          style={{ fontSize: '.75rem', color: i < item.rating ? '#fbbf24' : '#475569' }} />
-                      ))}
-                    </div>
-                    <p style={{ margin: 0, color: '#94a3b8', fontSize: '.9rem', lineHeight: 1.6 }}>
-                      "{item.text}"
-                    </p>
-                    <p style={{ margin: '8px 0 0', fontSize: '.7rem', color: '#64748b' }}>
-                      {new Date(item.created_at).toLocaleDateString('id-ID', {
-                        day: 'numeric', month: 'short', year: 'numeric'
-                      })}
-                    </p>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button
-                    onClick={() => handleToggleActive(item.id, item.is_active)}
-                    className="am-btn am-btn-sm"
-                    style={{
-                      background: item.is_active ? 'rgba(245,158,11,0.15)' : 'rgba(16,185,129,0.15)',
-                      color: item.is_active ? '#f59e0b' : '#10b981',
-                      border: 'none'
-                    }}
-                    title={item.is_active ? 'Nonaktifkan' : 'Aktifkan'}
-                  >
-                    <i className={`bi ${item.is_active ? 'bi-eye-slash' : 'bi-eye'}`} />
-                  </button>
-                  <button
-                    onClick={() => handleEdit(item)}
-                    className="am-btn am-btn-sm am-btn-secondary"
-                  >
-                    <i className="bi bi-pencil" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item.id)}
-                    className="am-btn am-btn-sm"
-                    style={{ background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: 'none' }}
-                  >
-                    <i className="bi bi-trash3" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Modal */}
-      {showModal && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 1000,
-          background: 'rgba(0,0,0,0.7)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '1rem'
-        }} onClick={() => setShowModal(false)}>
-          <div style={{
-            background: '#1e293b', borderRadius: 16, padding: '1.5rem',
-            width: '100%', maxWidth: 500
-          }} onClick={(e) => e.stopPropagation()}>
-            <h3 style={{ margin: '0 0 1.5rem', color: '#fff' }}>
-              {editingId ? 'Edit Testimoni' : 'Tambah Testimoni'}
-            </h3>
-            <form onSubmit={handleSubmit}>
-              <div style={{ marginBottom: '1rem' }}>
-                <label className="am-label">Nama Pelanggan</label>
-                <input
-                  type="text"
-                  className="am-input"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="Contoh: Budi Santoso"
-                  required
-                />
-              </div>
-              <div style={{ marginBottom: '1rem' }}>
-                <label className="am-label">Testimoni</label>
-                <textarea
-                  className="am-input"
-                  value={form.text}
-                  onChange={(e) => setForm({ ...form, text: e.target.value })}
-                  placeholder="Ketik testimoni pelanggan..."
-                  rows={3}
-                  required
-                  style={{ resize: 'vertical' }}
-                />
-              </div>
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label className="am-label">Rating</label>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setForm({ ...form, rating: star })}
-                      style={{
-                        background: 'none', border: 'none', cursor: 'pointer',
-                        fontSize: '1.5rem',
-                        color: star <= form.rating ? '#fbbf24' : '#475569',
-                        padding: 0
-                      }}
-                    >
-                      <i className={`bi ${star <= form.rating ? 'bi-star-fill' : 'bi-star'}`} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="am-btn am-btn-secondary"
-                >
-                  Batal
-                </button>
-                <button type="submit" className="am-btn am-btn-primary">
-                  {editingId ? 'Update' : 'Simpan'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      <ToastContainer toasts={toasts} removeToast={removeToast} />
-
+    <AppLayout>
       <style jsx global>{`
+        .fade-in {
+          animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .section-card {
+          animation: fadeIn 0.4s ease-out;
+        }
         .testimonials-list {
           max-width: 700px;
         }
-        @media (max-width: 640px) {
-          .testimonial-item > div:first-child {
-            flex-direction: column;
-          }
-          .testimonial-item .am-btn-group {
-            margin-top: 1rem;
-            width: 100%;
-            justify-content: flex-start;
-          }
-        }
       `}</style>
-    </div>
+
+      <div className="page-wrapper">
+        {/* Header */}
+        <div className="pg-header fade-in">
+          <div>
+            <h4 className="pg-title">
+              <i className="bi bi-chat-quote" style={{ color: '#f59e0b', marginRight: 8 }} />
+              Testimoni
+            </h4>
+            <p className="pg-subtitle">
+              Kelola testimoni pelanggan &mdash; {testimonials.length} testimoni
+            </p>
+          </div>
+          <button
+            onClick={() => { resetForm(); setShowModal(true) }}
+            className="am-btn am-btn-primary am-btn-pill am-btn-sm"
+            style={{ boxShadow: '0 2px 10px rgba(59,130,246,.25)' }}
+          >
+            <i className="bi bi-plus-circle" /> Tambah Testimoni
+          </button>
+        </div>
+
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--am-text-muted)' }}>
+            <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
+            <p style={{ marginTop: '8px' }}>Memuat...</p>
+          </div>
+        ) : testimonials.length === 0 ? (
+          <div className="section-card fade-in" style={{ textAlign: 'center', padding: '3rem' }}>
+            <i className="bi bi-chat-quote" style={{ fontSize: '3rem', color: 'var(--am-border)', marginBottom: '1rem' }} />
+            <p style={{ color: 'var(--am-text-muted)' }}>Belum ada testimoni. Tambahkan yang pertama!</p>
+          </div>
+        ) : (
+          <div className="testimonials-list fade-in">
+            {testimonials.map((item) => (
+              <div key={item.id} style={{
+                background: 'var(--am-surface)',
+                border: '1px solid var(--am-border)',
+                borderRadius: '16px',
+                padding: '20px',
+                marginBottom: '16px',
+                opacity: item.is_active ? 1 : 0.6,
+                boxShadow: 'var(--am-shadow)'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
+                  <div style={{ display: 'flex', gap: '16px', flex: 1 }}>
+                    <div style={{
+                      width: 52, height: 52, borderRadius: '14px',
+                      background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: '#fff', fontWeight: 700, fontSize: '1.2rem', flexShrink: 0
+                    }}>
+                      {item.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <h4 style={{ margin: '0 0 6px', fontWeight: 600, fontSize: '1rem' }}>
+                        {item.name}
+                        {!item.is_active && (
+                          <span style={{
+                            marginLeft: 8, fontSize: '.65rem', fontWeight: 500,
+                            padding: '2px 8px', background: 'var(--am-surface-2)', borderRadius: '999px',
+                            color: 'var(--am-text-muted)'
+                          }}>
+                            Nonaktif
+                          </span>
+                        )}
+                      </h4>
+                      <div style={{ display: 'flex', gap: '2px', marginBottom: '8px' }}>
+                        {[...Array(5)].map((_, i) => (
+                          <i key={i} className={`bi ${i < item.rating ? 'bi-star-fill' : 'bi-star'}`}
+                            style={{ fontSize: '.8rem', color: i < item.rating ? '#fbbf24' : 'var(--am-border)' }} />
+                        ))}
+                      </div>
+                      <p style={{ margin: 0, color: 'var(--am-text-muted)', fontSize: '.9rem', lineHeight: 1.6 }}>
+                        "{item.text}"
+                      </p>
+                      <p style={{ margin: '8px 0 0', fontSize: '.7rem', color: 'var(--am-text-subtle)' }}>
+                        {new Date(item.created_at).toLocaleDateString('id-ID', {
+                          day: 'numeric', month: 'short', year: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button
+                      onClick={() => handleToggleActive(item.id, item.is_active)}
+                      className="btn-act"
+                      style={{
+                        background: item.is_active ? 'rgba(245,158,11,.12)' : 'rgba(16,185,129,.12)',
+                        color: item.is_active ? '#f59e0b' : '#10b981',
+                        border: 'none'
+                      }}
+                      title={item.is_active ? 'Nonaktifkan' : 'Aktifkan'}
+                    >
+                      <i className={`bi ${item.is_active ? 'bi-eye-slash' : 'bi-eye'}`} />
+                    </button>
+                    <button
+                      onClick={() => handleEdit(item)}
+                      className="btn-act btn-act-blue"
+                    >
+                      <i className="bi bi-pencil" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item.id)}
+                      className="btn-act btn-act-red"
+                    >
+                      <i className="bi bi-trash3" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Modal */}
+        {showModal && (
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 1000,
+            background: 'rgba(0,0,0,0.6)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '1rem'
+          }} onClick={() => setShowModal(false)}>
+            <div className="section-card" style={{
+              width: '100%', maxWidth: 500
+            }} onClick={(e) => e.stopPropagation()}>
+              <div className="card-header">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <i className="bi bi-chat-quote" style={{ color: '#f59e0b' }} />
+                  {editingId ? 'Edit Testimoni' : 'Tambah Testimoni'}
+                </span>
+              </div>
+              <form onSubmit={handleSubmit} style={{ padding: '20px' }}>
+                <div style={{ marginBottom: '16px' }}>
+                  <label className="am-label">Nama Pelanggan</label>
+                  <input
+                    type="text"
+                    className="am-input"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    placeholder="Contoh: Budi Santoso"
+                    required
+                  />
+                </div>
+                <div style={{ marginBottom: '16px' }}>
+                  <label className="am-label">Testimoni</label>
+                  <textarea
+                    className="am-input"
+                    value={form.text}
+                    onChange={(e) => setForm({ ...form, text: e.target.value })}
+                    placeholder="Ketik testimoni pelanggan..."
+                    rows={3}
+                    required
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
+                <div style={{ marginBottom: '20px' }}>
+                  <label className="am-label">Rating</label>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setForm({ ...form, rating: star })}
+                        style={{
+                          background: 'none', border: 'none', cursor: 'pointer',
+                          fontSize: '1.5rem',
+                          color: star <= form.rating ? '#fbbf24' : 'var(--am-border)',
+                          padding: 0
+                        }}
+                      >
+                        <i className={`bi ${star <= form.rating ? 'bi-star-fill' : 'bi-star'}`} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                    className="am-btn am-btn-secondary"
+                  >
+                    Batal
+                  </button>
+                  <button type="submit" className="am-btn am-btn-primary">
+                    {editingId ? 'Update' : 'Simpan'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        <ToastContainer toasts={toasts} removeToast={removeToast} />
+      </div>
+    </AppLayout>
   )
 }

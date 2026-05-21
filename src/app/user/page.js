@@ -92,24 +92,39 @@ export default function UserManagement() {
 
   return (
     <AppLayout>
-      <div style={{ minHeight: '100vh', padding: '0' }}>
+      <style jsx global>{`
+        .fade-in {
+          animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .section-card {
+          animation: fadeIn 0.4s ease-out;
+        }
+      `}</style>
+
+      <div className="page-wrapper">
         {/* Header */}
-        <div className="pg-header">
+        <div className="pg-header fade-in">
           <div>
             <h4 className="pg-title">
-              <i className="bi bi-people" style={{ color: '#6366f1', marginRight: 8 }} />
+              <i className="bi bi-people-gear" style={{ color: '#6366f1', marginRight: 8 }} />
               Manajemen User
             </h4>
-            <p className="pg-subtitle">Total: {total} user</p>
+            <p className="pg-subtitle">
+              Kelola user sistem &mdash; {total.toLocaleString('id-ID')} user
+            </p>
           </div>
-          <Link href="/user/tambah" className="am-btn am-btn-primary am-btn-pill am-btn-sm">
+          <Link href="/user/tambah" className="am-btn am-btn-primary am-btn-pill am-btn-sm" style={{ boxShadow: '0 2px 10px rgba(59,130,246,.25)' }}>
             <i className="bi bi-person-plus" />
             Tambah User
           </Link>
         </div>
 
         {/* Search */}
-        <div style={{ marginBottom: '1.5rem' }}>
+        <div className="search-section fade-in">
           <input
             type="text"
             value={search}
@@ -121,58 +136,53 @@ export default function UserManagement() {
         </div>
 
         {/* Table */}
-        <div className="section-card">
+        <div className="section-card fade-in" style={{ marginBottom: '16px', overflow: 'hidden' }}>
           {users.length > 0 ? (
-            <table className="am-table">
-              <thead>
-                <tr>
-                  <th>No</th>
-                  <th>Username</th>
-                  <th>Role</th>
-                  <th>Tanggal Dibuat</th>
-                  <th>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user, i) => (
-                  <tr key={user.id}>
-                    <td style={{ color: '#64748b', fontSize: '.75rem', fontWeight: 700 }}>
-                      {(page - 1) * 10 + i + 1}
-                    </td>
-                    <td style={{ fontWeight: 600 }}>{user.username}</td>
-                    <td>{getRoleBadge(user.role)}</td>
-                    <td style={{ color: '#64748b', fontSize: '.85rem' }}>
-                      {new Date(user.created_at).toLocaleDateString('id-ID', {
-                        day: '2-digit', month: 'short', year: 'numeric'
-                      })}
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <Link href={`/user/edit/${user.id}`} style={{
-                          padding: '6px 12px', borderRadius: 6,
-                          background: 'transparent', border: '1px solid #3b82f6',
-                          color: '#3b82f6', fontSize: '.75rem', textDecoration: 'none'
-                        }}>
-                          <i className="bi bi-pencil" />
-                        </Link>
-                        <button
-                          onClick={() => setDeleteId(user.id)}
-                          style={{
-                            padding: '6px 12px', borderRadius: 6,
-                            background: 'transparent', border: '1px solid #ef4444',
-                            color: '#ef4444', fontSize: '.75rem', cursor: 'pointer'
-                          }}
-                        >
-                          <i className="bi bi-trash" />
-                        </button>
-                      </div>
-                    </td>
+            <div style={{ overflowX: 'auto' }}>
+              <table className="am-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: '50px', textAlign: 'center' }}>#</th>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Tanggal Dibuat</th>
+                    <th style={{ width: '100px', textAlign: 'center' }}>Aksi</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {users.map((user, i) => (
+                    <tr key={user.id}>
+                      <td style={{ textAlign: 'center', fontSize: '.75rem', color: 'var(--am-text-muted)', fontWeight: 700 }}>
+                        {(page - 1) * 10 + i + 1}
+                      </td>
+                      <td style={{ fontWeight: 600 }}>{user.username}</td>
+                      <td>{getRoleBadge(user.role)}</td>
+                      <td style={{ color: 'var(--am-text-muted)', fontSize: '.8rem' }}>
+                        {new Date(user.created_at).toLocaleDateString('id-ID', {
+                          day: '2-digit', month: 'short', year: 'numeric'
+                        })}
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                          <Link href={`/user/edit/${user.id}`} className="btn-act btn-act-blue" title="Edit">
+                            <i className="bi bi-pencil" />
+                          </Link>
+                          <button
+                            onClick={() => setDeleteId(user.id)}
+                            className="btn-act btn-act-red"
+                            title="Hapus"
+                          >
+                            <i className="bi bi-trash" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
-            <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
+            <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--am-text-muted)' }}>
               <i className="bi bi-people" style={{ fontSize: '2.5rem', display: 'block', marginBottom: '.5rem', opacity: 0.3 }} />
               {search ? 'User tidak ditemukan' : 'Belum ada data user'}
             </div>
@@ -181,31 +191,38 @@ export default function UserManagement() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '16px' }}>
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              style={{
-                padding: '8px 16px', borderRadius: 8,
-                background: page === 1 ? '#334155' : '#3b82f6',
-                color: '#fff', border: 'none', cursor: page === 1 ? 'not-allowed' : 'pointer'
-              }}
+              className="am-btn am-btn-secondary"
+              style={{ padding: '8px 14px', fontSize: '.875rem' }}
             >
-              ← Prev
+              <i className="bi bi-chevron-left" />
             </button>
-            <span style={{ padding: '8px 16px', color: '#94a3b8' }}>
-              Halaman {page} dari {totalPages}
-            </span>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
+              .map((p, idx, arr) => (
+                <>
+                  {idx > 0 && arr[idx - 1] !== p - 1 && <span style={{ padding: '8px 12px', color: 'var(--am-text-muted)' }}>…</span>}
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`am-btn ${page === p ? 'am-btn-primary' : 'am-btn-secondary'}`}
+                    style={{ padding: '8px 14px', fontSize: '.875rem', minWidth: '40px' }}
+                  >
+                    {p}
+                  </button>
+                </>
+              ))
+            }
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              style={{
-                padding: '8px 16px', borderRadius: 8,
-                background: page === totalPages ? '#334155' : '#3b82f6',
-                color: '#fff', border: 'none', cursor: page === totalPages ? 'not-allowed' : 'pointer'
-              }}
+              className="am-btn am-btn-secondary"
+              style={{ padding: '8px 14px', fontSize: '.875rem' }}
             >
-              Next →
+              <i className="bi bi-chevron-right" />
             </button>
           </div>
         )}
@@ -218,32 +235,27 @@ export default function UserManagement() {
             justifyContent: 'center', zIndex: 200
           }}>
             <div style={{
-              background: '#1e293b', padding: '2rem', borderRadius: 16,
-              maxWidth: 400, width: '90%'
+              background: 'var(--am-surface)', padding: '2rem', borderRadius: '16px',
+              maxWidth: 400, width: '90%', border: '1px solid var(--am-border)'
             }}>
-              <h4 style={{ color: '#fff', marginBottom: '1rem' }}>
+              <h4 style={{ color: 'var(--am-text)', marginBottom: '1rem', fontWeight: '700' }}>
                 <i className="bi bi-exclamation-triangle" style={{ color: '#ef4444', marginRight: 8 }} />
                 Konfirmasi Hapus
               </h4>
-              <p style={{ color: '#94a3b8', marginBottom: '1.5rem' }}>
+              <p style={{ color: 'var(--am-text-muted)', marginBottom: '1.5rem' }}>
                 Apakah Anda yakin ingin menghapus user ini? Tindakan ini tidak dapat dibatalkan.
               </p>
               <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
                 <button
                   onClick={() => setDeleteId(null)}
-                  style={{
-                    padding: '10px 20px', borderRadius: 8, background: '#334155',
-                    color: '#fff', border: 'none', cursor: 'pointer'
-                  }}
+                  className="am-btn am-btn-secondary"
                 >
                   Batal
                 </button>
                 <button
                   onClick={() => handleDelete(deleteId)}
-                  style={{
-                    padding: '10px 20px', borderRadius: 8, background: '#ef4444',
-                    color: '#fff', border: 'none', cursor: 'pointer'
-                  }}
+                  className="am-btn"
+                  style={{ background: '#ef4444', color: '#fff' }}
                 >
                   Hapus
                 </button>
@@ -251,17 +263,6 @@ export default function UserManagement() {
             </div>
           </div>
         )}
-
-        {/* Back link */}
-        <div style={{ marginTop: '2rem' }}>
-          <Link href="/dashboard" style={{
-            color: '#64748b', textDecoration: 'none',
-            display: 'inline-flex', alignItems: 'center', gap: 8
-          }}>
-            <i className="bi bi-arrow-left" />
-            Kembali ke Dashboard
-          </Link>
-        </div>
       </div>
     </AppLayout>
   )

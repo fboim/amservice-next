@@ -955,29 +955,150 @@ body {
   font-size: 1.3rem;
 }
 
-/* Dashboard Card Hover Effects */
-.dashboard-stats > div:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--am-shadow-md);
+/* Page Header - Consistent across all pages */
+.pg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: var(--am-surface);
+  border-radius: var(--am-radius-lg);
+  border: 1px solid var(--am-border);
+  box-shadow: var(--am-shadow);
 }
 
-/* Smooth transitions for all cards */
-.dashboard-stats > div,
-.section-card,
-.am-card {
+.pg-header .pg-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--am-text);
+  margin: 0 0 4px;
+  letter-spacing: -0.02em;
+}
+
+.pg-header .pg-subtitle {
+  font-size: .78rem;
+  color: var(--am-text-muted);
+  margin: 0;
+}
+
+/* Fade-in animation */
+.fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Section Card animation */
+.section-card {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Table animations */
+.am-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.am-table thead th {
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--am-text-muted);
+  background: var(--am-surface-2);
+  padding: 12px 16px;
+  border-bottom: 2px solid var(--am-border);
+  white-space: nowrap;
+}
+
+.am-table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--am-border);
+  vertical-align: middle;
+  font-size: .85rem;
+}
+
+.am-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.am-table tbody tr:hover {
+  background: var(--am-surface-2);
+}
+
+/* Stat Card for Laporan */
+.stat-card {
+  background: var(--am-surface);
+  border: 1px solid var(--am-border);
+  border-radius: var(--am-radius-lg);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--am-shadow);
   transition: all 0.25s ease;
 }
 
-/* Button hover effects */
-.am-btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(59,130,246,.4);
+.stat-card:hover {
+  box-shadow: var(--am-shadow-md);
+  transform: translateY(-2px);
 }
 
-/* Table row hover */
-.ds-table tbody tr:hover,
-.dashboard-table tbody tr:hover {
+/* Page wrapper for full-width pages */
+.page-wrapper {
+  min-height: 100%;
+  width: 100%;
+}
+
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Card header styles */
+.card-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--am-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background: var(--am-surface-2);
+}
+
+/* Search section */
+.search-section {
+  background: var(--am-surface);
+  border: 1px solid var(--am-border);
+  border-radius: var(--am-radius-lg);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 640px) {
+  .pg-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
+  }
+  .pg-header .pg-title {
+    font-size: 1rem;
+  }
+}
+
+/* Card hover effects */
+.scard:hover,
+.section-card:hover,
+.stat-card:hover {
+  box-shadow: var(--am-shadow-md);
+  transform: translateY(-2px);
 }
 
 /* Header icon gradient animation */

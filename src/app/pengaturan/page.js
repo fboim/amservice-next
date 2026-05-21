@@ -94,25 +94,40 @@ export default function Pengaturan() {
 
   return (
     <AppLayout>
-      <div style={{ minHeight: '100vh', padding: '0' }}>
+      <style jsx global>{`
+        .fade-in {
+          animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .section-card {
+          animation: fadeIn 0.4s ease-out;
+        }
+      `}</style>
+
+      <div className="page-wrapper">
         {/* Header */}
-        <div className="pg-header">
+        <div className="pg-header fade-in">
           <div>
             <h4 className="pg-title">
               <i className="bi bi-gear" style={{ color: '#64748b', marginRight: 8 }} />
               Pengaturan Toko
             </h4>
-            <p className="pg-subtitle">Atur informasi toko dan syarat ketentuan</p>
+            <p className="pg-subtitle">
+              Atur informasi toko dan syarat ketentuan
+            </p>
           </div>
         </div>
 
         {/* Message */}
         {message && (
-          <div style={{
+          <div className="fade-in" style={{
             padding: '12px 16px',
             background: message.includes('berhasil') ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
             border: `1px solid ${message.includes('berhasil') ? '#10b981' : '#ef4444'}`,
-            borderRadius: 8, marginBottom: '1.5rem',
+            borderRadius: '12px', marginBottom: '20px',
             color: message.includes('berhasil') ? '#10b981' : '#ef4444',
             fontSize: '.875rem'
           }}>
@@ -122,121 +137,112 @@ export default function Pengaturan() {
         )}
 
         <form onSubmit={handleSubmit}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+          <div className="dashboard-two-col fade-in" style={{ marginBottom: '20px' }}>
             {/* Left Column */}
             <div className="section-card">
-              <h5 style={{ color: '#94a3b8', marginBottom: '1.5rem' }}>
-                <i className="bi bi-shop" style={{ marginRight: 8 }} />
-                Informasi Toko
-              </h5>
-
-              <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', color: '#94a3b8', fontSize: '.85rem', marginBottom: 6 }}>
-                  Nama Toko
-                </label>
-                <input
-                  type="text"
-                  name="nama_toko"
-                  value={formData.nama_toko}
-                  onChange={handleChange}
-                  className="am-input"
-                  placeholder="AM SERVICE"
-                />
+              <div className="card-header">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <i className="bi bi-shop" style={{ color: '#3b82f6' }} />
+                  Informasi Toko
+                </span>
               </div>
+              <div style={{ padding: '20px' }}>
+                <div style={{ marginBottom: '20px' }}>
+                  <label className="am-label">Nama Toko</label>
+                  <input
+                    type="text"
+                    name="nama_toko"
+                    value={formData.nama_toko}
+                    onChange={handleChange}
+                    className="am-input"
+                    placeholder="AM SERVICE"
+                  />
+                </div>
 
-              <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', color: '#94a3b8', fontSize: '.85rem', marginBottom: 6 }}>
-                  No. WhatsApp
-                </label>
-                <input
-                  type="text"
-                  name="no_wa"
-                  value={formData.no_wa}
-                  onChange={handleChange}
-                  className="am-input"
-                  placeholder="08xxxxxxxxxx"
-                />
-              </div>
+                <div style={{ marginBottom: '20px' }}>
+                  <label className="am-label">No. WhatsApp</label>
+                  <input
+                    type="text"
+                    name="no_wa"
+                    value={formData.no_wa}
+                    onChange={handleChange}
+                    className="am-input"
+                    placeholder="08xxxxxxxxxx"
+                  />
+                </div>
 
-              <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', color: '#94a3b8', fontSize: '.85rem', marginBottom: 6 }}>
-                  Alamat
-                </label>
-                <textarea
-                  name="alamat"
-                  value={formData.alamat}
-                  onChange={handleChange}
-                  className="am-input"
-                  rows={3}
-                  placeholder="Jl. example No. 123, Kota"
-                  style={{ resize: 'vertical' }}
-                />
-              </div>
+                <div style={{ marginBottom: '20px' }}>
+                  <label className="am-label">Alamat</label>
+                  <textarea
+                    name="alamat"
+                    value={formData.alamat}
+                    onChange={handleChange}
+                    className="am-input"
+                    rows={3}
+                    placeholder="Jl. example No. 123, Kota"
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
 
-              <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', color: '#94a3b8', fontSize: '.85rem', marginBottom: 6 }}>
-                  Link Google Maps
-                </label>
-                <input
-                  type="url"
-                  name="link_maps"
-                  value={formData.link_maps}
-                  onChange={handleChange}
-                  className="am-input"
-                  placeholder="https://maps.google.com/..."
-                />
+                <div style={{ marginBottom: 0 }}>
+                  <label className="am-label">Link Google Maps</label>
+                  <input
+                    type="url"
+                    name="link_maps"
+                    value={formData.link_maps}
+                    onChange={handleChange}
+                    className="am-input"
+                    placeholder="https://maps.google.com/..."
+                  />
+                </div>
               </div>
             </div>
 
             {/* Right Column */}
             <div className="section-card">
-              <h5 style={{ color: '#94a3b8', marginBottom: '1.5rem' }}>
-                <i className="bi bi-file-text" style={{ marginRight: 8 }} />
-                Syarat & Ketentuan
-              </h5>
-
-              <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', color: '#94a3b8', fontSize: '.85rem', marginBottom: 6 }}>
-                  Syarat Penerimaan Unit
-                </label>
-                <textarea
-                  name="snk_penerimaan"
-                  value={formData.snk_penerimaan}
-                  onChange={handleChange}
-                  className="am-input"
-                  rows={5}
-                  placeholder="1. Pelanggan wajib menunjukkan nota...
-
-2. dst..."
-                  style={{ resize: 'vertical' }}
-                />
+              <div className="card-header">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <i className="bi bi-file-text" style={{ color: '#f59e0b' }} />
+                  Syarat & Ketentuan
+                </span>
               </div>
+              <div style={{ padding: '20px' }}>
+                <div style={{ marginBottom: '20px' }}>
+                  <label className="am-label">Syarat Penerimaan Unit</label>
+                  <textarea
+                    name="snk_penerimaan"
+                    value={formData.snk_penerimaan}
+                    onChange={handleChange}
+                    className="am-input"
+                    rows={5}
+                    placeholder="1. Pelanggan wajib menunjukkan nota..."
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
 
-              <div style={{ marginBottom: '1.25rem' }}>
-                <label style={{ display: 'block', color: '#94a3b8', fontSize: '.85rem', marginBottom: 6 }}>
-                  Syarat & Ketentuan Garansi
-                </label>
-                <textarea
-                  name="snk_garansi"
-                  value={formData.snk_garansi}
-                  onChange={handleChange}
-                  className="am-input"
-                  rows={5}
-                  placeholder="1. Garansi berlaku 7 hari...
-
-2. dst..."
-                  style={{ resize: 'vertical' }}
-                />
+                <div style={{ marginBottom: 0 }}>
+                  <label className="am-label">Syarat & Ketentuan Garansi</label>
+                  <textarea
+                    name="snk_garansi"
+                    value={formData.snk_garansi}
+                    onChange={handleChange}
+                    className="am-input"
+                    rows={5}
+                    placeholder="1. Garansi berlaku 7 hari..."
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
               </div>
             </div>
           </div>
 
           {/* Submit Button */}
-          <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button
               type="submit"
               disabled={saving}
               className="am-btn am-btn-primary"
+              style={{ padding: '12px 24px' }}
             >
               {saving ? (
                 <>
@@ -252,17 +258,6 @@ export default function Pengaturan() {
             </button>
           </div>
         </form>
-
-        {/* Back link */}
-        <div style={{ marginTop: '2rem' }}>
-          <Link href="/dashboard" style={{
-            color: '#64748b', textDecoration: 'none',
-            display: 'inline-flex', alignItems: 'center', gap: 8
-          }}>
-            <i className="bi bi-arrow-left" />
-            Kembali ke Dashboard
-          </Link>
-        </div>
       </div>
     </AppLayout>
   )

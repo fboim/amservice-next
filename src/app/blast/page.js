@@ -104,32 +104,47 @@ export default function BlastPage() {
 
   return (
     <AppLayout>
-      <div style={{ minHeight: '100vh', padding: '0' }}>
+      <style jsx global>{`
+        .fade-in {
+          animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .section-card {
+          animation: fadeIn 0.4s ease-out;
+        }
+      `}</style>
+
+      <div className="page-wrapper">
         {/* Header */}
-        <div className="pg-header">
+        <div className="pg-header fade-in">
           <div>
             <h4 className="pg-title">
               <i className="bi bi-whatsapp" style={{ color: '#25D366', marginRight: 8 }} />
               WhatsApp Blast
             </h4>
-            <p className="pg-subtitle">Kirim pesan massal ke pelanggan</p>
+            <p className="pg-subtitle">
+              Kirim pesan massal ke pelanggan
+            </p>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+        <div className="dashboard-two-col fade-in" style={{ marginBottom: '20px' }}>
           {/* Left: Target Selection */}
           <div>
             <div className="section-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h5 style={{ color: '#94a3b8', margin: 0 }}>
-                  <i className="bi bi-people-fill" style={{ marginRight: 8 }} />
+              <div className="card-header">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <i className="bi bi-people-fill" style={{ color: '#3b82f6' }} />
                   Pilih Target
-                </h5>
+                </span>
                 <select
                   value={table}
                   onChange={(e) => setTable(e.target.value)}
                   className="am-input"
-                  style={{ width: 'auto', fontSize: '.85rem' }}
+                  style={{ width: 'auto', fontSize: '.8rem', padding: '6px 10px' }}
                 >
                   <option value="pelanggan">Pelanggan</option>
                   <option value="servis">Servis Aktif</option>
@@ -137,49 +152,49 @@ export default function BlastPage() {
               </div>
 
               {loadingTargets ? (
-                <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
+                <div style={{ textAlign: 'center', padding: '2rem' }}>
                   <span className="spinner" style={{ width: 32, height: 32 }} />
-                  <p>Memuat target...</p>
+                  <p style={{ color: 'var(--am-text-muted)', marginTop: '8px' }}>Memuat target...</p>
                 </div>
               ) : (
                 <>
-                  <div style={{ marginBottom: '1rem' }}>
+                  <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--am-border)', display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <button
                       onClick={toggleAll}
-                      className="am-btn"
-                      style={{ fontSize: '.75rem', background: '#334155', padding: '6px 12px' }}
+                      className="am-btn am-btn-secondary"
+                      style={{ fontSize: '.75rem', padding: '6px 12px' }}
                     >
                       {selectedTargets.length === targets.length ? 'Batal Pilih Semua' : 'Pilih Semua'}
                     </button>
-                    <span style={{ marginLeft: 12, color: '#64748b', fontSize: '.85rem' }}>
+                    <span style={{ color: 'var(--am-text-muted)', fontSize: '.85rem' }}>
                       {selectedTargets.length} / {targets.length} dipilih
                     </span>
                   </div>
 
-                  <div style={{ maxHeight: 300, overflowY: 'auto', border: '1px solid #334155', borderRadius: 8 }}>
+                  <div style={{ maxHeight: 300, overflowY: 'auto' }}>
                     {targets.map((t, i) => (
                       <div
                         key={i}
                         onClick={() => toggleTarget(t.no_hp)}
                         style={{
-                          padding: '10px 12px', borderBottom: '1px solid #334155',
+                          padding: '12px 16px', borderBottom: '1px solid var(--am-border)',
                           cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12,
-                          background: selectedTargets.includes(t.no_hp) ? 'rgba(16,185,129,0.1)' : 'transparent',
+                          background: selectedTargets.includes(t.no_hp) ? 'rgba(16,185,129,0.08)' : 'transparent',
                           transition: 'background 0.2s'
                         }}
                       >
                         <div style={{
-                          width: 20, height: 20, borderRadius: 4, border: '2px solid #64748b',
+                          width: 22, height: 22, borderRadius: '6px', border: '2px solid var(--am-border)',
                           background: selectedTargets.includes(t.no_hp) ? '#10b981' : 'transparent',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center'
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
                         }}>
                           {selectedTargets.includes(t.no_hp) && (
                             <i className="bi bi-check" style={{ color: '#fff', fontSize: '.7rem' }} />
                           )}
                         </div>
                         <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 600, fontSize: '.85rem' }}>{t.nama}</div>
-                          <div style={{ fontSize: '.75rem', color: '#64748b' }}>{t.no_hp}</div>
+                          <div style={{ fontWeight: 600, fontSize: '.9rem' }}>{t.nama}</div>
+                          <div style={{ fontSize: '.75rem', color: 'var(--am-text-muted)' }}>{t.no_hp}</div>
                         </div>
                       </div>
                     ))}
@@ -189,25 +204,22 @@ export default function BlastPage() {
             </div>
 
             {/* Templates */}
-            <div className="section-card" style={{ marginTop: '1rem' }}>
-              <h5 style={{ color: '#94a3b8', marginBottom: '1rem' }}>
-                <i className="bi bi-file-text" style={{ marginRight: 8 }} />
-                Template Pesan
-              </h5>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div className="section-card" style={{ marginTop: '16px' }}>
+              <div className="card-header">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <i className="bi bi-file-text" style={{ color: '#f59e0b' }} />
+                  Template Pesan
+                </span>
+              </div>
+              <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {templates.map((t, i) => (
                   <button
                     key={i}
                     onClick={() => handleTemplateSelect(t)}
-                    style={{
-                      padding: '10px 14px', background: '#1e293b', border: '1px solid #334155',
-                      borderRadius: 8, color: '#94a3b8', textAlign: 'left', cursor: 'pointer',
-                      fontSize: '.85rem', transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={(e) => { e.target.style.borderColor = '#3b82f6'; e.target.style.color = '#fff' }}
-                    onMouseLeave={(e) => { e.target.style.borderColor = '#334155'; e.target.style.color = '#94a3b8' }}
+                    className="am-btn am-btn-secondary"
+                    style={{ justifyContent: 'flex-start', fontSize: '.85rem' }}
                   >
-                    <i className="bi bi-lightning" style={{ marginRight: 8 }} />
+                    <i className="bi bi-lightning" style={{ color: '#f59e0b' }} />
                     {t.name}
                   </button>
                 ))}
@@ -218,86 +230,80 @@ export default function BlastPage() {
           {/* Right: Message Composer */}
           <div>
             <div className="section-card">
-              <h5 style={{ color: '#94a3b8', marginBottom: '1rem' }}>
-                <i className="bi bi-chat-left-text" style={{ marginRight: 8 }} />
-               Tulis Pesan
-              </h5>
-
-              <textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                className="am-input"
-                rows={8}
-                placeholder="Ketik pesan yang akan dikirim...
+              <div className="card-header">
+                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <i className="bi bi-chat-left-text" style={{ color: '#10b981' }} />
+                  Tulis Pesan
+                </span>
+              </div>
+              <div style={{ padding: '16px' }}>
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="am-input"
+                  rows={8}
+                  placeholder="Ketik pesan yang akan dikirim...
 
 Gunakan {nama} untuk menggabungkan nama pelanggan."
-                style={{ resize: 'vertical', fontSize: '.9rem' }}
-              />
+                  style={{ resize: 'vertical', fontSize: '.9rem' }}
+                />
 
-              <div style={{ marginTop: '1rem', fontSize: '.75rem', color: '#64748b' }}>
-                <i className="bi bi-info-circle" style={{ marginRight: 4 }} />
-                {selectedTargets.length} target akan menerima pesan ini
+                <div style={{ marginTop: '12px', fontSize: '.75rem', color: 'var(--am-text-muted)' }}>
+                  <i className="bi bi-info-circle" style={{ marginRight: 4 }} />
+                  {selectedTargets.length} target akan menerima pesan ini
+                </div>
+
+                <button
+                  onClick={handleSend}
+                  disabled={loading || selectedTargets.length === 0}
+                  className="am-btn"
+                  style={{
+                    width: '100%', marginTop: '16px',
+                    background: '#25D366', color: '#fff',
+                    padding: '14px', fontSize: '1rem'
+                  }}
+                >
+                  {loading ? (
+                    <>
+                      <span className="spinner" style={{ width: 20, height: 20, marginRight: 8 }} />
+                      Mengirim...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-send" style={{ marginRight: 8 }} />
+                      Kirim ke {selectedTargets.length} Target
+                    </>
+                  )}
+                </button>
               </div>
-
-              <button
-                onClick={handleSend}
-                disabled={loading || selectedTargets.length === 0}
-                className="am-btn"
-                style={{
-                  width: '100%', marginTop: '1rem',
-                  background: '#25D366', color: '#fff',
-                  padding: '12px', fontSize: '1rem'
-                }}
-              >
-                {loading ? (
-                  <>
-                    <span className="spinner" style={{ width: 20, height: 20, marginRight: 8 }} />
-                    Mengirim...
-                  </>
-                ) : (
-                  <>
-                    <i className="bi bi-send" style={{ marginRight: 8 }} />
-                    Kirim ke {selectedTargets.length} Target
-                  </>
-                )}
-              </button>
             </div>
 
             {/* Result */}
             {result && (
-              <div className="section-card" style={{ marginTop: '1rem' }}>
-                <h5 style={{ color: '#94a3b8', marginBottom: '1rem' }}>
-                  <i className="bi bi-check-circle" style={{ marginRight: 8 }} />
-                  Hasil Pengiriman
-                </h5>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-                  <div style={{ textAlign: 'center', background: '#1e293b', padding: '1rem', borderRadius: 8 }}>
-                    <div style={{ fontSize: '2rem', fontWeight: 800, color: '#10b981' }}>{result.success}</div>
-                    <div style={{ fontSize: '.75rem', color: '#64748b' }}>Berhasil</div>
+              <div className="section-card" style={{ marginTop: '16px' }}>
+                <div className="card-header">
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <i className="bi bi-check-circle" style={{ color: '#10b981' }} />
+                    Hasil Pengiriman
+                  </span>
+                </div>
+                <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                  <div style={{ textAlign: 'center', background: 'var(--am-surface-2)', padding: '16px', borderRadius: '12px' }}>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#10b981' }}>{result.success}</div>
+                    <div style={{ fontSize: '.75rem', color: 'var(--am-text-muted)' }}>Berhasil</div>
                   </div>
-                  <div style={{ textAlign: 'center', background: '#1e293b', padding: '1rem', borderRadius: 8 }}>
-                    <div style={{ fontSize: '2rem', fontWeight: 800, color: '#ef4444' }}>{result.failed}</div>
-                    <div style={{ fontSize: '.75rem', color: '#64748b' }}>Gagal</div>
+                  <div style={{ textAlign: 'center', background: 'var(--am-surface-2)', padding: '16px', borderRadius: '12px' }}>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#ef4444' }}>{result.failed}</div>
+                    <div style={{ fontSize: '.75rem', color: 'var(--am-text-muted)' }}>Gagal</div>
                   </div>
-                  <div style={{ textAlign: 'center', background: '#1e293b', padding: '1rem', borderRadius: 8 }}>
-                    <div style={{ fontSize: '2rem', fontWeight: 800, color: '#3b82f6' }}>{result.total}</div>
-                    <div style={{ fontSize: '.75rem', color: '#64748b' }}>Total</div>
+                  <div style={{ textAlign: 'center', background: 'var(--am-surface-2)', padding: '16px', borderRadius: '12px' }}>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#3b82f6' }}>{result.total}</div>
+                    <div style={{ fontSize: '.75rem', color: 'var(--am-text-muted)' }}>Total</div>
                   </div>
                 </div>
               </div>
             )}
           </div>
-        </div>
-
-        {/* Back link */}
-        <div style={{ marginTop: '2rem' }}>
-          <Link href="/dashboard" style={{
-            color: '#64748b', textDecoration: 'none',
-            display: 'inline-flex', alignItems: 'center', gap: 8
-          }}>
-            <i className="bi bi-arrow-left" />
-            Kembali ke Dashboard
-          </Link>
         </div>
       </div>
     </AppLayout>

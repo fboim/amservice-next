@@ -121,24 +121,39 @@ export default function TrashPage() {
 
   return (
     <AppLayout>
-      <div style={{ minHeight: '100vh', padding: '0' }}>
+      <style jsx global>{`
+        .fade-in {
+          animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .section-card {
+          animation: fadeIn 0.4s ease-out;
+        }
+      `}</style>
+
+      <div className="page-wrapper">
         {/* Header */}
-        <div className="pg-header">
+        <div className="pg-header fade-in">
           <div>
             <h4 className="pg-title">
               <i className="bi bi-trash3" style={{ color: '#ef4444', marginRight: 8 }} />
               Riwayat Servis (Trash)
             </h4>
-            <p className="pg-subtitle">Total: {total} item di trash</p>
+            <p className="pg-subtitle">
+              Data servis yang dihapus &mdash; {total.toLocaleString('id-ID')} item
+            </p>
           </div>
           <Link href="/servis/data" className="am-btn am-btn-secondary am-btn-pill am-btn-sm">
             <i className="bi bi-arrow-left" />
-            Kembali ke Data Servis
+            Kembali
           </Link>
         </div>
 
         {/* Search */}
-        <div style={{ marginBottom: '1.5rem' }}>
+        <div className="search-section fade-in">
           <input
             type="text"
             value={search}
@@ -150,69 +165,63 @@ export default function TrashPage() {
         </div>
 
         {/* Table */}
-        <div className="section-card">
+        <div className="section-card fade-in" style={{ marginBottom: '16px', overflow: 'hidden' }}>
           {trash.length > 0 ? (
-            <table className="am-table">
-              <thead>
-                <tr>
-                  <th>No</th>
-                  <th>No. Servis</th>
-                  <th>Tanggal Hapus</th>
-                  <th>Customer</th>
-                  <th>HP</th>
-                  <th>Status</th>
-                  <th>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {trash.map((item, i) => (
-                  <tr key={item.id} style={{ opacity: 0.7 }}>
-                    <td style={{ color: '#64748b', fontSize: '.75rem', fontWeight: 700 }}>
-                      {(page - 1) * 15 + i + 1}
-                    </td>
-                    <td style={{ fontWeight: 700, color: '#ef4444' }}>{item.no_servis}</td>
-                    <td style={{ color: '#64748b', fontSize: '.85rem' }}>
-                      {item.deleted_at ? new Date(item.deleted_at).toLocaleDateString('id-ID', {
-                        day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-                      }) : '-'}
-                    </td>
-                    <td>{item.nama_pelanggan || '-'}</td>
-                    <td style={{ color: '#64748b', fontSize: '.85rem' }}>
-                      {item.merk_hp} {item.tipe_hp}
-                    </td>
-                    <td>{getStatusBadge(item.status)}</td>
-                    <td>
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <button
-                          onClick={() => handleRestore(item.id)}
-                          style={{
-                            padding: '6px 12px', borderRadius: 6,
-                            background: '#10b981', border: 'none',
-                            color: '#fff', fontSize: '.75rem', cursor: 'pointer'
-                          }}
-                          title="Restore"
-                        >
-                          <i className="bi bi-arrow-counterclockwise" />
-                        </button>
-                        <button
-                          onClick={() => handlePermanentDelete(item.id)}
-                          style={{
-                            padding: '6px 12px', borderRadius: 6,
-                            background: 'transparent', border: '1px solid #ef4444',
-                            color: '#ef4444', fontSize: '.75rem', cursor: 'pointer'
-                          }}
-                          title="Hapus Permanen"
-                        >
-                          <i className="bi bi-x-circle" />
-                        </button>
-                      </div>
-                    </td>
+            <div style={{ overflowX: 'auto' }}>
+              <table className="am-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: '50px', textAlign: 'center' }}>#</th>
+                    <th>No. Servis</th>
+                    <th>Tanggal Hapus</th>
+                    <th>Customer</th>
+                    <th>HP</th>
+                    <th style={{ width: '80px', textAlign: 'center' }}>Status</th>
+                    <th style={{ width: '110px', textAlign: 'center' }}>Aksi</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {trash.map((item, i) => (
+                    <tr key={item.id} style={{ opacity: 0.7 }}>
+                      <td style={{ textAlign: 'center', fontSize: '.75rem', color: 'var(--am-text-muted)', fontWeight: 700 }}>
+                        {(page - 1) * 15 + i + 1}
+                      </td>
+                      <td style={{ fontWeight: 700, color: '#ef4444', fontSize: '.85rem' }}>{item.no_servis}</td>
+                      <td style={{ color: 'var(--am-text-muted)', fontSize: '.8rem' }}>
+                        {item.deleted_at ? new Date(item.deleted_at).toLocaleDateString('id-ID', {
+                          day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                        }) : '-'}
+                      </td>
+                      <td style={{ fontSize: '.85rem' }}>{item.nama_pelanggan || '-'}</td>
+                      <td style={{ color: 'var(--am-text-muted)', fontSize: '.8rem' }}>
+                        {item.merk_hp} {item.tipe_hp}
+                      </td>
+                      <td style={{ textAlign: 'center' }}>{getStatusBadge(item.status)}</td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                          <button
+                            onClick={() => handleRestore(item.id)}
+                            className="btn-act btn-act-green"
+                            title="Restore"
+                          >
+                            <i className="bi bi-arrow-counterclockwise" />
+                          </button>
+                          <button
+                            onClick={() => handlePermanentDelete(item.id)}
+                            className="btn-act btn-act-red"
+                            title="Hapus Permanen"
+                          >
+                            <i className="bi bi-x-circle" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : (
-            <div style={{ padding: '3rem', textAlign: 'center', color: '#64748b' }}>
+            <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--am-text-muted)' }}>
               <i className="bi bi-trash3" style={{ fontSize: '2.5rem', display: 'block', marginBottom: '.5rem', opacity: 0.3 }} />
               {search ? 'Data tidak ditemukan' : 'Trash kosong'}
             </div>
@@ -221,45 +230,41 @@ export default function TrashPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '16px' }}>
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              style={{
-                padding: '8px 16px', borderRadius: 8,
-                background: page === 1 ? '#334155' : '#3b82f6',
-                color: '#fff', border: 'none', cursor: page === 1 ? 'not-allowed' : 'pointer'
-              }}
+              className="am-btn am-btn-secondary"
+              style={{ padding: '8px 14px', fontSize: '.875rem' }}
             >
-              ← Prev
+              <i className="bi bi-chevron-left" />
             </button>
-            <span style={{ padding: '8px 16px', color: '#94a3b8' }}>
-              Halaman {page} dari {totalPages}
-            </span>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
+              .map((p, idx, arr) => (
+                <>
+                  {idx > 0 && arr[idx - 1] !== p - 1 && <span style={{ padding: '8px 12px', color: 'var(--am-text-muted)' }}>…</span>}
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`am-btn ${page === p ? 'am-btn-primary' : 'am-btn-secondary'}`}
+                    style={{ padding: '8px 14px', fontSize: '.875rem', minWidth: '40px' }}
+                  >
+                    {p}
+                  </button>
+                </>
+              ))
+            }
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              style={{
-                padding: '8px 16px', borderRadius: 8,
-                background: page === totalPages ? '#334155' : '#3b82f6',
-                color: '#fff', border: 'none', cursor: page === totalPages ? 'not-allowed' : 'pointer'
-              }}
+              className="am-btn am-btn-secondary"
+              style={{ padding: '8px 14px', fontSize: '.875rem' }}
             >
-              Next →
+              <i className="bi bi-chevron-right" />
             </button>
           </div>
         )}
-
-        {/* Back link */}
-        <div style={{ marginTop: '2rem' }}>
-          <Link href="/dashboard" style={{
-            color: '#64748b', textDecoration: 'none',
-            display: 'inline-flex', alignItems: 'center', gap: 8
-          }}>
-            <i className="bi bi-arrow-left" />
-            Kembali ke Dashboard
-          </Link>
-        </div>
       </div>
     </AppLayout>
   )

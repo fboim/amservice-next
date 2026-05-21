@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import AppLayout from '@/components/AppLayout'
 
 export default function GantiPassword() {
   const router = useRouter()
@@ -83,83 +84,114 @@ export default function GantiPassword() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
-        <div style={{ textAlign: 'center', color: 'var(--am-text-muted)' }}>
-          <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
-          <p style={{ marginTop: '8px' }}>Memuat...</p>
+      <AppLayout>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh' }}>
+          <div style={{ textAlign: 'center', color: 'var(--am-text-muted)' }}>
+            <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
+            <p style={{ marginTop: '8px' }}>Memuat...</p>
+          </div>
         </div>
-      </div>
+      </AppLayout>
     )
   }
 
   return (
-    <div className="section-card" style={{ maxWidth: '500px', margin: '0 auto' }}>
-      <div className="card-header">
-        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <i className="bi bi-key-fill" style={{ color: '#3b82f6' }} />
-          Ganti Password
-        </span>
+    <AppLayout>
+      <style jsx global>{`
+        .fade-in {
+          animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .section-card {
+          animation: fadeIn 0.4s ease-out;
+        }
+      `}</style>
+
+      <div className="page-wrapper">
+        {/* Header */}
+        <div className="pg-header fade-in">
+          <div>
+            <h4 className="pg-title">
+              <i className="bi bi-key" style={{ color: '#3b82f6', marginRight: 8 }} />
+              Ganti Password
+            </h4>
+            <p className="pg-subtitle">
+              Ubah password akun Anda
+            </p>
+          </div>
+        </div>
+
+        <div className="section-card fade-in" style={{ maxWidth: '500px' }}>
+          <div className="card-header">
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <i className="bi bi-key-fill" style={{ color: '#3b82f6' }} />
+              Form Ganti Password
+            </span>
+          </div>
+
+          <form onSubmit={handleSubmit} style={{ padding: '20px' }}>
+            {error && (
+              <div style={{
+                padding: '12px', background: 'rgba(239,68,68,0.1)',
+                border: '1px solid rgba(239,68,68,0.3)', borderRadius: '12px',
+                color: '#ef4444', marginBottom: '16px', fontSize: '0.875rem'
+              }}>
+                <i className="bi bi-exclamation-circle" /> {error}
+              </div>
+            )}
+
+            {success && (
+              <div style={{
+                padding: '12px', background: 'rgba(16,185,129,0.1)',
+                border: '1px solid rgba(16,185,129,0.3)', borderRadius: '12px',
+                color: '#10b981', marginBottom: '16px', fontSize: '0.875rem'
+              }}>
+                <i className="bi bi-check-circle" /> {success}
+              </div>
+            )}
+
+            <div style={{ marginBottom: '16px' }}>
+              <label className="am-label">Password Lama</label>
+              <input
+                type="password"
+                value={passwordLama}
+                onChange={(e) => setPasswordLama(e.target.value)}
+                className="am-input"
+                placeholder="Masukkan password lama"
+              />
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label className="am-label">Password Baru</label>
+              <input
+                type="password"
+                value={passwordBaru}
+                onChange={(e) => setPasswordBaru(e.target.value)}
+                className="am-input"
+                placeholder="Masukkan password baru (min. 6 karakter)"
+              />
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label className="am-label">Konfirmasi Password Baru</label>
+              <input
+                type="password"
+                value={konfirmasi}
+                onChange={(e) => setKonfirmasi(e.target.value)}
+                className="am-input"
+                placeholder="Ulangi password baru"
+              />
+            </div>
+
+            <button type="submit" className="am-btn am-btn-primary" style={{ width: '100%', padding: '12px' }}>
+              <i className="bi bi-check-lg" /> Simpan Password Baru
+            </button>
+          </form>
+        </div>
       </div>
-
-      <form onSubmit={handleSubmit} style={{ padding: '20px' }}>
-        {error && (
-          <div style={{ padding: '12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', color: '#ef4444', marginBottom: '16px', fontSize: '0.875rem' }}>
-            <i className="bi bi-exclamation-circle" /> {error}
-          </div>
-        )}
-
-        {success && (
-          <div style={{ padding: '12px', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '8px', color: '#10b981', marginBottom: '16px', fontSize: '0.875rem' }}>
-            <i className="bi bi-check-circle" /> {success}
-          </div>
-        )}
-
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: '500', color: 'var(--am-text)' }}>
-            Password Lama
-          </label>
-          <input
-            type="password"
-            value={passwordLama}
-            onChange={(e) => setPasswordLama(e.target.value)}
-            className="am-input"
-            placeholder="Masukkan password lama"
-            style={{ width: '100%' }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: '500', color: 'var(--am-text)' }}>
-            Password Baru
-          </label>
-          <input
-            type="password"
-            value={passwordBaru}
-            onChange={(e) => setPasswordBaru(e.target.value)}
-            className="am-input"
-            placeholder="Masukkan password baru (min. 6 karakter)"
-            style={{ width: '100%' }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: '500', color: 'var(--am-text)' }}>
-            Konfirmasi Password Baru
-          </label>
-          <input
-            type="password"
-            value={konfirmasi}
-            onChange={(e) => setKonfirmasi(e.target.value)}
-            className="am-input"
-            placeholder="Ulangi password baru"
-            style={{ width: '100%' }}
-          />
-        </div>
-
-        <button type="submit" className="am-btn am-btn-primary" style={{ width: '100%' }}>
-          <i className="bi bi-check-lg" /> Simpan Password Baru
-        </button>
-      </form>
-    </div>
+    </AppLayout>
   )
 }

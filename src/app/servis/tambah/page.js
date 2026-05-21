@@ -130,10 +130,23 @@ export default function TambahServis() {
 
   return (
     <AppLayout>
-    <div style={{ minHeight: '100vh', padding: '0' }}>
+    <style jsx global>{`
+      .fade-in {
+        animation: fadeIn 0.4s ease-out;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .section-card {
+        animation: fadeIn 0.4s ease-out;
+      }
+    `}</style>
+
+    <div className="page-wrapper">
       <div style={{ maxWidth: 800, margin: '0 auto' }}>
         {/* Header */}
-        <div className="pg-header" style={{ marginBottom: '1.5rem' }}>
+        <div className="pg-header fade-in">
           <div>
             <h4 className="pg-title">
               <i className="bi bi-plus-circle" style={{ color: '#3b82f6', marginRight: 8 }} />
@@ -392,11 +405,11 @@ export default function TambahServis() {
           </div>
 
           {/* Total & Submit */}
-          <div className="section-card" style={{ marginBottom: '1.5rem', background: 'rgba(59, 130, 246, 0.1)', borderColor: '#3b82f6' }}>
+          <div className="section-card fade-in" style={{ marginBottom: '1.5rem', background: 'rgba(59, 130, 246, 0.08)', borderColor: '#3b82f6' }}>
             <div style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <span style={{ color: '#64748b', fontSize: '.875rem' }}>Total Biaya</span>
-                <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f1f5f9' }}>
+                <span style={{ color: 'var(--am-text-muted)', fontSize: '.875rem' }}>Total Biaya</span>
+                <div style={{ fontSize: '1.75rem', fontWeight: 800 }}>
                   {formatRupiah(calculateTotal())}
                 </div>
               </div>
