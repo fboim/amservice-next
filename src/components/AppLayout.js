@@ -176,32 +176,6 @@ function SidebarWrapper({ children }) {
         </div>
         )}
 
-        {/* Mobile Header - Simple logo centered (only on non-dashboard) */}
-        {pathname !== '/dashboard' && (
-        <div className="mobile-header-bar">
-          <button className="topbar-btn" onClick={onMobileOpen}>
-            <i className="bi bi-list" />
-          </button>
-          <div className="mobile-header-logo">
-            <i className="bi bi-lightning-charge-fill" style={{ color: '#fbbf24' }} />
-            AM SERVICE
-          </div>
-          <button
-            className="topbar-btn"
-            onClick={() => {
-              localStorage.removeItem('ams_token')
-              localStorage.removeItem('ams_user')
-              sessionStorage.removeItem('ams_token')
-              sessionStorage.removeItem('ams_user')
-              router.push('/login')
-            }}
-            style={{ color: '#f87171' }}
-          >
-            <i className="bi bi-box-arrow-right" />
-          </button>
-        </div>
-        )}
-
         {children}
       </div>
     </>

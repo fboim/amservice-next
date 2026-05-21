@@ -817,6 +817,11 @@ body {
   display: none;
 }
 
+/* Mobile header bar - hidden (using sidebar mobile topbar instead) */
+.mobile-header-bar {
+  display: none;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
