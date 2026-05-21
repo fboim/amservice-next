@@ -31,6 +31,7 @@ export default function LabelServis() {
       else if (type === 'tebal') window.MesinKasir.formatTebal(data)
       else if (type === 'logo') window.MesinKasir.cetakLogo(data)
       else if (type === 'qr') window.MesinKasir.cetakQR(data)
+      else if (type === 'inverse') window.MesinKasir.formatInverse && window.MesinKasir.formatInverse(data)
     } catch (e) { console.warn('BT error:', e) }
   }, [])
 
@@ -43,18 +44,45 @@ export default function LabelServis() {
     }
 
     const tipeBersih = servis.tipe_hp?.replace(/-/g, '').trim() || ''
+    const unitTxt = servis.merk_hp + ' ' + tipeBersih
+    const W = 32
 
-    // Print label
+    // Center function (match PHP)
+    const center = (t) => {
+      t = String(t).trim()
+      if (t.length >= W) return t.substring(0, W) + '\n'
+      return ' '.repeat(Math.floor((W - t.length) / 2)) + t + '\n'
+    }
+
+    // Print label (match PHP format)
     btSend('tebal', true)
-    btSend('teks', servis.nama_pelanggan + '\n')
+    btSend('teks', center('AM SERVICE'))
     btSend('tebal', false)
-    btSend('tebal', true)
-    btSend('teks', servis.merk_hp + ' ' + tipeBersih + '\n')
-    btSend('tebal', false)
-    btSend('tebal', true)
-    btSend('teks', servis.no_hp || '-' + '\n')
-    btSend('tebal', false)
-    btSend('teks', '\n\n')
+    btSend('teks', '--------------------------------\n')
+    btSend('teks', center(servis.nama_pelanggan || '-'))
+
+    // Check if formatInverse is available
+    const supportInverse = typeof window.MesinKasir.formatInverse === 'function'
+
+    if (supportInverse) {
+      // Use inverse formatting for unit
+      btSend('inverse', true)
+      btSend('tebal', true)
+      btSend('teks', center(unitTxt))
+      btSend('tebal', false)
+      btSend('inverse', false)
+    } else {
+      // Fallback: use border lines
+      btSend('teks', '================================\n')
+      btSend('tebal', true)
+      btSend('teks', center(unitTxt))
+      btSend('tebal', false)
+      btSend('teks', '================================\n')
+    }
+
+    btSend('teks', center(servis.no_hp || '-'))
+    btSend('teks', center(servis.no_servis || '-'))
+    btSend('teks', '\n\n\n')
   }
 
   // Keyboard shortcuts (print disabled in WebView)
@@ -196,14 +224,22 @@ export default function LabelServis() {
         padding: '4px 6px',
         fontFamily: 'Courier New, Courier, monospace',
         fontSize: '9px',
-        color: '#000'
+        color: '#000',
+        textAlign: 'center'
       }}>
-        {/* Label Box - Clean version without header */}
-        <div className="label-box">
-          <div className="bold" style={{ fontSize: '11px', marginBottom: '3px' }}>{servis.nama_pelanggan}</div>
-          <span className="unit-blok">{servis.merk_hp} {tipeBersih}</span>
-          <div className="bold" style={{ fontSize: '11px', marginTop: '3px' }}>{servis.no_hp || '-'}</div>
+        {/* Label Header */}
+        <div className="bold" style={{ fontSize: '12px', marginBottom: '2px' }}>AM SERVICE</div>
+        <div style={{ borderBottom: '1px dashed #000', margin: '2px 0' }}></div>
+        {/* Customer Name */}
+        <div style={{ fontSize: '10px', margin: '4px 0' }}>{servis.nama_pelanggan}</div>
+        {/* Unit (bold/inverse style) */}
+        <div className="bold" style={{ fontSize: '10px', background: '#000', color: '#fff', padding: '2px 4px', margin: '4px 0' }}>
+          {servis.merk_hp} {tipeBersih}
         </div>
+        {/* Phone */}
+        <div style={{ fontSize: '10px', margin: '4px 0' }}>{servis.no_hp || '-'}</div>
+        {/* Service Number */}
+        <div style={{ fontSize: '9px', margin: '2px 0' }}>{servis.no_servis}</div>
       </div>
 
       {/* Action Buttons */}
