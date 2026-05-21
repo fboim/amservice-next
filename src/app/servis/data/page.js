@@ -175,62 +175,20 @@ function DataServisContent() {
 
   return (
     <AppLayout>
-      <style jsx global>{`
-        .fade-in {
-          animation: fadeIn 0.4s ease-out;
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .section-card {
-          animation: fadeIn 0.4s ease-out;
-        }
-      `}</style>
-
       {/* Page Header */}
       <div className="pg-header fade-in">
         <div>
-          {showTrash ? (
-            <>
-              <h4 className="pg-title">
-                <i className="bi bi-trash3" style={{ color: '#ef4444', marginRight: 8 }} />
-                Data Terhapus
-              </h4>
-              <p className="pg-subtitle">
-                Data servis yang dihapus &mdash; {total.toLocaleString('id-ID')} data &middot; Admin dapat memulihkan
-              </p>
-            </>
-          ) : (
-            <>
-              <h4 className="pg-title">
-                <i className="bi bi-tools" style={{ color: '#3b82f6', marginRight: 8 }} />
-                Data Servis
-              </h4>
-              <p className="pg-subtitle">
-                Kelola semua riwayat perbaikan HP &mdash; {total.toLocaleString('id-ID')} data
-              </p>
-            </>
-          )}
+          <h4 className="pg-title">
+            <i className="bi bi-tools" style={{ color: '#3b82f6', marginRight: 8 }} />
+            Data Servis
+          </h4>
+          <p className="pg-subtitle">
+            Kelola semua riwayat perbaikan HP &mdash; {total.toLocaleString('id-ID')} data
+          </p>
         </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          {isAdmin && (
-            showTrash ? (
-              <Link href="/servis/data" className="am-btn am-btn-secondary am-btn-pill am-btn-sm">
-                <i className="bi bi-arrow-left" /> Kembali
-              </Link>
-            ) : (
-              <Link href="/servis/data?trash=1" className="am-btn am-btn-secondary am-btn-pill am-btn-sm" title="Lihat data terhapus">
-                <i className="bi bi-trash3" /> Sampah
-              </Link>
-            )
-          )}
-          {!showTrash && !isPengunjung && (
-            <Link href="/servis/tambah" className="am-btn am-btn-primary am-btn-pill am-btn-sm" style={{ boxShadow: '0 2px 10px rgba(59,130,246,.25)' }}>
-              <i className="bi bi-plus-circle" /> Servis Baru
-            </Link>
-          )}
-        </div>
+        <Link href="/servis/tambah" className="am-btn am-btn-primary am-btn-pill am-btn-sm" style={{ boxShadow: '0 2px 10px rgba(59,130,246,.25)' }}>
+          <i className="bi bi-plus-circle" /> Servis Baru
+        </Link>
       </div>
 
       {/* Search + Filter */}

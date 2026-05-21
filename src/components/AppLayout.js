@@ -124,7 +124,8 @@ function SidebarWrapper({ children }) {
       />
 
       <div className="am-main">
-        {/* Desktop Header - Clean and focused */}
+        {/* Desktop Header - Only show on dashboard */}
+        {pathname === '/dashboard' && (
         <div className="header-bar">
           {/* Left - Page Title & User Info */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -173,8 +174,10 @@ function SidebarWrapper({ children }) {
             </Link>
           </div>
         </div>
+        )}
 
-        {/* Mobile Header - Simple logo centered */}
+        {/* Mobile Header - Simple logo centered (only on non-dashboard) */}
+        {pathname !== '/dashboard' && (
         <div className="mobile-header-bar">
           <button className="topbar-btn" onClick={onMobileOpen}>
             <i className="bi bi-list" />
@@ -197,6 +200,7 @@ function SidebarWrapper({ children }) {
             <i className="bi bi-box-arrow-right" />
           </button>
         </div>
+        )}
 
         {children}
       </div>

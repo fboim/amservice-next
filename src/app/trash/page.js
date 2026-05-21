@@ -126,6 +126,20 @@ export default function TrashPage() {
 
   return (
     <AppLayout>
+      {/* Page Header */}
+      <div className="pg-header fade-in">
+        <div>
+          <h4 className="pg-title">
+            <i className="bi bi-clock-history" style={{ color: '#ef4444', marginRight: 8 }} />
+            Riwayat Servis
+          </h4>
+          <p className="pg-subtitle">Data servis yang sudah dihapus &mdash; {total.toLocaleString('id-ID')} data</p>
+        </div>
+        <Link href="/servis/data" className="am-btn am-btn-secondary am-btn-sm">
+          <i className="bi bi-arrow-left" /> Kembali
+        </Link>
+      </div>
+
       {/* Search */}
       <div className="section-card" style={{ marginBottom: '20px', padding: '16px' }}>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>

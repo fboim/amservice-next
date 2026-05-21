@@ -812,19 +812,9 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Header bar responsive - cleaner design */
+/* Header bar - shown only on dashboard */
 .header-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 24px;
-  padding: 20px 24px;
-  background: var(--am-surface);
-  border-radius: var(--am-radius-lg);
-  border: 1px solid var(--am-border);
-  box-shadow: var(--am-shadow);
+  display: none;
 }
 
 .header-actions {
