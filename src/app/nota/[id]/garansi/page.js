@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { getPrinter, checkBluetoothSupport } from '@/lib/bluetooth-printer'
 
 export default function GaransiServis() {
   const router = useRouter()
@@ -14,84 +13,130 @@ export default function GaransiServis() {
   const [servisData, setServisData] = useState(null)
   const [pengaturanData, setPengaturanData] = useState(null)
   const [downloading, setDownloading] = useState(false)
-  const [bluetoothSupported, setBluetoothSupported] = useState(false)
-  const [bluetoothConnected, setBluetoothConnected] = useState(false)
-  const [connecting, setConnecting] = useState(false)
+  const [printerReady, setPrinterReady] = useState(false)
 
   useEffect(() => {
     fetchAllData()
-    checkBluetoothSupport().then(supported => setBluetoothSupported(supported))
+    // Check if MesinKasir plugin is available
+    const checkPrinter = setInterval(() => {
+      if (window.MesinKasir) {
+        setPrinterReady(true)
+        clearInterval(checkPrinter)
+      }
+    }, 500)
+    return () => clearInterval(checkPrinter)
   }, [id])
 
-  // Connect Bluetooth printer
-  const handleConnectBluetooth = async () => {
-    setConnecting(true)
+  // Bluetooth print queue - use refs for mutable state
+  const btQueueRef = useRef([])
+  const btBusyRef = useRef(false)
+  const btSend = useCallback((type, data) => {
+    btQueueRef.current.push({type, data})
+    if (!btBusyRef.current) processQueue()
+  }, [])
+  const processQueue = useCallback(() => {
+    if (btQueueRef.current.length === 0) { btBusyRef.current = false; return }
+    btBusyRef.current = true
+    const cmd = btQueueRef.current.shift()
     try {
-      const printer = getPrinter()
-      await printer.connect()
-      setBluetoothConnected(true)
-    } catch (err) {
-      console.error('BT connect failed:', err)
-      alert('Gagal terhubung ke printer Bluetooth')
-    } finally {
-      setConnecting(false)
-    }
-  }
+      if (cmd.type === 'teks') window.MesinKasir.cetakTeks(cmd.data)
+      else if (cmd.type === 'tebal') window.MesinKasir.formatTebal(cmd.data)
+      else if (cmd.type === 'logo') window.MesinKasir.cetakLogo(cmd.data)
+      else if (cmd.type === 'qr') window.MesinKasir.cetakQR(cmd.data)
+    } catch (e) { console.warn('BT error:', e) }
+    setTimeout(processQueue, 100)
+  }, [])
 
-  // Disconnect Bluetooth printer
-  const handleDisconnectBluetooth = async () => {
-    try {
-      const printer = getPrinter()
-      await printer.disconnect()
-      setBluetoothConnected(false)
-    } catch (err) {
-      console.error('BT disconnect failed:', err)
-    }
-  }
-
-  // Print via Bluetooth
-  const handlePrintBluetooth = async () => {
+  // Print via Bluetooth (MesinKasir plugin)
+  const handlePrintBluetooth = () => {
     if (!servisData) return
+    if (!window.MesinKasir) {
+      alert('MesinKasir plugin belum aktif. Pastikan aplikasi terhubung ke printer.')
+      return
+    }
 
-    try {
-      const printer = getPrinter()
+    const p = pengaturanData || {}
+    const servis = servisData
+    const tipeBersih = servis.tipe_hp?.replace(/-/g, '').trim() || ''
+    const keluhanBersih = getKeluhanBersih(servis.keluhan)
+    const totalBiaya = formatRupiah(servis.estimasi_biaya)
+    const masaGaransi = servis.garansi || 'Tidak Ada'
+    const linkMaps = p.link_maps || 'https://maps.google.com'
 
-      // Get logo as base64 if exists
-      let logoBase64 = null
-      const logoImg = document.querySelector('.thermal-preview img')
-      if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
-        const canvas = document.createElement('canvas')
-        canvas.width = 50
-        canvas.height = 50
-        const ctx = canvas.getContext('2d')
-        ctx.drawImage(logoImg, 0, 0, 50, 50)
-        logoBase64 = canvas.toDataURL('image/png')
+    const center = (t) => {
+      t = String(t)
+      if (t.length >= 32) return t.substring(0, 32) + '\n'
+      return ' '.repeat(Math.floor((32 - t.length) / 2)) + t + '\n'
+    }
+
+    // Load logo and start printing
+    const logoImg = new Image()
+    logoImg.crossOrigin = 'Anonymous'
+    logoImg.src = '/logo.png'
+    logoImg.onload = () => {
+      const cv = document.createElement('canvas')
+      cv.width = 120
+      cv.height = Math.round((logoImg.height / logoImg.width) * 120)
+      const ctx = cv.getContext('2d')
+      ctx.fillStyle = '#FFF'
+      ctx.fillRect(0, 0, cv.width, cv.height)
+      ctx.drawImage(logoImg, 0, 0, cv.width, cv.height)
+      btSend('logo', cv.toDataURL('image/png'))
+      lanjutCetak()
+    }
+    logoImg.onerror = () => { lanjutCetak() }
+
+    const lanjutCetak = () => {
+      // Store name
+      btSend('tebal', true)
+      btSend('teks', center((p.nama_toko || 'AM SERVICE').toUpperCase()))
+      btSend('tebal', false)
+      btSend('teks', '\x1b\x4d\x01\x1b\x61\x01')
+
+      // Address & WA
+      if (p.alamat) {
+        const al = p.alamat.replace(/\n/g, ' ')
+        for (const line of al.split(' ').filter(l => l.trim())) {
+          btSend('teks', line + '\n')
+        }
       }
+      if (p.no_wa) btSend('teks', 'WA: ' + p.no_wa + '\n')
 
-      const linkMaps = pengaturanData?.link_maps || 'https://maps.google.com'
-      const linkCek = `https://amservice.web.id/cek_servis.php?no=${servisData.no_servis}`
+      btSend('teks', '\x1b\x4d\x00\x1b\x61\x00')
+      btSend('teks', '--------------------------------\n')
+      btSend('tebal', true)
+      btSend('teks', center('NOTA GARANSI SERVIS'))
+      btSend('tebal', false)
+      btSend('teks', '--------------------------------\n')
 
-      await printer.printReceipt({
-        logoBase64,
-        storeName: (pengaturanData?.nama_toko || 'AM SERVICE').toUpperCase(),
-        address: pengaturanData?.alamat || '',
-        whatsapp: pengaturanData?.no_wa || '',
-        title: 'NOTA GARANSI SERVIS',
-        noServis: servisData.no_servis,
-        date: new Date(servisData.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' }),
-        customer: servisData.nama_pelanggan,
-        phone: servisData.no_hp || '-',
-        unit: `${servisData.merk_hp} ${servisData.tipe_hp?.replace(/-/g, '').trim() || ''}`,
-        problem: getKeluhanBersih(servisData.keluhan),
-        total: formatRupiah(servisData.estimasi_biaya),
-        terms: [servisData.garansi ? `GARANSI: ${servisData.garansi}` : ''],
-        qrUrl: linkMaps
-      })
+      // Data
+      btSend('teks', 'No: ' + servis.no_servis + ' | ' + new Date(servis.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' }) + '\n')
+      btSend('teks', 'Nama: ' + servis.nama_pelanggan + ' (' + (servis.no_hp || '-') + ')\n')
+      btSend('teks', 'Unit: ' + servis.merk_hp + ' ' + tipeBersih + '\n')
+      btSend('teks', 'Keluhan: ' + keluhanBersih + '\n')
+      btSend('teks', '--------------------------------\n')
 
-      alert('Cetak berhasil!')
-    } catch (err) {
-      console.error('Print failed:', err)
-      alert('Gagal mencetak: ' + err.message)
+      // Total
+      btSend('teks', '\x1b\x61\x01')
+      btSend('tebal', true)
+      btSend('teks', 'TOTAL BIAYA: Rp ' + totalBiaya + '\n')
+      btSend('tebal', false)
+      btSend('teks', '\x1b\x61\x00')
+
+      // Garansi
+      btSend('teks', '--------------------------------\n')
+      btSend('tebal', true)
+      btSend('teks', center('GARANSI: ' + masaGaransi.toUpperCase()))
+      btSend('tebal', false)
+      btSend('teks', '--------------------------------\n')
+
+      // QR Maps
+      btSend('teks', '\x1b\x61\x01')
+      btSend('teks', 'Bantu Kami Berkembang!\n')
+      btSend('teks', 'Scan untuk review:\n')
+      btSend('qr', linkMaps)
+      btSend('teks', '\x1b\x61\x00')
+      btSend('teks', '\n\n\n')
     }
   }
 
@@ -330,19 +375,14 @@ export default function GaransiServis() {
           <i className="bi bi-printer" />
           Cetak
         </button>
-        {bluetoothSupported && (
-          bluetoothConnected ? (
-            <button onClick={handlePrintBluetooth} className="btn-bluetooth" title="Cetak via Bluetooth">
-              <i className="bi bi-bluetooth" />
-              BT
-            </button>
-          ) : (
-            <button onClick={handleConnectBluetooth} disabled={connecting} className="btn-bluetooth-disconnect" title="Hubungkan Bluetooth">
-              <i className={`bi ${connecting ? 'bi-hourglass-split' : 'bi-bluetooth'}`} />
-              {connecting ? '...' : 'BT'}
-            </button>
-          )
-        )}
+        <button
+          onClick={handlePrintBluetooth}
+          className={printerReady ? 'btn-bluetooth' : 'btn-bluetooth-disconnect'}
+          title={printerReady ? 'Cetak via Bluetooth' : 'MesinKasir belum terhubung'}
+        >
+          <i className="bi bi-bluetooth" />
+          BT
+        </button>
         <button
           onClick={handleDownloadPDF}
           disabled={downloading}

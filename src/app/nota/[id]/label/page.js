@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { getPrinter, checkBluetoothSupport } from '@/lib/bluetooth-printer'
 
 export default function LabelServis() {
   const router = useRouter()
@@ -11,49 +10,61 @@ export default function LabelServis() {
 
   const [loading, setLoading] = useState(true)
   const [servis, setServis] = useState(null)
-  const [bluetoothSupported, setBluetoothSupported] = useState(false)
-  const [bluetoothConnected, setBluetoothConnected] = useState(false)
-  const [connecting, setConnecting] = useState(false)
+  const [printerReady, setPrinterReady] = useState(false)
 
   useEffect(() => {
     fetchServis()
-    checkBluetoothSupport().then(supported => setBluetoothSupported(supported))
+    // Check if MesinKasir plugin is available
+    const checkPrinter = setInterval(() => {
+      if (window.MesinKasir) {
+        setPrinterReady(true)
+        clearInterval(checkPrinter)
+      }
+    }, 500)
+    return () => clearInterval(checkPrinter)
   }, [id])
 
-  // Connect Bluetooth printer
-  const handleConnectBluetooth = async () => {
-    setConnecting(true)
+  // Bluetooth print queue - use refs for mutable state
+  const btQueueRef = useRef([])
+  const btBusyRef = useRef(false)
+  const btSend = useCallback((type, data) => {
+    btQueueRef.current.push({type, data})
+    if (!btBusyRef.current) processQueue()
+  }, [])
+  const processQueue = useCallback(() => {
+    if (btQueueRef.current.length === 0) { btBusyRef.current = false; return }
+    btBusyRef.current = true
+    const cmd = btQueueRef.current.shift()
     try {
-      const printer = getPrinter()
-      await printer.connect()
-      setBluetoothConnected(true)
-    } catch (err) {
-      console.error('BT connect failed:', err)
-      alert('Gagal terhubung ke printer Bluetooth')
-    } finally {
-      setConnecting(false)
-    }
-  }
+      if (cmd.type === 'teks') window.MesinKasir.cetakTeks(cmd.data)
+      else if (cmd.type === 'tebal') window.MesinKasir.formatTebal(cmd.data)
+      else if (cmd.type === 'logo') window.MesinKasir.cetakLogo(cmd.data)
+      else if (cmd.type === 'qr') window.MesinKasir.cetakQR(cmd.data)
+    } catch (e) { console.warn('BT error:', e) }
+    setTimeout(processQueue, 100)
+  }, [])
 
-  // Print via Bluetooth
-  const handlePrintBluetooth = async () => {
+  // Print via Bluetooth (MesinKasir plugin)
+  const handlePrintBluetooth = () => {
     if (!servis) return
-
-    try {
-      const printer = getPrinter()
-      const tipeBersih = servis.tipe_hp?.replace(/-/g, '').trim() || ''
-
-      await printer.printLabel({
-        customerName: servis.nama_pelanggan,
-        unit: `${servis.merk_hp} ${tipeBersih}`,
-        phone: servis.no_hp || '-'
-      })
-
-      alert('Cetak label berhasil!')
-    } catch (err) {
-      console.error('Print failed:', err)
-      alert('Gagal mencetak: ' + err.message)
+    if (!window.MesinKasir) {
+      alert('MesinKasir plugin belum aktif. Pastikan aplikasi terhubung ke printer.')
+      return
     }
+
+    const tipeBersih = servis.tipe_hp?.replace(/-/g, '').trim() || ''
+
+    // Print label
+    btSend('tebal', true)
+    btSend('teks', servis.nama_pelanggan + '\n')
+    btSend('tebal', false)
+    btSend('tebal', true)
+    btSend('teks', servis.merk_hp + ' ' + tipeBersih + '\n')
+    btSend('tebal', false)
+    btSend('tebal', true)
+    btSend('teks', servis.no_hp || '-' + '\n')
+    btSend('tebal', false)
+    btSend('teks', '\n\n')
   }
 
   // Keyboard shortcuts
@@ -208,36 +219,18 @@ export default function LabelServis() {
 
       {/* Action Buttons */}
       <div style={{ textAlign: 'center', marginTop: '20px' }} className="no-print">
-        {bluetoothSupported && (
-          bluetoothConnected ? (
-            <button onClick={handlePrintBluetooth} style={{
-              padding: '8px 24px',
-              background: '#8b5cf6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              marginRight: '10px'
-            }}>
-              <i className="bi bi-bluetooth" style={{ marginRight: '6px' }} />
-              Cetak BT
-            </button>
-          ) : (
-            <button onClick={handleConnectBluetooth} disabled={connecting} style={{
-              padding: '8px 24px',
-              background: '#64748b',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: connecting ? 'wait' : 'pointer',
-              marginRight: '10px',
-              opacity: connecting ? 0.7 : 1
-            }}>
-              <i className={`bi ${connecting ? 'bi-hourglass-split' : 'bi-bluetooth'}`} style={{ marginRight: '6px' }} />
-              {connecting ? 'Menghub...' : 'BT'}
-            </button>
-          )
-        )}
+        <button onClick={handlePrintBluetooth} style={{
+          padding: '8px 24px',
+          background: '#8b5cf6',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+          marginRight: '10px'
+        }}>
+          <i className="bi bi-bluetooth" style={{ marginRight: '6px' }} />
+          BT
+        </button>
         <button onClick={() => window.print()} style={{
           padding: '8px 24px',
           background: '#3b82f6',

@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { getPrinter, checkBluetoothSupport } from '@/lib/bluetooth-printer'
 
 export default function NotaPenerimaan() {
   const router = useRouter()
@@ -14,86 +13,128 @@ export default function NotaPenerimaan() {
   const [servis, setServis] = useState(null)
   const [pengaturan, setPengaturan] = useState(null)
   const [downloading, setDownloading] = useState(false)
-  const [bluetoothSupported, setBluetoothSupported] = useState(false)
-  const [bluetoothConnected, setBluetoothConnected] = useState(false)
-  const [connecting, setConnecting] = useState(false)
+  const [printerReady, setPrinterReady] = useState(false)
 
   useEffect(() => {
     fetchAllData()
-    checkBluetoothSupport().then(supported => setBluetoothSupported(supported))
+    // Check if MesinKasir plugin is available
+    const checkPrinter = setInterval(() => {
+      if (window.MesinKasir) {
+        setPrinterReady(true)
+        clearInterval(checkPrinter)
+      }
+    }, 500)
+    return () => clearInterval(checkPrinter)
   }, [id])
 
-  // Connect Bluetooth printer
-  const handleConnectBluetooth = async () => {
-    setConnecting(true)
+  // Bluetooth print queue - use refs for mutable state
+  const btQueueRef = useRef([])
+  const btBusyRef = useRef(false)
+  const btSend = useCallback((type, data) => {
+    btQueueRef.current.push({type, data})
+    if (!btBusyRef.current) processQueue()
+  }, [])
+  const processQueue = useCallback(() => {
+    if (btQueueRef.current.length === 0) { btBusyRef.current = false; return }
+    btBusyRef.current = true
+    const cmd = btQueueRef.current.shift()
     try {
-      const printer = getPrinter()
-      await printer.connect()
-      setBluetoothConnected(true)
-    } catch (err) {
-      console.error('BT connect failed:', err)
-      alert('Gagal terhubung ke printer Bluetooth')
-    } finally {
-      setConnecting(false)
-    }
-  }
+      if (cmd.type === 'teks') window.MesinKasir.cetakTeks(cmd.data)
+      else if (cmd.type === 'tebal') window.MesinKasir.formatTebal(cmd.data)
+      else if (cmd.type === 'logo') window.MesinKasir.cetakLogo(cmd.data)
+      else if (cmd.type === 'qr') window.MesinKasir.cetakQR(cmd.data)
+    } catch (e) { console.warn('BT error:', e) }
+    setTimeout(processQueue, 100)
+  }, [])
 
-  // Disconnect Bluetooth printer
-  const handleDisconnectBluetooth = async () => {
-    try {
-      const printer = getPrinter()
-      await printer.disconnect()
-      setBluetoothConnected(false)
-    } catch (err) {
-      console.error('BT disconnect failed:', err)
-    }
-  }
-
-  // Print via Bluetooth
-  const handlePrintBluetooth = async () => {
+  // Print via Bluetooth (MesinKasir plugin)
+  const handlePrintBluetooth = () => {
     if (!servis) return
+    if (!window.MesinKasir) {
+      alert('MesinKasir plugin belum aktif. Pastikan aplikasi terhubung ke printer.')
+      return
+    }
 
-    try {
-      const printer = getPrinter()
+    const p = pengaturan || {}
+    const tipeBersih = servis.tipe_hp?.replace(/-/g, '').trim() || ''
+    const keluhanBersih = getKeluhanBersih(servis.keluhan)
+    const estimasi = formatRupiah(servis.estimasi_biaya)
+    const linkCek = `https://amservice.web.id/cek_servis.php?no=${servis.no_servis}`
 
-      // Get logo as base64 if exists
-      let logoBase64 = null
-      const logoImg = document.querySelector('.thermal-preview img')
-      if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
-        const canvas = document.createElement('canvas')
-        canvas.width = 50
-        canvas.height = 50
-        const ctx = canvas.getContext('2d')
-        ctx.drawImage(logoImg, 0, 0, 50, 50)
-        logoBase64 = canvas.toDataURL('image/png')
+    const center = (t) => {
+      t = String(t)
+      if (t.length >= 32) return t.substring(0, 32) + '\n'
+      return ' '.repeat(Math.floor((32 - t.length) / 2)) + t + '\n'
+    }
+
+    // Load logo and start printing
+    const logoImg = new Image()
+    logoImg.crossOrigin = 'Anonymous'
+    logoImg.src = '/logo.png'
+    logoImg.onload = () => {
+      const cv = document.createElement('canvas')
+      cv.width = 120
+      cv.height = Math.round((logoImg.height / logoImg.width) * 120)
+      const ctx = cv.getContext('2d')
+      ctx.fillStyle = '#FFF'
+      ctx.fillRect(0, 0, cv.width, cv.height)
+      ctx.drawImage(logoImg, 0, 0, cv.width, cv.height)
+      btSend('logo', cv.toDataURL('image/png'))
+      lanjutCetak()
+    }
+    logoImg.onerror = () => { lanjutCetak() }
+
+    const lanjutCetak = () => {
+      // Store name
+      btSend('tebal', true)
+      btSend('teks', center((p.nama_toko || 'AM SERVICE').toUpperCase()))
+      btSend('tebal', false)
+      btSend('teks', '\x1b\x4d\x01\x1b\x61\x01')
+
+      // Address & WA
+      if (p.alamat) {
+        const al = p.alamat.replace(/\n/g, ' ')
+        for (const line of al.split(' ').filter(l => l.trim())) {
+          btSend('teks', line + '\n')
+        }
       }
+      if (p.no_wa) btSend('teks', 'WA: ' + p.no_wa + '\n')
 
-      const linkCek = `https://amservice.web.id/cek_servis.php?no=${servis.no_servis}`
+      btSend('teks', '\x1b\x4d\x00\x1b\x61\x00')
+      btSend('teks', '--------------------------------\n')
+      btSend('tebal', true)
+      btSend('teks', center('TANDA TERIMA SERVIS'))
+      btSend('tebal', false)
+      btSend('teks', '--------------------------------\n')
 
-      await printer.printReceipt({
-        logoBase64,
-        storeName: (pengaturan?.nama_toko || 'AM SERVICE').toUpperCase(),
-        address: pengaturan?.alamat || '',
-        whatsapp: pengaturan?.no_wa || '',
-        title: 'TANDA TERIMA SERVIS',
-        noServis: servis.no_servis,
-        date: formatDate(servis.tanggal),
-        customer: servis.nama_pelanggan,
-        phone: servis.no_hp || '-',
-        unit: `${servis.merk_hp} ${servis.tipe_hp?.replace(/-/g, '').trim() || ''}`,
-        problem: getKeluhanBersih(servis.keluhan),
-        total: formatRupiah(servis.estimasi_biaya),
-        terms: [
-          '1. Harap bawa nota ini saat pengambilan.',
-          '2. Kehilangan data bukan tanggung jawab toko.'
-        ],
-        qrUrl: linkCek
-      })
+      // Data
+      btSend('teks', 'No: ' + servis.no_servis + ' | ' + formatDate(servis.tanggal) + '\n')
+      btSend('teks', 'Nama: ' + servis.nama_pelanggan + ' (' + (servis.no_hp || '-') + ')\n')
+      btSend('teks', 'Unit: ' + servis.merk_hp + ' ' + tipeBersih + '\n')
+      btSend('teks', '--------------------------------\n')
+      btSend('teks', 'Keluhan: ' + keluhanBersih + '\n')
+      btSend('teks', '--------------------------------\n')
 
-      alert('Cetak berhasil!')
-    } catch (err) {
-      console.error('Print failed:', err)
-      alert('Gagal mencetak: ' + err.message)
+      // Total
+      btSend('teks', '\x1b\x61\x01')
+      btSend('tebal', true)
+      btSend('teks', 'ESTIMASI: Rp ' + estimasi + '\n')
+      btSend('tebal', false)
+      btSend('teks', '\x1b\x61\x00')
+
+      // Terms
+      btSend('teks', '--------------------------------\n')
+      btSend('teks', '.------------------------------.\n')
+      btSend('teks', '| 1. Bawa nota saat pengambilan |\n')
+      btSend('teks', '| 2. Data bukan tanggung jawab |\n')
+      btSend('teks', "'------------------------------'\n")
+
+      // QR
+      btSend('teks', '\x1b\x61\x01')
+      btSend('teks', 'Cek Status Servis:\n')
+      btSend('qr', linkCek)
+      btSend('teks', '\x1b\x61\x00')
+      btSend('teks', '\n\n\n')
     }
   }
 
@@ -343,19 +384,14 @@ export default function NotaPenerimaan() {
           <i className="bi bi-printer" />
           Cetak
         </button>
-        {bluetoothSupported && (
-          bluetoothConnected ? (
-            <button onClick={handlePrintBluetooth} className="btn-bluetooth" title="Cetak via Bluetooth">
-              <i className="bi bi-bluetooth" />
-              BT
-            </button>
-          ) : (
-            <button onClick={handleConnectBluetooth} disabled={connecting} className="btn-bluetooth-disconnect" title="Hubungkan Bluetooth">
-              <i className={`bi ${connecting ? 'bi-hourglass-split' : 'bi-bluetooth'}`} />
-              {connecting ? '...' : 'BT'}
-            </button>
-          )
-        )}
+        <button
+          onClick={handlePrintBluetooth}
+          className={printerReady ? 'btn-bluetooth' : 'btn-bluetooth-disconnect'}
+          title={printerReady ? 'Cetak via Bluetooth' : 'MesinKasir belum terhubung'}
+        >
+          <i className={`bi ${printerReady ? 'bi-bluetooth' : 'bi-bluetooth'}`} />
+          {printerReady ? 'BT' : 'BT'}
+        </button>
         <button
           onClick={handleDownloadPDF}
           disabled={downloading}
