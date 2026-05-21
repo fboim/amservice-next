@@ -149,32 +149,28 @@ export default function NotaServis() {
     logoImg.onerror = () => { lanjutCetak() }
   }
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts (print disabled in WebView)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         router.back()
-      } else if (e.ctrlKey && e.key === 'p') {
-        e.preventDefault()
-        window.print()
       }
+      // Print shortcut disabled - causes WebView crash
+      // else if (e.ctrlKey && e.key === 'p') {
+      //   e.preventDefault()
+      //   window.print()
+      // }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [router])
 
-  // Auto-print after content loads (disabled for WebView - causes freeze)
-  useEffect(() => {
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-    if (isMobile) return
-
-    if (!loading && servis && printRef.current) {
-      const timer = setTimeout(() => {
-        window.print()
-      }, 800)
-      return () => clearTimeout(timer)
-    }
-  }, [loading, servis])
+  // Auto-print disabled completely - causes WebView crash
+  // useEffect(() => {
+  //   if (!loading && servis && printRef.current) {
+  //     window.print()
+  //   }
+  // }, [loading, servis])
 
   const fetchAllData = async () => {
     try {
@@ -586,7 +582,7 @@ export default function NotaServis() {
               <i className="bi bi-bluetooth" /> BT
             </button>
             <button
-              onClick={() => window.print()}
+              onClick={() => alert('Gunakan tombol BT untuk mencetak via Bluetooth')}
               style={{
                 padding: '10px 20px',
                 background: '#3b82f6',
