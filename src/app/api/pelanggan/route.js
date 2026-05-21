@@ -13,55 +13,44 @@ export async function GET(request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY
     )
 
-    // Query from servis table, group by nama_pelanggan
-    let query = supabase
+    // Get all servis and extract unique pelanggan
+    const { data: allServis, error } = await supabase
       .from('servis')
-      .select('nama_pelanggan, no_hp, count', { count: 'exact' })
+      .select('nama_pelanggan, no_hp')
       .is('deleted_at', null)
       .not('nama_pelanggan', 'is', null)
-      .group('nama_pelanggan, no_hp')
-
-    const { data, error, count } = await query
+      .order('nama_pelanggan', { ascending: true })
 
     if (error) {
-      // Fallback: just get all pelanggan from servis
-      const { data: allServis, error: err2 } = await supabase
-        .from('servis')
-        .select('nama_pelanggan, no_hp', { count: 'exact' })
-        .is('deleted_at', null)
-        .not('nama_pelanggan', 'is', null)
-        .order('nama_pelanggan', { ascending: true })
-
-      if (err2) {
-        return Response.json({ error: err2.message }, { status: 500 })
-      }
-
-      // Get unique pelanggan
-      const pelangganMap = {}
-      allServis.forEach(s => {
-        const key = s.no_hp
-        if (!pelangganMap[key]) {
-          pelangganMap[key] = { nama_pelanggan: s.nama_pelanggan, no_hp: s.no_hp }
-        }
-      })
-
-      const pelangganList = Object.values(pelangganMap)
-      let filtered = pelangganList
-      if (search) {
-        const searchLower = search.toLowerCase()
-        filtered = pelangganList.filter(p =>
-          p.nama_pelanggan.toLowerCase().includes(searchLower) ||
-          p.no_hp.includes(search)
-        )
-      }
-
-      const total = filtered.length
-      const paginated = filtered.slice(offset, offset + limit)
-
-      return Response.json({ pelanggan: paginated, total })
+      return Response.json({ error: error.message }, { status: 500 })
     }
 
-    return Response.json({ pelanggan: data || [], total: count || 0 })
+    // Get unique pelanggan by no_hp
+    const pelangganMap = {}
+    allServis.forEach(s => {
+      const key = s.no_hp
+      if (!pelangganMap[key]) {
+        pelangganMap[key] = { nama_pelanggan: s.nama_pelanggan, no_hp: s.no_hp }
+      }
+    })
+
+    let pelangganList = Object.values(pelangganMap)
+    let total = pelangganList.length
+
+    // Apply search filter
+    if (search) {
+      const searchLower = search.toLowerCase()
+      pelangganList = pelangganList.filter(p =>
+        p.nama_pelanggan.toLowerCase().includes(searchLower) ||
+        p.no_hp.includes(search)
+      )
+      total = pelangganList.length
+    }
+
+    // Apply pagination
+    const paginated = pelangganList.slice(offset, offset + limit)
+
+    return Response.json({ pelanggan: paginated, total })
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 })
   }
