@@ -27,33 +27,15 @@ export default function GaransiServis() {
     return () => clearInterval(checkPrinter)
   }, [id])
 
-  // Bluetooth print queue - use refs for mutable state
-  const btQueueRef = useRef([])
-  const btBusyRef = useRef(false)
-  const processQueueRef = useRef(null)
-
-  const processQueue = useCallback(() => {
-    if (btQueueRef.current.length === 0) { btBusyRef.current = false; return }
-    btBusyRef.current = true
-    const cmd = btQueueRef.current.shift()
-    try {
-      if (cmd.type === 'teks') window.MesinKasir.cetakTeks(cmd.data)
-      else if (cmd.type === 'tebal') window.MesinKasir.formatTebal(cmd.data)
-      else if (cmd.type === 'logo') window.MesinKasir.cetakLogo(cmd.data)
-      else if (cmd.type === 'qr') window.MesinKasir.cetakQR(cmd.data)
-    } catch (e) { console.warn('BT error:', e) }
-    setTimeout(() => processQueueRef.current && processQueueRef.current(), 100)
-  }, [])
-
-  // Set the ref to processQueue
-  useEffect(() => {
-    processQueueRef.current = processQueue
-  }, [processQueue])
-
+  // Direct print without queue (simpler, less blocking)
   const btSend = useCallback((type, data) => {
-    btQueueRef.current.push({type, data})
-    if (!btBusyRef.current) processQueue()
-  }, [processQueue])
+    try {
+      if (type === 'teks') window.MesinKasir.cetakTeks(data)
+      else if (type === 'tebal') window.MesinKasir.formatTebal(data)
+      else if (type === 'logo') window.MesinKasir.cetakLogo(data)
+      else if (type === 'qr') window.MesinKasir.cetakQR(data)
+    } catch (e) { console.warn('BT error:', e) }
+  }, [])
 
   // Print via Bluetooth (MesinKasir plugin)
   const handlePrintBluetooth = () => {
