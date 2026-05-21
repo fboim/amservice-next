@@ -41,9 +41,20 @@ export default function Home() {
     // Fetch testimonials from API
     fetchTestimonials()
 
+    // Check URL for no parameter (from QR scan)
+    const urlParams = new URLSearchParams(window.location.search)
+    const noParam = urlParams.get('no')
+    if (noParam) {
+      setSearchInput(noParam)
+      // Auto-search after a short delay
+      setTimeout(() => {
+        handleCekServisDirect(noParam)
+      }, 500)
+    }
+
     // Redirect to dashboard if already logged in
     const token = localStorage.getItem('ams_token') || sessionStorage.getItem('ams_token')
-    if (token) {
+    if (token && !noParam) {
       window.location.href = '/dashboard'
     }
   }, [])
@@ -62,6 +73,27 @@ export default function Home() {
     setSearchResult(null)
     try {
       const res = await fetch(`/api/servis?no_servis=${encodeURIComponent(searchInput)}`)
+      const data = await res.json()
+      if (data && (data.no_servis || data.not_found)) {
+        setSearchResult(data)
+      } else {
+        setSearchResult({ not_found: true })
+      }
+    } catch (error) {
+      setSearchResult({ error: true })
+    } finally {
+      setSearching(false)
+    }
+  }
+
+  // Direct search (for QR scan from URL parameter)
+  const handleCekServisDirect = async (noServis) => {
+    if (!noServis) return
+
+    setSearching(true)
+    setSearchResult(null)
+    try {
+      const res = await fetch(`/api/servis?no_servis=${encodeURIComponent(noServis)}`)
       const data = await res.json()
       if (data && (data.no_servis || data.not_found)) {
         setSearchResult(data)
