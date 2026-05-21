@@ -42,7 +42,7 @@ export default function NotaPenerimaan() {
       else if (cmd.type === 'logo') window.MesinKasir.cetakLogo(cmd.data)
       else if (cmd.type === 'qr') window.MesinKasir.cetakQR(cmd.data)
     } catch (e) { console.warn('BT error:', e) }
-    setTimeout(() => processQueueRef.current && processQueueRef.current(), 100)
+    setTimeout(() => processQueueRef.current?.(), 100)
   }, [])
 
   // Set the ref to processQueue
@@ -50,10 +50,13 @@ export default function NotaPenerimaan() {
     processQueueRef.current = processQueue
   }, [processQueue])
 
+  // btSend - use stable function
   const btSend = useCallback((type, data) => {
     btQueueRef.current.push({type, data})
-    if (!btBusyRef.current) processQueue()
-  }, [processQueue])
+    if (!btBusyRef.current) {
+      processQueueRef.current?.()
+    }
+  }, [])
 
   // Print via Bluetooth (MesinKasir plugin)
   const handlePrintBluetooth = () => {
@@ -596,9 +599,12 @@ export default function NotaPenerimaan() {
           opacity: 0.7;
           cursor: wait;
         }
+        .btn-bluetooth:hover, .btn-bluetooth-disconnect:hover {
+          opacity: 0.9;
+        }
 
         @media print {
-          .action-bar { display: none; }
+          .action-bar { display: none !important; }
           .preview-wrapper {
             padding: 0;
             background: #fff;

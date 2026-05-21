@@ -603,9 +603,12 @@ export default function GaransiServis() {
           opacity: 0.7;
           cursor: wait;
         }
+        .btn-bluetooth:hover, .btn-bluetooth-disconnect:hover {
+          opacity: 0.9;
+        }
 
         @media print {
-          .action-bar { display: none; }
+          .action-bar { display: none !important; }
           .preview-wrapper {
             padding: 0;
             background: #fff;
