@@ -1,4 +1,5 @@
 'use client'
+export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -32,6 +33,7 @@ export default function Laporan() {
   const fetchLaporan = useCallback(async () => {
     setLoading(true)
     try {
+      const token = localStorage.getItem('ams_token') || sessionStorage.getItem('ams_token')
       const params = new URLSearchParams({ type: period })
       if (period === 'bulanan') params.set('bulan', bulan)
       if (period === 'custom') {
@@ -46,7 +48,10 @@ export default function Laporan() {
 
       const res = await fetch(`/api/laporan?${params}`, {
         cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache' }
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Authorization': `Bearer ${token}`
+        }
       })
       const result = await res.json()
       setData(result)

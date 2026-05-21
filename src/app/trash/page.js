@@ -1,4 +1,5 @@
 'use client'
+export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -24,11 +25,15 @@ export default function TrashPage() {
   const fetchTrash = useCallback(async () => {
     setLoading(true)
     try {
+      const token = localStorage.getItem('ams_token') || sessionStorage.getItem('ams_token')
       const params = new URLSearchParams({ page, limit: 15 })
       if (search) params.set('search', search)
       const res = await fetch(`/api/trash?${params}`, {
         cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache' }
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Authorization': `Bearer ${token}`
+        }
       })
       const data = await res.json()
       setTrash(data.trash || [])
