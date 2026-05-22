@@ -117,6 +117,14 @@ export async function GET(request) {
       })
     }
 
+    // Get total servis tahun ini
+    const yearStart = `${currentYear}-01-01`
+    const { count: totalTahun } = await supabase
+      .from('servis')
+      .select('*', { count: 'exact', head: true })
+      .gte('tanggal', yearStart)
+      .is('deleted_at', null)
+
     return Response.json({
       antrean: antrean || 0,
       proses: proses || 0,
@@ -126,6 +134,7 @@ export async function GET(request) {
       omzet_bulan: omzetBulan,
       monthly_data: monthsData,
       merk_populer: merkPopuler,
+      total_tahun: totalTahun || 0,
     })
   } catch (error) {
     console.error('Dashboard API error:', error)
