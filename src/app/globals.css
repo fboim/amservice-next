@@ -54,19 +54,7 @@
   box-sizing: border-box;
 }
 
-/* Page transition - smooth fade effect */
-body.page-transitioning .am-main {
-  animation: pageEnter 0.25s ease-out;
-}
-
-@keyframes pageEnter {
-  from {
-    opacity: 0.5;
-  }
-  to {
-    opacity: 1;
-  }
-}
+/* Page transition handled by PageTransition component */
 
 body {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

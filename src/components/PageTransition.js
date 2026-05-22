@@ -1,19 +1,27 @@
 'use client'
 
-import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
-export default function PageTransition() {
+export default function PageTransition({ children }) {
   const pathname = usePathname()
+  const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
-    // Prevent animation on mount
-    document.body.classList.add('page-transitioning')
-    const timer = setTimeout(() => {
-      document.body.classList.remove('page-transitioning')
-    }, 300)
+    // Set visible immediately on mount
+    setIsVisible(true)
+  }, [])
+
+  useEffect(() => {
+    // Hide content briefly during navigation
+    setIsVisible(false)
+    const timer = setTimeout(() => setIsVisible(true), 50)
     return () => clearTimeout(timer)
   }, [pathname])
 
-  return null
+  return (
+    <div style={{ opacity: isVisible ? 1 : 0, transition: 'opacity 0.1s' }}>
+      {children}
+    </div>
+  )
 }
