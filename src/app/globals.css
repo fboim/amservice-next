@@ -864,9 +864,17 @@ body {
     display: none; /* Hide desktop header on mobile */
   }
   .header-actions {
-    width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    z-index: 30;
+    display: flex;
+    justify-content: center;
+  }
+  .header-actions a {
+    flex: 1;
+    max-width: 280px;
   }
   .role-badge {
     display: none;
