@@ -170,8 +170,6 @@ export async function PUT(request) {
       validData.tanggal = new Date().toISOString().split('T')[0]
     }
 
-    console.log('Updating servis:', id, validData)
-
     const { data, error } = await supabaseAdmin
       .from('servis')
       .update(validData)

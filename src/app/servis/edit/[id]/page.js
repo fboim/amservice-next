@@ -88,10 +88,17 @@ export default function EditServis() {
     setSaving(true)
 
     try {
+      // Send tanggal as today when status is "Sudah Diambil"
+      const submitData = {
+        id,
+        ...form,
+        tanggal: form.status === 'Sudah Diambil' ? new Date().toISOString().split('T')[0] : undefined
+      }
+
       const res = await fetch('/api/servis', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, ...form })
+        body: JSON.stringify(submitData)
       })
 
       const data = await res.json()
