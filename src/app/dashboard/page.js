@@ -519,23 +519,57 @@ export default function Dashboard() {
           </div>
           <div style={{ padding: '12px' }}>
             {chartData.length > 0 ? (
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px', height: '100px' }}>
-                {chartData.map((month, i) => {
-                  const height = maxVal > 0 ? (month.value / maxVal) * 80 : 0
-                  const isMax = month.value === maxVal
-                  return (
-                    <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                      <div style={{
-                        width: '100%', height: `${height}px`,
-                        background: isMax ? '#3b82f6' : 'rgba(59,130,246,0.25)',
-                        borderRadius: '4px 4px 0 0',
-                        transition: 'height 0.3s',
-                        minHeight: '4px'
-                      }} />
-                      <span style={{ fontSize: '.55rem', color: textMuted, fontWeight: '600' }}>{month.label}</span>
-                    </div>
-                  )
-                })}
+              <div style={{ position: 'relative', height: '120px' }}>
+                <svg width="100%" height="120" viewBox={`0 0 ${chartData.length * 50 + 20} 120`} style={{ overflow: 'visible' }}>
+                  {/* Grid lines */}
+                  {[20, 50, 80].map((y) => (
+                    <line key={y} x1="10" y1={y} x2={chartData.length * 50 + 10} y2={y} stroke="var(--am-border)" strokeWidth="1" strokeDasharray="2,2" />
+                  ))}
+                  {/* Bars */}
+                  {chartData.map((month, i) => {
+                    const x = 15 + i * 50
+                    const barH = maxVal > 0 ? (month.value / maxVal) * 80 : 0
+                    const y = 100 - barH
+                    return (
+                      <g key={i}>
+                        <rect
+                          x={x} y={y} width="20" height={barH}
+                          fill="rgba(59,130,246,0.2)"
+                          stroke="#3b82f6"
+                          strokeWidth="1"
+                          rx="2"
+                        />
+                        <text x={x + 10} y={110} textAnchor="middle" fontSize="8" fill={textMuted} fontWeight="600">{month.label}</text>
+                        <text x={x + 10} y={y - 4} textAnchor="middle" fontSize="9" fill={textMain} fontWeight="700">{month.value}</text>
+                      </g>
+                    )
+                  })}
+                  {/* Line connecting tops */}
+                  {chartData.length > 1 && (
+                    <polyline
+                      points={chartData.map((month, i) => {
+                        const x = 15 + i * 50 + 10
+                        const barH = maxVal > 0 ? (month.value / maxVal) * 80 : 0
+                        const y = 100 - barH
+                        return `${x},${y}`
+                      }).join(' ')}
+                      fill="none"
+                      stroke="#f59e0b"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  )}
+                  {/* Dots on line */}
+                  {chartData.map((month, i) => {
+                    const x = 15 + i * 50 + 10
+                    const barH = maxVal > 0 ? (month.value / maxVal) * 80 : 0
+                    const y = 100 - barH
+                    return (
+                      <circle key={i} cx={x} cy={y} r="4" fill="#f59e0b" stroke="var(--am-surface)" strokeWidth="2" />
+                    )
+                  })}
+                </svg>
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '24px', color: textMuted }}>
