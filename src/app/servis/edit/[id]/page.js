@@ -91,14 +91,10 @@ export default function EditServis() {
       const res = await fetch('/api/servis', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id,
-          ...form,
-        })
+        body: JSON.stringify({ id, ...form })
       })
 
       const data = await res.json()
-
       if (data.error) throw new Error(data.error)
 
       router.push('/servis/data')
@@ -112,11 +108,8 @@ export default function EditServis() {
   if (loading) {
     return (
       <AppLayout>
-        <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ textAlign: 'center', color: 'var(--am-text-muted)' }}>
-            <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
-            <p style={{ marginTop: '8px' }}>Memuat data...</p>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '40vh' }}>
+          <i className="bi bi-arrow-repeat" style={{ fontSize: '1.5rem', animation: 'spin 1s linear infinite' }} />
         </div>
       </AppLayout>
     )
@@ -125,7 +118,7 @@ export default function EditServis() {
   return (
     <AppLayout>
     <div className="page-wrapper">
-      <div style={{ maxWidth: 800, margin: '0 auto' }}>
+      <div style={{ maxWidth: 700, margin: '0 auto', padding: '16px' }}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px' }}>
           <Link href="/servis/data" className="am-btn am-btn-secondary am-btn-sm">
             <i className="bi bi-arrow-left" /> Kembali
@@ -133,84 +126,64 @@ export default function EditServis() {
         </div>
 
         <form onSubmit={handleSubmit}>
-          {/* Card 1: Pelanggan & Perangkat */}
-          <div style={{ background: 'var(--am-card-bg)', border: '1px solid var(--am-border)', borderRadius: '8px', padding: '12px 16px', marginBottom: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', fontWeight: '600', fontSize: '0.875rem' }}>
-              <i className="bi bi-person-badge" style={{ color: '#3b82f6' }} />
-              <span>Pelanggan & Perangkat</span>
+          <div style={{ display: 'grid', gap: '8px', gridTemplateColumns: '2fr 1fr' }}>
+            <div>
+              <label className="am-label">Nama Pelanggan</label>
+              <input type="text" name="nama_pelanggan" value={form.nama_pelanggan} onChange={handleChange} className="am-input" required />
             </div>
-            <div style={{ display: 'grid', gap: '10px', gridTemplateColumns: '2fr 1fr' }}>
-              <div>
-                <label className="am-label">Nama Pelanggan</label>
-                <input type="text" name="nama_pelanggan" value={form.nama_pelanggan} onChange={handleChange} className="am-input" required />
-              </div>
-              <div>
-                <label className="am-label">No. HP</label>
-                <input type="text" name="no_hp" value={form.no_hp} onChange={handleChange} className="am-input" />
-              </div>
-              <div>
-                <label className="am-label">Merk HP</label>
-                <input type="text" name="merk_hp" value={form.merk_hp} onChange={handleChange} className="am-input" required />
-              </div>
-              <div>
-                <label className="am-label">Tipe HP</label>
-                <input type="text" name="tipe_hp" value={form.tipe_hp} onChange={handleChange} className="am-input" />
-              </div>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label className="am-label">Keluhan</label>
-                <textarea name="keluhan" value={form.keluhan} onChange={handleChange} className="am-input" rows={2} required />
-              </div>
+            <div>
+              <label className="am-label">No. HP</label>
+              <input type="text" name="no_hp" value={form.no_hp} onChange={handleChange} className="am-input" />
             </div>
           </div>
 
-          {/* Card 2: Perbaikan & Biaya */}
-          <div style={{ background: 'var(--am-card-bg)', border: '1px solid var(--am-border)', borderRadius: '8px', padding: '12px 16px', marginBottom: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', fontWeight: '600', fontSize: '0.875rem' }}>
-              <i className="bi bi-tools" style={{ color: '#d97706' }} />
-              <span>Perbaikan & Biaya</span>
+          <div style={{ display: 'grid', gap: '8px', gridTemplateColumns: '1fr 1fr', marginTop: '8px' }}>
+            <div>
+              <label className="am-label">Merk HP</label>
+              <input type="text" name="merk_hp" value={form.merk_hp} onChange={handleChange} className="am-input" required />
             </div>
-            <div style={{ display: 'grid', gap: '10px', gridTemplateColumns: '1fr 1fr' }}>
-              <div>
-                <label className="am-label" style={{ color: '#dc2626' }}>Modal (Rp)</label>
-                <input
-                  type="text"
-                  value={form.modal_sparepart ? fmt(form.modal_sparepart) : ''}
-                  onChange={handleModalChange}
-                  className="am-input"
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <label className="am-label" style={{ color: '#059669' }}>Total Biaya (Rp)</label>
-                <input
-                  type="text"
-                  value={form.estimasi_biaya ? fmt(form.estimasi_biaya) : ''}
-                  onChange={handleBiayaChange}
-                  className="am-input"
-                  placeholder="0"
-                />
-              </div>
-              <div>
-                <label className="am-label">Status</label>
-                <select name="status" value={form.status} onChange={handleChange} className="am-input">
-                  {['Antrean', 'Proses', 'Siap Diambil', 'Sudah Diambil', 'Tidak Bisa'].map(s => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="am-label">Garansi</label>
-                <select name="garansi" value={form.garansi} onChange={handleChange} className="am-input">
-                  {['Tidak Ada', '7 Hari', '14 Hari', '30 Hari'].map(g => (
-                    <option key={g} value={g}>{g}</option>
-                  ))}
-                </select>
-              </div>
+            <div>
+              <label className="am-label">Tipe HP</label>
+              <input type="text" name="tipe_hp" value={form.tipe_hp} onChange={handleChange} className="am-input" />
             </div>
           </div>
 
-          {/* Submit */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 0' }}>
+          <div style={{ marginTop: '8px' }}>
+            <label className="am-label">Keluhan</label>
+            <textarea name="keluhan" value={form.keluhan} onChange={handleChange} className="am-input" rows={2} required />
+          </div>
+
+          <div style={{ display: 'grid', gap: '8px', gridTemplateColumns: '1fr 1fr', marginTop: '8px' }}>
+            <div>
+              <label className="am-label" style={{ color: '#dc2626' }}>Modal (Rp)</label>
+              <input type="text" value={form.modal_sparepart ? fmt(form.modal_sparepart) : ''} onChange={handleModalChange} className="am-input" placeholder="0" />
+            </div>
+            <div>
+              <label className="am-label" style={{ color: '#059669' }}>Total Biaya (Rp)</label>
+              <input type="text" value={form.estimasi_biaya ? fmt(form.estimasi_biaya) : ''} onChange={handleBiayaChange} className="am-input" placeholder="0" />
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gap: '8px', gridTemplateColumns: '1fr 1fr', marginTop: '8px' }}>
+            <div>
+              <label className="am-label">Status</label>
+              <select name="status" value={form.status} onChange={handleChange} className="am-input">
+                {['Antrean', 'Proses', 'Siap Diambil', 'Sudah Diambil', 'Tidak Bisa'].map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="am-label">Garansi</label>
+              <select name="garansi" value={form.garansi} onChange={handleChange} className="am-input">
+                {['Tidak Ada', '7 Hari', '14 Hari', '30 Hari'].map(g => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
             <button type="submit" disabled={saving} className="am-btn am-btn-primary am-btn-pill">
               {saving ? <><i className="bi bi-arrow-repeat" style={{ animation: 'spin 1s linear infinite' }} /> Menyimpan...</> : <><i className="bi bi-save" /> Simpan</>}
             </button>
