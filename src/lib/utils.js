@@ -1,11 +1,18 @@
 // Currency formatting
 export function formatRupiah(angka) {
   if (angka === undefined || angka === null) return 'Rp 0'
-  if (typeof angka !== 'string' && typeof angka !== 'number') return 'Rp 0'
-  if (typeof angka === 'string' && angka.trim() === '') return 'Rp 0'
-  const num = typeof angka === 'string' ? parseInt(angka.replace(/\D/g, '')) : Number(angka)
-  if (isNaN(num)) return 'Rp 0'
-  return 'Rp ' + num.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+  if (Array.isArray(angka)) return 'Rp 0'
+  if (typeof angka === 'object') return 'Rp 0'
+  if (typeof angka === 'string') {
+    if (angka.trim() === '') return 'Rp 0'
+    const num = parseInt(angka.replace(/\D/g, ''))
+    if (isNaN(num)) return 'Rp 0'
+    return 'Rp ' + num.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+  }
+  if (typeof angka === 'number') {
+    return 'Rp ' + angka.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+  }
+  return 'Rp 0'
 }
 
 // Parse rupiah string to number
