@@ -209,7 +209,7 @@ export default function Dashboard() {
         ].map((card) => (
           <div
             key={card.label}
-            className="bg-white rounded-lg p-3 border border-gray-200 border-l-4 flex items-center gap-2"
+            className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700 border-l-4 flex items-center gap-2"
             style={{ borderLeftColor: card.border }}
           >
             <div style={{
@@ -220,13 +220,13 @@ export default function Dashboard() {
               <i className={`bi ${card.icon}`} />
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div className="text-[10px] font-bold uppercase tracking-wide text-gray-500">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 {card.label}
               </div>
-              <div className="text-lg font-bold text-gray-900 leading-tight">
+              <div className="text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">
                 {card.value}
               </div>
-              <div className="text-[10px] text-gray-400">{card.sub}</div>
+              <div className="text-[10px] text-gray-400 dark:text-gray-500">{card.sub}</div>
             </div>
           </div>
         ))}
@@ -234,34 +234,34 @@ export default function Dashboard() {
 
       {/* Omzet Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
-        <div className="bg-white rounded-lg p-3 border border-gray-200 border-l-4 border-l-purple-500 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600">
+        <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700 border-l-4 border-l-purple-500 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
             <i className="bi bi-cash-stack text-base" />
           </div>
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-wide text-gray-500">
+            <div className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
               Omzet Hari Ini
             </div>
-            <div className="text-base font-bold text-gray-900 leading-tight">
+            <div className="text-base font-bold text-gray-900 dark:text-gray-100 leading-tight">
               {safeFormatRupiah(stats.omzet_hari)}
             </div>
-            <div className="text-[10px] text-gray-400">
+            <div className="text-[10px] text-gray-400 dark:text-gray-500">
               {stats.selesai} transaksi selesai
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-lg p-3 border border-gray-200 border-l-4 border-l-rose-500 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-rose-100 flex items-center justify-center text-rose-600">
+        <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700 border-l-4 border-l-rose-500 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400">
             <i className="bi bi-graph-up-arrow text-base" />
           </div>
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-wide text-gray-500">
+            <div className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
               Omzet Bulan Ini
             </div>
-            <div className="text-base font-bold text-gray-900 leading-tight">
+            <div className="text-base font-bold text-gray-900 dark:text-gray-100 leading-tight">
               {safeFormatRupiah(stats.omzet_bulan)}
             </div>
-            <div className="text-[10px] text-gray-400">
+            <div className="text-[10px] text-gray-400 dark:text-gray-500">
               {new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
             </div>
           </div>
@@ -270,9 +270,9 @@ export default function Dashboard() {
 
       {/* Servis Table - Full Width */}
       <div className="mb-3">
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="p-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
-            <span className="flex items-center gap-2 text-sm font-semibold text-gray-800">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
+          <div className="p-3 bg-gray-50 dark:bg-slate-800/50 border-b border-gray-200 dark:border-slate-700 flex justify-between items-center">
+            <span className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-200">
               <i className="bi bi-clock-history text-blue-500" /> Servis Terbaru
             </span>
             <Link href="/servis/data" className="text-xs text-blue-500 font-semibold flex items-center gap-1 no-underline">
@@ -282,34 +282,34 @@ export default function Dashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="bg-gray-100">
-                  <th className="p-2 text-center text-[10px] font-bold uppercase tracking-wide text-gray-500 border-b border-gray-200">No</th>
-                  <th className="p-2 text-left text-[10px] font-bold uppercase tracking-wide text-gray-500 border-b border-gray-200">Pelanggan</th>
-                  <th className="p-2 text-left text-[10px] font-bold uppercase tracking-wide text-gray-500 border-b border-gray-200 hidden md:table-cell">Unit HP</th>
-                  <th className="p-2 text-left text-[10px] font-bold uppercase tracking-wide text-gray-500 border-b border-gray-200">Keluhan</th>
-                  <th className="p-2 text-center text-[10px] font-bold uppercase tracking-wide text-gray-500 border-b border-gray-200">Status</th>
-                  <th className="p-2 text-right text-[10px] font-bold uppercase tracking-wide text-gray-500 border-b border-gray-200 hidden sm:table-cell">Biaya</th>
-                  <th className="p-2 text-center text-[10px] font-bold uppercase tracking-wide text-gray-500 border-b border-gray-200">Aksi</th>
+                <tr className="dark:bg-slate-800 bg-gray-100">
+                  <th className="p-2 text-center text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-slate-700">No</th>
+                  <th className="p-2 text-left text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-slate-700">Pelanggan</th>
+                  <th className="p-2 text-left text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-slate-700 hidden md:table-cell">Unit HP</th>
+                  <th className="p-2 text-left text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-slate-700">Keluhan</th>
+                  <th className="p-2 text-center text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-slate-700">Status</th>
+                  <th className="p-2 text-right text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-slate-700 hidden sm:table-cell">Biaya</th>
+                  <th className="p-2 text-center text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-slate-700">Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {servisTerbaru.length > 0 ? servisTerbaru.map((s, i) => (
-                  <tr key={s.id} className={`border-b border-gray-200 ${i % 2 === 0 ? 'bg-gray-50' : ''}`}>
-                    <td className="p-2 text-center font-bold text-gray-400">{i + 1}</td>
+                  <tr key={s.id} className={`border-b border-gray-200 dark:border-slate-700 ${i % 2 === 0 ? 'bg-gray-50 dark:bg-slate-800/50' : ''}`}>
+                    <td className="p-2 text-center font-bold text-gray-400 dark:text-gray-500">{i + 1}</td>
                     <td className="p-2 text-left">
-                      <div className="font-semibold text-gray-900 text-xs">{s.nama_pelanggan}</div>
-                      <div className="text-[10px] text-gray-400">{s.no_servis}</div>
+                      <div className="font-semibold text-gray-900 dark:text-gray-100 text-xs">{s.nama_pelanggan}</div>
+                      <div className="text-[10px] text-gray-400 dark:text-gray-500">{s.no_servis}</div>
                     </td>
                     <td className="p-2 text-left hidden md:table-cell">
-                      <div className="font-semibold text-gray-900 text-xs">{s.merk_hp} {s.tipe_hp}</div>
-                      <div className="text-[10px] text-gray-400">
+                      <div className="font-semibold text-gray-900 dark:text-gray-100 text-xs">{s.merk_hp} {s.tipe_hp}</div>
+                      <div className="text-[10px] text-gray-400 dark:text-gray-500">
                         {new Date(s.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })}
                       </div>
                     </td>
                     <td className="p-2 text-left max-w-[100px]">
                       {s.keluhan ? (
                         <span
-                          className="text-blue-500 underline decoration-dotted underline-offset-2 text-xs cursor-pointer"
+                          className="text-blue-500 dark:text-blue-400 underline decoration-dotted underline-offset-2 text-xs cursor-pointer"
                           onClick={() => setModalKeluhan({ hp: `${s.merk_hp} ${s.tipe_hp}`, nama: s.nama_pelanggan, keluhan: s.keluhan })}
                         >
                           {s.keluhan.length > 20 ? s.keluhan.substring(0, 20) + '…' : s.keluhan}
@@ -327,7 +327,7 @@ export default function Dashboard() {
                         {statusText(s.status)}
                       </span>
                     </td>
-                    <td className="p-2 text-right font-semibold text-gray-900 text-xs hidden sm:table-cell">
+                    <td className="p-2 text-right font-semibold text-gray-900 dark:text-gray-100 text-xs hidden sm:table-cell">
                       {safeFormatRupiah(s.estimasi_biaya)}
                     </td>
                     <td className="p-2 text-center">
@@ -417,9 +417,9 @@ export default function Dashboard() {
       {/* Bottom Section: Merk Populer + Chart */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
         {/* Merk Populer */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="p-3 bg-gray-50 border-b border-gray-200">
-            <span className="flex items-center gap-2 text-sm font-semibold text-gray-800">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
+          <div className="p-3 bg-gray-50 dark:bg-slate-800/50 border-b border-gray-200 dark:border-slate-700">
+            <span className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-200">
               <i className="bi bi-trophy-fill text-amber-500" /> Merk Populer
             </span>
           </div>
@@ -431,18 +431,18 @@ export default function Dashboard() {
               return (
                 <div key={i} className="mb-2 last:mb-0">
                   <div className="flex justify-between items-center mb-1">
-                    <span className="font-semibold text-xs text-gray-900">{merk.merk_hp}</span>
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-${colors[i]}-100 text-${colors[i]}-600`}>
+                    <span className="font-semibold text-xs text-gray-900 dark:text-gray-100">{merk.merk_hp}</span>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-${colors[i]}-100 dark:bg-${colors[i]}-900/30 text-${colors[i]}-600 dark:text-${colors[i]}-400`}>
                       {merk.total}x
                     </span>
                   </div>
-                  <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-1 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
                     <div className={`h-full rounded-full bg-${colors[i]}-500`} style={{ width: `${width}%` }} />
                   </div>
                 </div>
               )
             }) : (
-              <div className="p-4 text-center text-gray-400 text-sm">
+              <div className="p-4 text-center text-gray-400 dark:text-gray-500 text-sm">
                 Belum ada data
               </div>
             )}
@@ -450,13 +450,13 @@ export default function Dashboard() {
         </div>
 
         {/* Chart - Omzet per Bulan */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden md:col-span-2">
-          <div className="p-3 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
-            <span className="flex items-center gap-2 text-sm font-semibold text-gray-800">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden md:col-span-2">
+          <div className="p-3 bg-gray-50 dark:bg-slate-800/50 border-b border-gray-200 dark:border-slate-700 flex justify-between items-center">
+            <span className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-200">
               <i className="bi bi-graph-up text-purple-500" /> Omzet per Bulan
             </span>
-            <span className="text-xs text-gray-400">
-              Total <strong className="text-gray-700">{stats.total_tahun || 0}</strong> servis
+            <span className="text-xs text-gray-400 dark:text-gray-500">
+              Total <strong className="text-gray-700 dark:text-gray-200">{stats.total_tahun || 0}</strong> servis
             </span>
           </div>
           <div className="p-3">

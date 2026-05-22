@@ -88,11 +88,12 @@ export default function EditServis() {
     setSaving(true)
 
     try {
-      // Send tanggal as today when status is "Sudah Diambil"
+      // When status is "Sudah Diambil", force tanggal to today
       const submitData = {
         id,
         ...form,
-        tanggal: form.status === 'Sudah Diambil' ? new Date().toISOString().split('T')[0] : undefined
+        tanggal: form.status === 'Sudah Diambil' ? new Date().toISOString().split('T')[0] : undefined,
+        force_tanggal: form.status === 'Sudah Diambil' ? true : undefined
       }
 
       const res = await fetch('/api/servis', {

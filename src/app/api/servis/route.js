@@ -166,7 +166,7 @@ export async function PUT(request) {
     }
 
     // When status changes to "Sudah Diambil", update tanggal to today
-    if (updateData.status === 'Sudah Diambil') {
+    if (updateData.status === 'Sudah Diambil' || updateData.force_tanggal) {
       validData.tanggal = new Date().toISOString().split('T')[0]
     }
 
