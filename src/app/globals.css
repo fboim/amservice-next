@@ -156,9 +156,26 @@ body {
   justify-content: center;
   min-width: 40px;
   height: 40px;
+  transition: background 0.2s;
+}
+
+.topbar-btn:hover {
+  background: rgba(255,255,255,.1);
 }
 
 .topbar-btn i { font-size: 1.3rem; }
+
+/* Servis Baru button in mobile topbar */
+.topbar-btn[href],
+a.topbar-btn {
+  background: var(--am-primary);
+  color: #fff;
+}
+
+.topbar-btn[href]:hover,
+a.topbar-btn:hover {
+  background: var(--am-primary-dark);
+}
 
 .topbar-brand {
   display: flex;

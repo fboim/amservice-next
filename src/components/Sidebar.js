@@ -120,6 +120,9 @@ export default function Sidebar() {
           </div>
 
           <div className="topbar-actions">
+            <Link href="/servis/tambah" className="topbar-btn" title="Servis Baru" style={{ background: 'var(--am-primary)', color: '#fff' }}>
+              <i className="bi bi-plus-circle-fill" />
+            </Link>
             <button onClick={toggleTheme} title="Ganti Tema" className="topbar-btn">
               <i className={`bi ${theme === 'dark' ? 'bi-moon-stars' : 'bi-sun'}`} />
             </button>
