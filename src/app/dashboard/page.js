@@ -450,196 +450,100 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Sidebar */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignSelf: 'start' }}>
-          {/* Stok Menipis */}
+        {/* Bottom Section: Merk Populer + Chart */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '12px', marginBottom: '12px' }}>
+        {/* Merk Populer */}
+        <div style={{
+          background: surface, borderRadius: '10px',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+          border: `1px solid ${border}`, overflow: 'hidden'
+        }}>
           <div style={{
-            background: surface, borderRadius: '10px',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-            border: `1px solid ${border}`, overflow: 'hidden'
+            padding: '10px 14px',
+            background: 'var(--am-surface-2)',
+            borderBottom: `1px solid ${border}`,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
           }}>
-            <div style={{
-              padding: '10px 14px',
-              background: 'var(--am-surface-2)',
-              borderBottom: `1px solid ${border}`,
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-            }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.8rem', fontWeight: '600', color: textMain }}>
-                <i className="bi bi-exclamation-triangle-fill" style={{ color: '#ef4444' }} /> Stok Menipis
-              </span>
-              <span style={{
-                background: '#ef4444', color: '#fff',
-                fontSize: '.65rem', fontWeight: '700',
-                padding: '2px 8px', borderRadius: '999px'
-              }}>
-                {lowStock.length}
-              </span>
-            </div>
-            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-              {lowStock.length > 0 ? lowStock.map((sp) => {
-                const dotColor = sp.stok === 0 ? '#ef4444' : sp.stok <= 2 ? '#f97316' : '#f59e0b'
-                return (
-                  <li key={sp.id} style={{
-                    padding: '8px 14px', borderBottom: `1px solid ${border}`,
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flex: 1 }}>
-                      <span style={{
-                        width: '6px', height: '6px', borderRadius: '50%',
-                        background: dotColor, flexShrink: 0
-                      }} />
-                      <span style={{ fontSize: '.75rem', color: textMain, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {sp.nama_sparepart}
-                      </span>
-                    </div>
-                    <span style={{
-                      background: dotColor, color: '#fff',
-                      fontSize: '.6rem', fontWeight: '700',
-                      padding: '2px 6px', borderRadius: '4px', marginLeft: '6px', flexShrink: 0
-                    }}>
-                      {sp.stok}
-                    </span>
-                  </li>
-                )
-              }) : (
-                <li style={{ padding: '16px', textAlign: 'center', color: textMuted, fontSize: '.75rem' }}>
-                  <i className="bi bi-check-circle" style={{ color: '#059669', marginRight: '4px' }} /> Stok aman
-                </li>
-              )}
-            </ul>
-            <div style={{ padding: '10px' }}>
-              <Link href="/sparepart" style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                width: '100%', padding: '8px', borderRadius: '999px',
-                border: `1px solid #ef4444`, color: '#ef4444',
-                fontSize: '.7rem', fontWeight: '600', textDecoration: 'none'
-              }}>
-                <i className="bi bi-tag" /> Kelola Sparepart
-              </Link>
-            </div>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.75rem', fontWeight: '600', color: textMain }}>
+              <i className="bi bi-trophy-fill" style={{ color: '#f59e0b' }} /> Merk Populer
+            </span>
           </div>
-
-          {/* Merk Populer */}
-          <div style={{
-            background: surface, borderRadius: '10px',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-            border: `1px solid ${border}`, overflow: 'hidden'
-          }}>
-            <div style={{
-              padding: '10px 14px',
-              background: 'var(--am-surface-2)',
-              borderBottom: `1px solid ${border}`
-            }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.8rem', fontWeight: '600', color: textMain }}>
-                <i className="bi bi-trophy-fill" style={{ color: '#f59e0b' }} /> Merk Populer
-              </span>
-            </div>
-            <div>
-              {stats.merk_populer && stats.merk_populer.length > 0 ? stats.merk_populer.slice(0, 5).map((merk, i) => {
-                const colors = ['#3b82f6', '#8b5cf6', '#06b6d4', '#f59e0b', '#64748b']
-                return (
-                  <div key={i} style={{
-                    padding: '8px 14px', borderBottom: `1px solid ${border}`,
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{
-                        width: '24px', height: '24px', borderRadius: '6px',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontWeight: '800', fontSize: '.65rem',
-                        background: `${colors[i]}20`, color: colors[i]
-                      }}>
-                        {i + 1}
-                      </div>
-                      <span style={{ fontWeight: '600', fontSize: '.8rem', color: textMain }}>{merk.merk_hp}</span>
-                    </div>
+          <div style={{ padding: '8px 0' }}>
+            {stats.merk_populer && stats.merk_populer.length > 0 ? stats.merk_populer.slice(0, 5).map((merk, i) => {
+              const colors = ['#3b82f6', '#8b5cf6', '#06b6d4', '#f59e0b', '#64748b']
+              const maxCount = stats.merk_populer[0]?.total || 1
+              const width = (merk.total / maxCount) * 100
+              return (
+                <div key={i} style={{ padding: '6px 14px', borderBottom: `1px solid ${border}` }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <span style={{ fontWeight: '600', fontSize: '.75rem', color: textMain }}>{merk.merk_hp}</span>
                     <span style={{
                       background: `${colors[i]}20`, color: colors[i],
                       fontSize: '.6rem', fontWeight: '700',
-                      padding: '2px 8px', borderRadius: '999px'
+                      padding: '1px 6px', borderRadius: '999px'
                     }}>
                       {merk.total}x
                     </span>
                   </div>
-                )
-              }) : (
-                <div style={{ padding: '16px', textAlign: 'center', color: textMuted, fontSize: '.75rem' }}>
-                  Belum ada data
+                  <div style={{ height: '4px', background: 'var(--am-border)', borderRadius: '2px', overflow: 'hidden' }}>
+                    <div style={{ width: `${width}%`, height: '100%', background: colors[i], borderRadius: '2px' }} />
+                  </div>
                 </div>
-              )}
-            </div>
+              )
+            }) : (
+              <div style={{ padding: '16px', textAlign: 'center', color: textMuted, fontSize: '.75rem' }}>
+                Belum ada data
+              </div>
+            )}
           </div>
         </div>
-      </div>
 
-      {/* Chart */}
-      <div style={{
-        background: surface, borderRadius: '10px',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-        border: `1px solid ${border}`, overflow: 'hidden'
-      }}>
+        {/* Chart - Omzet per Bulan */}
         <div style={{
-          padding: '10px 14px',
-          background: 'var(--am-surface-2)',
-          borderBottom: `1px solid ${border}`,
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+          background: surface, borderRadius: '10px',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+          border: `1px solid ${border}`, overflow: 'hidden'
         }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.8rem', fontWeight: '600', color: textMain }}>
-            <i className="bi bi-bar-chart-line" style={{ color: '#3b82f6' }} /> Statistik Unit Masuk {new Date().getFullYear()}
-          </span>
-          <span style={{ fontSize: '.7rem', color: textMuted }}>
-            Total <strong style={{ color: textMain }}>{stats.total_tahun || 0}</strong> unit
-          </span>
-        </div>
-        <div style={{ padding: '16px' }}>
-          {chartData.length > 0 ? (
-            <div style={{ height: '200px', position: 'relative' }}>
-              <svg width="100%" height="200" viewBox={`0 0 ${chartData.length * 50 + 30} 200`} preserveAspectRatio="xMidYMid meet" style={{ overflow: 'visible' }}>
-                {/* Grid lines */}
-                {[0, 40, 80, 120, 160].map((y) => (
-                  <line key={y} x1="20" y1={y + 10} x2={chartData.length * 50 + 20} y2={y + 10} stroke={border} strokeWidth="1" strokeDasharray="3,3" />
-                ))}
+          <div style={{
+            padding: '10px 14px',
+            background: 'var(--am-surface-2)',
+            borderBottom: `1px solid ${border}`,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+          }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.75rem', fontWeight: '600', color: textMain }}>
+              <i className="bi bi-graph-up" style={{ color: '#8b5cf6' }} /> Omzet per Bulan
+            </span>
+            <span style={{ fontSize: '.7rem', color: textMuted }}>
+              Total <strong style={{ color: textMain }}>{stats.total_tahun || 0}</strong> servis
+            </span>
+          </div>
+          <div style={{ padding: '12px' }}>
+            {chartData.length > 0 ? (
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px', height: '100px' }}>
                 {chartData.map((month, i) => {
-                  const x = 20 + i * 50 + 25
-                  const barHeight = (month.value / maxVal) * 130
-                  const y = 170 - barHeight
+                  const height = maxVal > 0 ? (month.value / maxVal) * 80 : 0
                   const isMax = month.value === maxVal
                   return (
-                    <g key={i}>
-                      <rect
-                        x={x - 12} y={y} width="24" height={barHeight}
-                        fill={isMax ? 'rgba(59,130,246,0.85)' : 'rgba(59,130,246,0.18)'}
-                        stroke={isMax ? '#3b82f6' : 'rgba(59,130,246,0.35)'}
-                        strokeWidth="1" rx="4"
-                      />
-                      <text x={x} y={y - 6} textAnchor="middle" fontSize="9" fontWeight="700" fill={textMain}>
-                        {month.value}
-                      </text>
-                      <text x={x} y="186" textAnchor="middle" fontSize="8" fontWeight="600" fill={textMuted}>
-                        {month.label}
-                      </text>
-                    </g>
+                    <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                      <div style={{
+                        width: '100%', height: `${height}px`,
+                        background: isMax ? '#3b82f6' : 'rgba(59,130,246,0.25)',
+                        borderRadius: '4px 4px 0 0',
+                        transition: 'height 0.3s',
+                        minHeight: '4px'
+                      }} />
+                      <span style={{ fontSize: '.55rem', color: textMuted, fontWeight: '600' }}>{month.label}</span>
+                    </div>
                   )
                 })}
-                {/* Trend line */}
-                {chartData.length > 1 && (() => {
-                  const points = chartData.map((month, i) => {
-                    const x = 20 + i * 50 + 25
-                    const y = 170 - (month.value / maxVal) * 130
-                    return `${x},${y}`
-                  }).join(' ')
-                  return (
-                    <polyline points={points} fill="none" stroke="#f59e0b" strokeWidth="2" strokeDasharray="4,3" strokeLinecap="round" strokeLinejoin="round" />
-                  )
-                })()}
-              </svg>
-            </div>
-          ) : (
-            <div style={{ textAlign: 'center', padding: '32px', color: textMuted }}>
-              <i className="bi bi-bar-chart-line" style={{ fontSize: '1.5rem', opacity: 0.3 }} />
-              <p style={{ margin: '6px 0 0', fontSize: '.8rem' }}>Belum ada data grafik</p>
-            </div>
-          )}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '24px', color: textMuted }}>
+                <i className="bi bi-bar-chart-line" style={{ fontSize: '1.25rem', opacity: 0.3 }} />
+                <p style={{ margin: '4px 0 0', fontSize: '.75rem' }}>Belum ada data</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </AppLayout>
