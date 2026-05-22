@@ -118,8 +118,8 @@ export async function POST(request) {
         merk_hp: body.merk_hp,
         tipe_hp: body.tipe_hp,
         keluhan: body.keluhan,
-        estimasi_biaya: body.estimasi_biaya,
-        modal_sparepart: body.modal_sparepart,
+        estimasi_biaya: body.estimasi_biaya ? parseInt(body.estimasi_biaya) : null,
+        modal_sparepart: body.modal_sparepart ? parseInt(body.modal_sparepart) : null,
         status: body.status || 'Antrean',
         garansi: body.garansi || 'Tidak Ada',
         foto_hp: body.foto_hp,
@@ -150,7 +150,12 @@ export async function PUT(request) {
     const validColumns = ['nama_pelanggan', 'no_hp', 'merk_hp', 'tipe_hp', 'keluhan', 'estimasi_biaya', 'modal_sparepart', 'status', 'garansi', 'foto_hp', 'deleted_at']
     for (const key of validColumns) {
       if (key in updateData) {
-        validData[key] = updateData[key]
+        // Handle integer fields - convert empty strings to null
+        if (key === 'estimasi_biaya' || key === 'modal_sparepart') {
+          validData[key] = updateData[key] === '' || updateData[key] == null ? null : parseInt(updateData[key])
+        } else {
+          validData[key] = updateData[key]
+        }
       }
     }
 
