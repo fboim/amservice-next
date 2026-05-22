@@ -291,9 +291,8 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Table & Sidebar */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px', marginBottom: '12px' }}>
-        {/* Servis Table */}
+      {/* Servis Table - Full Width */}
+      <div style={{ marginBottom: '12px' }}>
         <div style={{
           background: surface, borderRadius: '10px',
           boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
@@ -449,8 +448,9 @@ export default function Dashboard() {
             </table>
           </div>
         </div>
+      </div>
 
-        {/* Bottom Section: Merk Populer + Chart */}
+      {/* Bottom Section: Merk Populer + Chart */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '12px', marginBottom: '12px' }}>
         {/* Merk Populer */}
         <div style={{
