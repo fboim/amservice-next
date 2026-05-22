@@ -209,8 +209,16 @@ export default function Dashboard() {
         ].map((card) => (
           <div
             key={card.label}
-            className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700 border-l-4 flex items-center gap-2"
-            style={{ borderLeftColor: card.border }}
+            style={{
+              background: 'var(--am-surface)',
+              borderRadius: 'var(--am-radius)',
+              padding: '12px',
+              border: '1px solid var(--am-border)',
+              borderLeft: `3px solid ${card.border}`,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}
           >
             <div style={{
               width: '32px', height: '32px', borderRadius: '6px',
@@ -220,13 +228,13 @@ export default function Dashboard() {
               <i className={`bi ${card.icon}`} />
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+              <div style={{ fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: 'var(--am-text-muted)' }}>
                 {card.label}
               </div>
-              <div className="text-lg font-bold text-gray-900 dark:text-gray-100 leading-tight">
+              <div style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1.2, margin: '2px 0' }}>
                 {card.value}
               </div>
-              <div className="text-[10px] text-gray-400 dark:text-gray-500">{card.sub}</div>
+              <div style={{ fontSize: '10px', color: 'var(--am-text-muted)' }}>{card.sub}</div>
             </div>
           </div>
         ))}
@@ -234,34 +242,60 @@ export default function Dashboard() {
 
       {/* Omzet Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
-        <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700 border-l-4 border-l-purple-500 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
-            <i className="bi bi-cash-stack text-base" />
+        <div style={{
+          background: 'var(--am-surface)',
+          borderRadius: 'var(--am-radius)',
+          padding: '12px',
+          border: '1px solid var(--am-border)',
+          borderLeft: '3px solid #8b5cf6',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
+        }}>
+          <div style={{
+            width: '36px', height: '36px', borderRadius: '8px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(139,92,246,0.12)', color: '#7c3aed', fontSize: '1rem'
+          }}>
+            <i className="bi bi-cash-stack" />
           </div>
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            <div style={{ fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: 'var(--am-text-muted)' }}>
               Omzet Hari Ini
             </div>
-            <div className="text-base font-bold text-gray-900 dark:text-gray-100 leading-tight">
+            <div style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1.2, margin: '2px 0' }}>
               {safeFormatRupiah(stats.omzet_hari)}
             </div>
-            <div className="text-[10px] text-gray-400 dark:text-gray-500">
+            <div style={{ fontSize: '10px', color: 'var(--am-text-muted)' }}>
               {stats.selesai} transaksi selesai
             </div>
           </div>
         </div>
-        <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700 border-l-4 border-l-rose-500 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400">
-            <i className="bi bi-graph-up-arrow text-base" />
+        <div style={{
+          background: 'var(--am-surface)',
+          borderRadius: 'var(--am-radius)',
+          padding: '12px',
+          border: '1px solid var(--am-border)',
+          borderLeft: '3px solid #f43f5e',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
+        }}>
+          <div style={{
+            width: '36px', height: '36px', borderRadius: '8px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(244,63,94,0.12)', color: '#e11d48', fontSize: '1rem'
+          }}>
+            <i className="bi bi-graph-up-arrow" />
           </div>
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            <div style={{ fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: 'var(--am-text-muted)' }}>
               Omzet Bulan Ini
             </div>
-            <div className="text-base font-bold text-gray-900 dark:text-gray-100 leading-tight">
+            <div style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1.2, margin: '2px 0' }}>
               {safeFormatRupiah(stats.omzet_bulan)}
             </div>
-            <div className="text-[10px] text-gray-400 dark:text-gray-500">
+            <div style={{ fontSize: '10px', color: 'var(--am-text-muted)' }}>
               {new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
             </div>
           </div>
@@ -270,46 +304,58 @@ export default function Dashboard() {
 
       {/* Servis Table - Full Width */}
       <div className="mb-3">
-        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
-          <div className="p-3 bg-gray-50 dark:bg-slate-800/50 border-b border-gray-200 dark:border-slate-700 flex justify-between items-center">
-            <span className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-200">
-              <i className="bi bi-clock-history text-blue-500" /> Servis Terbaru
+        <div style={{
+          background: 'var(--am-surface)',
+          borderRadius: 'var(--am-radius)',
+          border: '1px solid var(--am-border)',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            padding: '10px 14px',
+            background: 'var(--am-surface-2)',
+            borderBottom: '1px solid var(--am-border)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.8rem', fontWeight: '600', color: 'var(--am-text)' }}>
+              <i className="bi bi-clock-history" style={{ color: '#3b82f6' }} /> Servis Terbaru
             </span>
-            <Link href="/servis/data" className="text-xs text-blue-500 font-semibold flex items-center gap-1 no-underline">
+            <Link href="/servis/data" style={{ fontSize: '.7rem', color: '#3b82f6', fontWeight: '600', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
               Lihat Semua <i className="bi bi-arrow-right" />
             </Link>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="dark:bg-slate-800 bg-gray-100">
-                  <th className="p-2 text-center text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-slate-700">No</th>
-                  <th className="p-2 text-left text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-slate-700">Pelanggan</th>
-                  <th className="p-2 text-left text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-slate-700 hidden md:table-cell">Unit HP</th>
-                  <th className="p-2 text-left text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-slate-700">Keluhan</th>
-                  <th className="p-2 text-center text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-slate-700">Status</th>
-                  <th className="p-2 text-right text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-slate-700 hidden sm:table-cell">Biaya</th>
-                  <th className="p-2 text-center text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-slate-700">Aksi</th>
+                <tr style={{ background: 'var(--am-surface-2)' }}>
+                  <th style={{ padding: '8px', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', textAlign: 'center' }}>No</th>
+                  <th style={{ padding: '8px', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', textAlign: 'left' }}>Pelanggan</th>
+                  <th style={{ padding: '8px', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', textAlign: 'left' }} className="hidden md:table-cell">Unit HP</th>
+                  <th style={{ padding: '8px', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', textAlign: 'left' }}>Keluhan</th>
+                  <th style={{ padding: '8px', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', textAlign: 'center' }}>Status</th>
+                  <th style={{ padding: '8px', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', textAlign: 'right' }} className="hidden sm:table-cell">Biaya</th>
+                  <th style={{ padding: '8px', fontSize: '10px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', textAlign: 'center' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {servisTerbaru.length > 0 ? servisTerbaru.map((s, i) => (
-                  <tr key={s.id} className={`border-b border-gray-200 dark:border-slate-700 ${i % 2 === 0 ? 'bg-gray-50 dark:bg-slate-800/50' : ''}`}>
-                    <td className="p-2 text-center font-bold text-gray-400 dark:text-gray-500">{i + 1}</td>
-                    <td className="p-2 text-left">
-                      <div className="font-semibold text-gray-900 dark:text-gray-100 text-xs">{s.nama_pelanggan}</div>
-                      <div className="text-[10px] text-gray-400 dark:text-gray-500">{s.no_servis}</div>
+                  <tr key={s.id} style={{ background: i % 2 === 0 ? 'var(--am-surface-2)' : 'transparent', borderBottom: '1px solid var(--am-border)' }}>
+                    <td style={{ padding: '8px', textAlign: 'center', fontWeight: '700', color: 'var(--am-text-muted)' }}>{i + 1}</td>
+                    <td style={{ padding: '8px', textAlign: 'left' }}>
+                      <div style={{ fontWeight: '600', color: 'var(--am-text)', fontSize: '.8rem' }}>{s.nama_pelanggan}</div>
+                      <div style={{ fontSize: '10px', color: 'var(--am-text-muted)' }}>{s.no_servis}</div>
                     </td>
-                    <td className="p-2 text-left hidden md:table-cell">
-                      <div className="font-semibold text-gray-900 dark:text-gray-100 text-xs">{s.merk_hp} {s.tipe_hp}</div>
-                      <div className="text-[10px] text-gray-400 dark:text-gray-500">
+                    <td style={{ padding: '8px', textAlign: 'left' }} className="hidden md:table-cell">
+                      <div style={{ fontWeight: '600', color: 'var(--am-text)', fontSize: '.8rem' }}>{s.merk_hp} {s.tipe_hp}</div>
+                      <div style={{ fontSize: '10px', color: 'var(--am-text-muted)' }}>
                         {new Date(s.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })}
                       </div>
                     </td>
-                    <td className="p-2 text-left max-w-[100px]">
+                    <td style={{ padding: '8px', textAlign: 'left', maxWidth: '120px' }}>
                       {s.keluhan ? (
                         <span
-                          className="text-blue-500 dark:text-blue-400 underline decoration-dotted underline-offset-2 text-xs cursor-pointer"
+                          style={{ color: '#3b82f6', textDecoration: 'underline dotted', textUnderlineOffset: '3px', fontSize: '.75rem', cursor: 'pointer' }}
                           onClick={() => setModalKeluhan({ hp: `${s.merk_hp} ${s.tipe_hp}`, nama: s.nama_pelanggan, keluhan: s.keluhan })}
                         >
                           {s.keluhan.length > 20 ? s.keluhan.substring(0, 20) + '…' : s.keluhan}
@@ -327,7 +373,7 @@ export default function Dashboard() {
                         {statusText(s.status)}
                       </span>
                     </td>
-                    <td className="p-2 text-right font-semibold text-gray-900 dark:text-gray-100 text-xs hidden sm:table-cell">
+                    <td style={{ padding: '8px', textAlign: 'right', fontWeight: '600', color: 'var(--am-text)' }} className="hidden sm:table-cell">
                       {safeFormatRupiah(s.estimasi_biaya)}
                     </td>
                     <td className="p-2 text-center">
@@ -417,32 +463,45 @@ export default function Dashboard() {
       {/* Bottom Section: Merk Populer + Chart */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
         {/* Merk Populer */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden">
-          <div className="p-3 bg-gray-50 dark:bg-slate-800/50 border-b border-gray-200 dark:border-slate-700">
-            <span className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-200">
-              <i className="bi bi-trophy-fill text-amber-500" /> Merk Populer
+        <div style={{
+          background: 'var(--am-surface)',
+          borderRadius: 'var(--am-radius)',
+          border: '1px solid var(--am-border)',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            padding: '10px 14px',
+            background: 'var(--am-surface-2)',
+            borderBottom: '1px solid var(--am-border)'
+          }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.8rem', fontWeight: '600', color: 'var(--am-text)' }}>
+              <i className="bi bi-trophy-fill" style={{ color: '#f59e0b' }} /> Merk Populer
             </span>
           </div>
-          <div className="p-2">
+          <div style={{ padding: '8px 0' }}>
             {stats.merk_populer && stats.merk_populer.length > 0 ? stats.merk_populer.slice(0, 5).map((merk, i) => {
-              const colors = ['blue', 'purple', 'cyan', 'amber', 'gray']
+              const colors = ['#3b82f6', '#8b5cf6', '#06b6d4', '#f59e0b', '#64748b']
               const maxCount = stats.merk_populer[0]?.total || 1
               const width = (merk.total / maxCount) * 100
               return (
-                <div key={i} className="mb-2 last:mb-0">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="font-semibold text-xs text-gray-900 dark:text-gray-100">{merk.merk_hp}</span>
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-${colors[i]}-100 dark:bg-${colors[i]}-900/30 text-${colors[i]}-600 dark:text-${colors[i]}-400`}>
+                <div key={i} style={{ padding: '6px 14px', borderBottom: i < 4 ? '1px solid var(--am-border)' : 'none' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <span style={{ fontWeight: '600', fontSize: '.75rem', color: 'var(--am-text)' }}>{merk.merk_hp}</span>
+                    <span style={{
+                      background: `${colors[i]}20`, color: colors[i],
+                      fontSize: '10px', fontWeight: '700',
+                      padding: '2px 8px', borderRadius: '999px'
+                    }}>
                       {merk.total}x
                     </span>
                   </div>
-                  <div className="h-1 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full bg-${colors[i]}-500`} style={{ width: `${width}%` }} />
+                  <div style={{ height: '4px', background: 'var(--am-border)', borderRadius: '2px', overflow: 'hidden' }}>
+                    <div style={{ width: `${width}%`, height: '100%', background: colors[i], borderRadius: '2px' }} />
                   </div>
                 </div>
               )
             }) : (
-              <div className="p-4 text-center text-gray-400 dark:text-gray-500 text-sm">
+              <div style={{ padding: '16px', textAlign: 'center', color: 'var(--am-text-muted)', fontSize: '.75rem' }}>
                 Belum ada data
               </div>
             )}
@@ -450,22 +509,35 @@ export default function Dashboard() {
         </div>
 
         {/* Chart - Omzet per Bulan */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 overflow-hidden md:col-span-2">
-          <div className="p-3 bg-gray-50 dark:bg-slate-800/50 border-b border-gray-200 dark:border-slate-700 flex justify-between items-center">
-            <span className="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-gray-200">
-              <i className="bi bi-graph-up text-purple-500" /> Omzet per Bulan
+        <div style={{
+          background: 'var(--am-surface)',
+          borderRadius: 'var(--am-radius)',
+          border: '1px solid var(--am-border)',
+          overflow: 'hidden',
+          gridColumn: 'span 1'
+        }} className="md:col-span-2">
+          <div style={{
+            padding: '10px 14px',
+            background: 'var(--am-surface-2)',
+            borderBottom: '1px solid var(--am-border)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.8rem', fontWeight: '600', color: 'var(--am-text)' }}>
+              <i className="bi bi-graph-up" style={{ color: '#8b5cf6' }} /> Omzet per Bulan
             </span>
-            <span className="text-xs text-gray-400 dark:text-gray-500">
-              Total <strong className="text-gray-700 dark:text-gray-200">{stats.total_tahun || 0}</strong> servis
+            <span style={{ fontSize: '.7rem', color: 'var(--am-text-muted)' }}>
+              Total <strong style={{ color: 'var(--am-text)' }}>{stats.total_tahun || 0}</strong> servis
             </span>
           </div>
-          <div className="p-3">
+          <div style={{ padding: '12px' }}>
             {chartData.length > 0 ? (
-              <div className="relative h-24">
+              <div style={{ position: 'relative', height: '96px' }}>
                 <svg width="100%" height="96" viewBox={`0 0 ${chartData.length * 40 + 16} 96`} style={{ overflow: 'visible' }}>
                   {/* Grid lines */}
                   {[16, 40, 64].map((y) => (
-                    <line key={y} x1="8" y1={y} x2={chartData.length * 40 + 8} y2={y} stroke="#e5e7eb" strokeWidth="1" strokeDasharray="2,2" />
+                    <line key={y} x1="8" y1={y} x2={chartData.length * 40 + 8} y2={y} stroke="var(--am-border)" strokeWidth="1" strokeDasharray="2,2" />
                   ))}
                   {/* Bars */}
                   {chartData.map((month, i) => {
@@ -475,8 +547,8 @@ export default function Dashboard() {
                     return (
                       <g key={i}>
                         <rect x={x} y={y} width="16" height={barH} fill="rgba(59,130,246,0.2)" stroke="#3b82f6" strokeWidth="1" rx="2" />
-                        <text x={x + 8} y="92" textAnchor="middle" fontSize="7" fill="#9ca3af" fontWeight="600">{month.label}</text>
-                        <text x={x + 8} y={y - 3} textAnchor="middle" fontSize="8" fill="#1f2937" fontWeight="700">{month.value}</text>
+                        <text x={x + 8} y="92" textAnchor="middle" fontSize="7" fill="var(--am-text-muted)" fontWeight="600">{month.label}</text>
+                        <text x={x + 8} y={y - 3} textAnchor="middle" fontSize="8" fill="var(--am-text)" fontWeight="700">{month.value}</text>
                       </g>
                     )
                   })}
@@ -498,15 +570,15 @@ export default function Dashboard() {
                     const barH = maxVal > 0 ? (month.value / maxVal) * 64 : 0
                     const y = 80 - barH
                     return (
-                      <circle key={i} cx={x} cy={y} r="3" fill="#f59e0b" stroke="white" strokeWidth="1.5" />
+                      <circle key={i} cx={x} cy={y} r="3" fill="#f59e0b" stroke="var(--am-surface)" strokeWidth="1.5" />
                     )
                   })}
                 </svg>
               </div>
             ) : (
-              <div className="text-center py-6 text-gray-400">
-                <i className="bi bi-bar-chart-line text-2xl opacity-30" />
-                <p className="text-xs mt-1">Belum ada data</p>
+              <div style={{ textAlign: 'center', padding: '24px', color: 'var(--am-text-muted)' }}>
+                <i className="bi bi-bar-chart-line" style={{ fontSize: '1.25rem', opacity: 0.3 }} />
+                <p style={{ margin: '4px 0 0', fontSize: '.75rem' }}>Belum ada data</p>
               </div>
             )}
           </div>
