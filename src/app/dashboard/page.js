@@ -20,7 +20,6 @@ export default function Dashboard() {
   const dropdownRefs = useRef({})
 
   useEffect(() => {
-    // Check dark mode
     const savedTheme = localStorage.getItem('theme')
     const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches
     setIsDark(savedTheme === 'dark' || (!savedTheme && systemDark))
@@ -85,13 +84,13 @@ export default function Dashboard() {
 
   const statusBadge = (status) => {
     const classes = {
-      'Antrean': 'bg-slate-100 text-slate-600',
-      'Proses': 'bg-amber-100 text-amber-700',
-      'Siap Diambil': 'bg-cyan-100 text-cyan-700',
-      'Sudah Diambil': 'bg-emerald-100 text-emerald-700',
-      'Tidak Bisa': 'bg-red-100 text-red-600'
+      'Antrean': 'badge-antrean',
+      'Proses': 'badge-proses',
+      'Siap Diambil': 'badge-siap',
+      'Sudah Diambil': 'badge-selesai',
+      'Tidak Bisa': 'badge-gagal'
     }
-    return classes[status] || 'bg-gray-100 text-gray-600'
+    return classes[status] || 'badge-antrean'
   }
 
   const statusText = (status) => {
@@ -140,13 +139,18 @@ export default function Dashboard() {
   const textMain = isDark ? '#f3f4f6' : '#1f2937'
   const textMuted = isDark ? '#9ca3af' : '#6b7280'
 
+  // Prepare chart data - all 12 months
+  const chartData = stats.monthly_data || []
+  const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+  const maxVal = Math.max(...chartData.map(m => m.value), 1)
+
   return (
     <AppLayout>
       {/* Modal Keluhan */}
       {modalKeluhan && (
         <div
           style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9000,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             backdropFilter: 'blur(4px)'
           }}
@@ -154,32 +158,32 @@ export default function Dashboard() {
         >
           <div
             style={{
-              background: surface, borderRadius: '16px', padding: '24px', maxWidth: '480px',
-              width: '90%', boxShadow: '0 25px 50px rgba(0,0,0,0.25)', border: `1px solid ${border}`
+              background: surface, borderRadius: '12px', padding: '20px', maxWidth: '500px',
+              width: '90%', boxShadow: '0 20px 50px rgba(0,0,0,0.25)', border: `1px solid ${border}`
             }}
             onClick={e => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
               <div>
                 <div style={{ fontWeight: '700', fontSize: '1rem', color: textMain }}>{modalKeluhan.hp}</div>
-                <div style={{ fontSize: '.875rem', color: textMuted, marginTop: '4px' }}>{modalKeluhan.nama}</div>
+                <div style={{ fontSize: '.8rem', color: textMuted, marginTop: '2px' }}>{modalKeluhan.nama}</div>
               </div>
               <button
                 onClick={() => setModalKeluhan(null)}
-                style={{ background: 'none', border: 'none', fontSize: '1.5rem', color: textMuted, cursor: 'pointer', lineHeight: 1 }}
+                style={{ background: 'none', border: 'none', fontSize: '1.25rem', color: textMuted, cursor: 'pointer', lineHeight: 1 }}
               >
                 ×
               </button>
             </div>
             <div style={{
-              background: isDark ? '#374151' : '#f3f4f6',
-              borderRadius: '12px', padding: '16px',
+              background: isDark ? '#374151' : '#f3f4f5',
+              borderRadius: '8px', padding: '14px',
               border: `1px solid ${border}`
             }}>
-              <div style={{ fontSize: '.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted, marginBottom: '8px' }}>
+              <div style={{ fontSize: '.65rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted, marginBottom: '6px' }}>
                 Keluhan
               </div>
-              <div style={{ fontSize: '.875rem', lineHeight: 1.6, color: textMain, whiteSpace: 'pre-wrap' }}>
+              <div style={{ fontSize: '.85rem', lineHeight: 1.6, color: textMain, whiteSpace: 'pre-wrap' }}>
                 {modalKeluhan.keluhan}
               </div>
             </div>
@@ -187,11 +191,10 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
+      {/* Header - PHP Style (no Dashboard title) */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
         <div>
-          <h4 style={{ fontWeight: '700', fontSize: '1.125rem', color: textMain }}>Dashboard</h4>
-          <p style={{ fontSize: '.875rem', color: textMuted }}>
+          <p style={{ fontSize: '.8rem', color: textMuted }}>
             <span style={{ marginRight: '4px' }}>📅</span>
             {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
             {' · '}Halo, <strong style={{ color: textMain }}>{user?.username || 'User'}</strong>
@@ -200,8 +203,8 @@ export default function Dashboard() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{
             display: 'inline-flex', alignItems: 'center', gap: '4px',
-            fontSize: '.75rem', fontWeight: '700', padding: '6px 12px', borderRadius: '999px',
-            background: isDark ? '#374151' : '#f3f4f6',
+            fontSize: '.7rem', fontWeight: '700', padding: '4px 10px', borderRadius: '999px',
+            background: isDark ? '#374151' : '#f3f4f5',
             border: `1px solid ${border}`,
             color: textMuted, textTransform: 'uppercase'
           }}>
@@ -210,8 +213,8 @@ export default function Dashboard() {
           <Link href="/servis/tambah" style={{
             display: 'inline-flex', alignItems: 'center', gap: '6px',
             padding: '8px 16px', background: '#3b82f6', color: '#fff',
-            fontSize: '.875rem', fontWeight: '600', borderRadius: '999px',
-            textDecoration: 'none', boxShadow: '0 4px 12px rgba(59,130,246,0.3)',
+            fontSize: '.8rem', fontWeight: '600', borderRadius: '999px',
+            textDecoration: 'none', boxShadow: '0 4px 12px rgba(59,130,246,0.25)',
             transition: 'all 0.2s'
           }}>
             <i className="bi bi-plus-lg" /> Servis Baru
@@ -220,93 +223,91 @@ export default function Dashboard() {
       </div>
 
       {/* Status Cards - 4 Kolom */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '10px' }}>
         {[
-          { label: 'Antrean', value: stats.antrean, sub: 'Unit hari ini', icon: 'bi-clock-fill', color: '#3b82f6', border: '#3b82f6' },
+          { label: 'Antrean', value: stats.antrean, sub: 'Unit hari ini', icon: 'bi-person-plus-fill', color: '#3b82f6', border: '#3b82f6' },
           { label: 'Dikerjakan', value: stats.proses, sub: 'Sedang diproses', icon: 'bi-tools', color: '#d97706', border: '#f59e0b' },
-          { label: 'Siap Diambil', value: stats.siap, sub: 'Tunggu pelanggan', icon: 'bi-box-seam-fill', color: '#0891b2', border: '#06b6d4' },
+          { label: 'Siap Diambil', value: stats.siap, sub: 'Tunggu pelanggan', icon: 'bi-bag-check-fill', color: '#0891b2', border: '#06b6d4' },
           { label: 'Selesai', value: stats.selesai, sub: 'Diambil hari ini', icon: 'bi-check-circle-fill', color: '#059669', border: '#10b981' },
         ].map((card) => (
           <div
             key={card.label}
+            id={`angka-${card.label.toLowerCase()}`}
             style={{
-              background: surface, borderRadius: '12px', padding: '16px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-              border: `1px solid ${border}`, borderLeft: `4px solid ${card.border}`,
-              display: 'flex', alignItems: 'center', gap: '12px',
-              transition: 'all 0.2s', cursor: 'default'
+              background: surface, borderRadius: '10px', padding: '14px',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+              border: `1px solid ${border}`, borderLeft: `3px solid ${card.border}`,
+              display: 'flex', alignItems: 'center', gap: '10px'
             }}
-            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
           >
             <div style={{
-              width: '44px', height: '44px', borderRadius: '10px',
+              width: '38px', height: '38px', borderRadius: '8px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: `${card.color}18`, color: card.color, fontSize: '1.125rem', flexShrink: 0
+              background: `${card.color}15`, color: card.color, fontSize: '1rem', flexShrink: 0
             }}>
               <i className={`bi ${card.icon}`} />
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: '.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted }}>
+              <div style={{ fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted }}>
                 {card.label}
               </div>
-              <div style={{ fontSize: '1.5rem', fontWeight: '800', color: textMain, lineHeight: 1.2, margin: '4px 0' }}>
+              <div style={{ fontSize: '1.25rem', fontWeight: '800', color: textMain, lineHeight: 1.2, margin: '2px 0' }}>
                 {card.value}
               </div>
-              <div style={{ fontSize: '.75rem', color: textMuted }}>{card.sub}</div>
+              <div style={{ fontSize: '.65rem', color: textMuted }}>{card.sub}</div>
             </div>
           </div>
         ))}
       </div>
 
       {/* Omzet Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px', marginBottom: '12px' }}>
         <div style={{
-          background: surface, borderRadius: '12px', padding: '16px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-          border: `1px solid ${border}`, borderLeft: '4px solid #8b5cf6',
-          display: 'flex', alignItems: 'center', gap: '12px'
+          background: surface, borderRadius: '10px', padding: '14px',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+          border: `1px solid ${border}`, borderLeft: '3px solid #8b5cf6',
+          display: 'flex', alignItems: 'center', gap: '10px'
         }}>
           <div style={{
-            width: '44px', height: '44px', borderRadius: '10px',
+            width: '38px', height: '38px', borderRadius: '8px',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'rgba(139,92,246,0.12)', color: '#7c3aed', fontSize: '1.125rem'
+            background: 'rgba(139,92,246,0.12)', color: '#7c3aed', fontSize: '1rem'
           }}>
-            <i className="bi bi-currency-dollar" />
+            <i className="bi bi-cash-stack" />
           </div>
           <div>
-            <div style={{ fontSize: '.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted }}>
+            <div style={{ fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted }}>
               Omzet Hari Ini
             </div>
-            <div style={{ fontSize: '1.125rem', fontWeight: '800', color: textMain, lineHeight: 1.2, margin: '4px 0' }}>
+            <div style={{ fontSize: '1rem', fontWeight: '800', color: textMain, lineHeight: 1.2, margin: '2px 0' }}>
               {formatRupiah(stats.omzet_hari)}
             </div>
-            <div style={{ fontSize: '.75rem', color: textMuted }}>
+            <div style={{ fontSize: '.65rem', color: textMuted }}>
               {stats.selesai} transaksi selesai
             </div>
           </div>
         </div>
         <div style={{
-          background: surface, borderRadius: '12px', padding: '16px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-          border: `1px solid ${border}`, borderLeft: '4px solid #f43f5e',
-          display: 'flex', alignItems: 'center', gap: '12px'
+          background: surface, borderRadius: '10px', padding: '14px',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+          border: `1px solid ${border}`, borderLeft: '3px solid #f43f5e',
+          display: 'flex', alignItems: 'center', gap: '10px'
         }}>
           <div style={{
-            width: '44px', height: '44px', borderRadius: '10px',
+            width: '38px', height: '38px', borderRadius: '8px',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'rgba(244,63,94,0.12)', color: '#e11d48', fontSize: '1.125rem'
+            background: 'rgba(244,63,94,0.12)', color: '#e11d48', fontSize: '1rem'
           }}>
             <i className="bi bi-graph-up-arrow" />
           </div>
           <div>
-            <div style={{ fontSize: '.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted }}>
+            <div style={{ fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted }}>
               Omzet Bulan Ini
             </div>
-            <div style={{ fontSize: '1.125rem', fontWeight: '800', color: textMain, lineHeight: 1.2, margin: '4px 0' }}>
+            <div style={{ fontSize: '1rem', fontWeight: '800', color: textMain, lineHeight: 1.2, margin: '2px 0' }}>
               {formatRupiah(stats.omzet_bulan)}
             </div>
-            <div style={{ fontSize: '.75rem', color: textMuted }}>
+            <div style={{ fontSize: '.65rem', color: textMuted }}>
               {new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
             </div>
           </div>
@@ -314,163 +315,145 @@ export default function Dashboard() {
       </div>
 
       {/* Table & Sidebar */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px', marginBottom: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px', marginBottom: '12px' }}>
         {/* Servis Table */}
         <div style={{
-          background: surface, borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          background: surface, borderRadius: '10px',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
           border: `1px solid ${border}`, overflow: 'hidden'
         }}>
           <div style={{
-            padding: '12px 16px',
+            padding: '10px 14px',
             background: isDark ? '#1f2937' : '#f9fafb',
             borderBottom: `1px solid ${border}`,
             display: 'flex', justifyContent: 'space-between', alignItems: 'center'
           }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '.875rem', fontWeight: '600', color: textMain }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.8rem', fontWeight: '600', color: textMain }}>
               <i className="bi bi-clock-history" style={{ color: '#3b82f6' }} /> Servis Terbaru
             </span>
             <Link href="/servis/data" style={{
-              fontSize: '.75rem', color: '#3b82f6', fontWeight: '600',
+              fontSize: '.7rem', color: '#3b82f6', fontWeight: '600',
               textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px'
             }}>
               Lihat Semua <i className="bi bi-arrow-right" />
             </Link>
           </div>
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.875rem' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.8rem' }}>
               <thead>
                 <tr style={{ background: isDark ? '#1f2937' : '#f9fafb' }}>
-                  <th style={{ padding: '10px 12px', fontSize: '.7rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'center' }}>No</th>
-                  <th style={{ padding: '10px 12px', fontSize: '.7rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'left' }}>Pelanggan</th>
-                  <th style={{ padding: '10px 12px', fontSize: '.7rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'left' }}>Unit HP</th>
-                  <th style={{ padding: '10px 12px', fontSize: '.7rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'left' }}>Keluhan</th>
-                  <th style={{ padding: '10px 12px', fontSize: '.7rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'center' }}>Status</th>
-                  <th style={{ padding: '10px 12px', fontSize: '.7rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'right' }}>Biaya</th>
-                  <th style={{ padding: '10px 12px', fontSize: '.7rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'center' }}>Aksi</th>
+                  <th style={{ padding: '8px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'center' }}>No</th>
+                  <th style={{ padding: '8px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'left' }}>Pelanggan</th>
+                  <th style={{ padding: '8px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'left' }}>Unit HP</th>
+                  <th style={{ padding: '8px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'left' }}>Keluhan</th>
+                  <th style={{ padding: '8px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'center' }}>Status</th>
+                  <th style={{ padding: '8px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'right' }}>Biaya</th>
+                  <th style={{ padding: '8px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'center' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {servisTerbaru.length > 0 ? servisTerbaru.map((s, i) => (
-                  <tr key={s.id} style={{ borderBottom: `1px solid ${border}` }}>
-                    <td style={{ padding: '12px', textAlign: 'center', fontSize: '.75rem', color: textMuted, fontWeight: '700' }}>{i + 1}</td>
-                    <td style={{ padding: '12px', textAlign: 'left' }}>
+                  <tr key={s.id} className={i % 2 === 0 ? (isDark ? 'bg-gray-800/30' : 'bg-gray-50/50') : ''} style={{ borderBottom: `1px solid ${border}` }}>
+                    <td style={{ padding: '10px', textAlign: 'center', color: textMuted, fontWeight: '700' }}>{i + 1}</td>
+                    <td style={{ padding: '10px', textAlign: 'left' }}>
                       <div style={{ fontWeight: '600', color: textMain }}>{s.nama_pelanggan}</div>
-                      <div style={{ fontSize: '.75rem', color: textMuted }}>{s.no_servis}</div>
+                      <div style={{ fontSize: '.65rem', color: textMuted }}>{s.no_servis}</div>
                     </td>
-                    <td style={{ padding: '12px', textAlign: 'left' }}>
+                    <td style={{ padding: '10px', textAlign: 'left' }}>
                       <div style={{ fontWeight: '600', color: textMain }}>{s.merk_hp} {s.tipe_hp}</div>
-                      <div style={{ fontSize: '.75rem', color: textMuted }}>
+                      <div style={{ fontSize: '.65rem', color: textMuted }}>
                         {new Date(s.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </div>
                     </td>
-                    <td style={{ padding: '12px', textAlign: 'left', maxWidth: '200px' }}>
+                    <td style={{ padding: '10px', textAlign: 'left', maxWidth: '160px', cursor: 'pointer' }}>
                       {s.keluhan ? (
                         <span
-                          style={{ fontSize: '.75rem', color: '#3b82f6', cursor: 'pointer', textDecoration: 'underline dotted' }}
+                          className="keluhan-cell"
+                          style={{ color: '#3b82f6', textDecoration: 'underline dotted', textUnderlineOffset: '3px' }}
                           onClick={() => setModalKeluhan({ hp: `${s.merk_hp} ${s.tipe_hp}`, nama: s.nama_pelanggan, keluhan: s.keluhan })}
                         >
-                          {s.keluhan.length > 40 ? s.keluhan.substring(0, 40) + '…' : s.keluhan}
+                          {s.keluhan.length > 30 ? s.keluhan.substring(0, 30) + '…' : s.keluhan}
                         </span>
                       ) : (
                         <span style={{ color: textMuted }}>-</span>
                       )}
                     </td>
-                    <td style={{ padding: '12px', textAlign: 'center' }}>
-                      <span className={statusBadge(s.status)} style={{
+                    <td style={{ padding: '10px', textAlign: 'center' }}>
+                      <span className={`badge-soft ${statusBadge(s.status)}`} style={{
                         display: 'inline-flex', alignItems: 'center',
-                        padding: '4px 10px', borderRadius: '999px',
-                        fontSize: '.7rem', fontWeight: '700'
+                        padding: '3px 8px', borderRadius: '999px',
+                        fontSize: '.65rem', fontWeight: '700'
                       }}>
                         {statusText(s.status)}
                       </span>
                     </td>
-                    <td style={{ padding: '12px', textAlign: 'right', fontWeight: '600', color: textMain }}>
+                    <td style={{ padding: '10px', textAlign: 'right', fontWeight: '600', color: textMain }}>
                       {formatRupiah(s.estimasi_biaya)}
                     </td>
-                    <td style={{ padding: '12px', textAlign: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                    <td style={{ padding: '10px', textAlign: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
                         {!isPengunjung && (
-                          <Link href={`/servis/edit/${s.id}`} style={{
-                            padding: '6px', borderRadius: '6px', color: '#3b82f6',
-                            background: 'rgba(59,130,246,0.1)', display: 'flex', alignItems: 'center'
-                          }} title="Edit">
+                          <Link href={`/servis/edit/${s.id}`} className="btn-act btn-act-blue" title="Edit">
                             <i className="bi bi-pencil-square" />
                           </Link>
                         )}
                         <div style={{ position: 'relative' }} ref={el => dropdownRefs.current[s.id] = el}>
                           <button
+                            className="btn-act btn-act-dark"
                             onClick={() => setOpenDropdown(openDropdown === s.id ? null : s.id)}
-                            style={{
-                              padding: '6px', borderRadius: '6px',
-                              color: textMain, background: isDark ? '#374151' : '#f3f4f6',
-                              display: 'flex', alignItems: 'center', border: `1px solid ${border}`
-                            }}
                           >
-                            <i className="bi bi-chevron-down" style={{ fontSize: '.75rem' }} />
+                            <i className="bi bi-chevron-down" style={{ fontSize: '.7rem' }} />
                           </button>
                           {openDropdown === s.id && (
                             <div style={{
                               position: 'absolute', right: 0, top: '100%', marginTop: '4px',
                               background: surface, border: `1px solid ${border}`,
-                              borderRadius: '10px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
-                              minWidth: '180px', zIndex: 100, overflow: 'hidden'
+                              borderRadius: '8px', boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+                              minWidth: '160px', zIndex: 100, overflow: 'hidden'
                             }}>
                               <Link href={`/nota/${s.id}`} target="_blank" style={{
-                                display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px',
-                                fontSize: '.8rem', color: textMain, textDecoration: 'none',
+                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
+                                fontSize: '.75rem', color: textMain, textDecoration: 'none',
                                 borderBottom: `1px solid ${border}`
                               }}>
                                 <i className="bi bi-receipt" style={{ color: '#059669' }} /> Nota Offline
                               </Link>
                               <Link href={`/nota/${s.id}/penerimaan`} target="_blank" style={{
-                                display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px',
-                                fontSize: '.8rem', color: textMain, textDecoration: 'none',
+                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
+                                fontSize: '.75rem', color: textMain, textDecoration: 'none',
                                 borderBottom: `1px solid ${border}`
                               }}>
                                 <i className="bi bi-qr-code" style={{ color: '#2563eb' }} /> QR Code
                               </Link>
                               <Link href={`/nota/${s.id}/garansi`} target="_blank" style={{
-                                display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px',
-                                fontSize: '.8rem', color: textMain, textDecoration: 'none',
+                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
+                                fontSize: '.75rem', color: textMain, textDecoration: 'none',
                                 borderBottom: `1px solid ${border}`
                               }}>
                                 <i className="bi bi-shield-check" style={{ color: '#f59e0b' }} /> Nota Garansi
                               </Link>
                               <Link href={`/nota/${s.id}/label`} target="_blank" style={{
-                                display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px',
-                                fontSize: '.8rem', color: textMain, textDecoration: 'none',
+                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
+                                fontSize: '.75rem', color: textMain, textDecoration: 'none',
                                 borderBottom: `1px solid ${border}`
                               }}>
                                 <i className="bi bi-tag" style={{ color: '#8b5cf6' }} /> Label
                               </Link>
                               <div style={{ height: '1px', background: border }} />
                               <a href={`/nota/${s.id}/penerimaan?pdf=1`} target="_blank" style={{
-                                display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px',
-                                fontSize: '.8rem', color: '#0ea5e9', textDecoration: 'none'
+                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
+                                fontSize: '.75rem', color: '#0ea5e9', textDecoration: 'none'
                               }}>
                                 <i className="bi bi-download" /> PDF Penerimaan
-                              </a>
-                              <a href={`/nota/${s.id}/garansi?pdf=1`} target="_blank" style={{
-                                display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px',
-                                fontSize: '.8rem', color: '#0ea5e9', textDecoration: 'none'
-                              }}>
-                                <i className="bi bi-download" /> PDF Garansi
                               </a>
                             </div>
                           )}
                         </div>
-                        <a href={getWhatsAppUrl(s)} target="_blank" style={{
-                          padding: '6px', borderRadius: '6px', color: '#25d366',
-                          background: 'rgba(37,211,102,0.1)', display: 'flex', alignItems: 'center'
-                        }} title="WhatsApp">
+                        <a href={getWhatsAppUrl(s)} target="_blank" className="btn-act btn-act-green" title="WhatsApp">
                           <i className="bi bi-whatsapp" />
                         </a>
                         {isAdmin && (
-                          <button onClick={() => handleDelete(s.id)} style={{
-                            padding: '6px', borderRadius: '6px', color: '#ef4444',
-                            background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center'
-                          }} title="Hapus">
+                          <button onClick={() => handleDelete(s.id)} className="btn-act btn-act-red" title="Hapus">
                             <i className="bi bi-trash" />
                           </button>
                         )}
@@ -479,8 +462,8 @@ export default function Dashboard() {
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan="7" style={{ textAlign: 'center', padding: '40px', color: textMuted }}>
-                      <i className="bi bi-inbox" style={{ fontSize: '2rem', display: 'block', marginBottom: '8px', opacity: 0.3 }} />
+                    <td colSpan="7" style={{ textAlign: 'center', padding: '32px', color: textMuted }}>
+                      <i className="bi bi-inbox" style={{ fontSize: '1.5rem', display: 'block', marginBottom: '6px', opacity: 0.3 }} />
                       Belum ada data servis
                     </td>
                   </tr>
@@ -490,25 +473,26 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Sidebar - Stok Menipis */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignSelf: 'start' }}>
+        {/* Sidebar */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignSelf: 'start' }}>
+          {/* Stok Menipis */}
           <div style={{
-            background: surface, borderRadius: '12px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            background: surface, borderRadius: '10px',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
             border: `1px solid ${border}`, overflow: 'hidden'
           }}>
             <div style={{
-              padding: '12px 16px',
+              padding: '10px 14px',
               background: isDark ? '#1f2937' : '#f9fafb',
               borderBottom: `1px solid ${border}`,
               display: 'flex', justifyContent: 'space-between', alignItems: 'center'
             }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '.875rem', fontWeight: '600', color: textMain }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.8rem', fontWeight: '600', color: textMain }}>
                 <i className="bi bi-exclamation-triangle-fill" style={{ color: '#ef4444' }} /> Stok Menipis
               </span>
               <span style={{
                 background: '#ef4444', color: '#fff',
-                fontSize: '.7rem', fontWeight: '700',
+                fontSize: '.65rem', fontWeight: '700',
                 padding: '2px 8px', borderRadius: '999px'
               }}>
                 {lowStock.length}
@@ -519,170 +503,166 @@ export default function Dashboard() {
                 const dotColor = sp.stok === 0 ? '#ef4444' : sp.stok <= 2 ? '#f97316' : '#f59e0b'
                 return (
                   <li key={sp.id} style={{
-                    padding: '10px 16px', borderBottom: `1px solid ${border}`,
+                    padding: '8px 14px', borderBottom: `1px solid ${border}`,
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                   }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0, flex: 1 }}>
                       <span style={{
-                        width: '8px', height: '8px', borderRadius: '50%',
+                        width: '6px', height: '6px', borderRadius: '50%',
                         background: dotColor, flexShrink: 0
                       }} />
-                      <span style={{ fontSize: '.8rem', color: textMain, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: '.75rem', color: textMain, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {sp.nama_sparepart}
                       </span>
                     </div>
                     <span style={{
                       background: dotColor, color: '#fff',
-                      fontSize: '.7rem', fontWeight: '700',
-                      padding: '2px 8px', borderRadius: '6px', marginLeft: '8px', flexShrink: 0
+                      fontSize: '.6rem', fontWeight: '700',
+                      padding: '2px 6px', borderRadius: '4px', marginLeft: '6px', flexShrink: 0
                     }}>
                       {sp.stok}
                     </span>
                   </li>
                 )
               }) : (
-                <li style={{ padding: '20px', textAlign: 'center', color: textMuted, fontSize: '.8rem' }}>
-                  Stok aman
+                <li style={{ padding: '16px', textAlign: 'center', color: textMuted, fontSize: '.75rem' }}>
+                  <i className="bi bi-check-circle" style={{ color: '#059669', marginRight: '4px' }} /> Stok aman
                 </li>
               )}
             </ul>
-            <div style={{ padding: '12px' }}>
+            <div style={{ padding: '10px' }}>
               <Link href="/sparepart" style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                width: '100%', padding: '10px', borderRadius: '999px',
+                width: '100%', padding: '8px', borderRadius: '999px',
                 border: `1px solid #ef4444`, color: '#ef4444',
-                fontSize: '.8rem', fontWeight: '600', textDecoration: 'none',
-                transition: 'all 0.2s'
+                fontSize: '.7rem', fontWeight: '600', textDecoration: 'none'
               }}>
                 <i className="bi bi-tag" /> Kelola Sparepart
               </Link>
             </div>
           </div>
+
+          {/* Merk Populer */}
+          <div style={{
+            background: surface, borderRadius: '10px',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+            border: `1px solid ${border}`, overflow: 'hidden'
+          }}>
+            <div style={{
+              padding: '10px 14px',
+              background: isDark ? '#1f2937' : '#f9fafb',
+              borderBottom: `1px solid ${border}`
+            }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.8rem', fontWeight: '600', color: textMain }}>
+                <i className="bi bi-trophy-fill" style={{ color: '#f59e0b' }} /> Merk Populer
+              </span>
+            </div>
+            <div>
+              {stats.merk_populer && stats.merk_populer.length > 0 ? stats.merk_populer.slice(0, 5).map((merk, i) => {
+                const colors = ['#3b82f6', '#8b5cf6', '#06b6d4', '#f59e0b', '#64748b']
+                return (
+                  <div key={i} style={{
+                    padding: '8px 14px', borderBottom: `1px solid ${border}`,
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{
+                        width: '24px', height: '24px', borderRadius: '6px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontWeight: '800', fontSize: '.65rem',
+                        background: `${colors[i]}20`, color: colors[i]
+                      }}>
+                        {i + 1}
+                      </div>
+                      <span style={{ fontWeight: '600', fontSize: '.8rem', color: textMain }}>{merk.merk_hp}</span>
+                    </div>
+                    <span style={{
+                      background: `${colors[i]}20`, color: colors[i],
+                      fontSize: '.6rem', fontWeight: '700',
+                      padding: '2px 8px', borderRadius: '999px'
+                    }}>
+                      {merk.total}x
+                    </span>
+                  </div>
+                )
+              }) : (
+                <div style={{ padding: '16px', textAlign: 'center', color: textMuted, fontSize: '.75rem' }}>
+                  Belum ada data
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Chart & Merk Populer */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px', marginBottom: '16px' }}>
-        {/* Chart */}
+      {/* Chart */}
+      <div style={{
+        background: surface, borderRadius: '10px',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+        border: `1px solid ${border}`, overflow: 'hidden'
+      }}>
         <div style={{
-          background: surface, borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-          border: `1px solid ${border}`, overflow: 'hidden'
+          padding: '10px 14px',
+          background: isDark ? '#1f2937' : '#f9fafb',
+          borderBottom: `1px solid ${border}`,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center'
         }}>
-          <div style={{
-            padding: '12px 16px',
-            background: isDark ? '#1f2937' : '#f9fafb',
-            borderBottom: `1px solid ${border}`,
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-          }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '.875rem', fontWeight: '600', color: textMain }}>
-              <i className="bi bi-bar-chart-line" style={{ color: '#3b82f6' }} /> Statistik Unit Masuk {new Date().getFullYear()}
-            </span>
-            <span style={{ fontSize: '.75rem', color: textMuted }}>
-              Total <strong style={{ color: textMain }}>{stats.total_tahun || 0}</strong> unit
-            </span>
-          </div>
-          <div style={{ padding: '20px' }}>
-            {(() => {
-              const chartData = stats.monthly_data || []
-              const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
-              const maxVal = Math.max(...chartData.map(m => m.value), 1)
-              return (
-                <div style={{ height: '220px', position: 'relative' }}>
-                  <svg width="100%" height="220" viewBox={`0 0 ${chartData.length * 60 + 40} 220`} preserveAspectRatio="xMidYMid meet" style={{ overflow: 'visible' }}>
-                    {/* Grid lines */}
-                    {[0, 55, 110, 165].map((y) => (
-                      <line key={y} x1="30" y1={y + 10} x2={chartData.length * 60 + 30} y2={y + 10} stroke={border} strokeWidth="1" strokeDasharray="4,4" />
-                    ))}
-                    {chartData.map((month, i) => {
-                      const x = 30 + i * 60 + 30
-                      const barHeight = (month.value / maxVal) * 150
-                      const y = 175 - barHeight
-                      const isMax = month.value === maxVal
-                      return (
-                        <g key={i}>
-                          <rect
-                            x={x - 15} y={y} width="30" height={barHeight}
-                            fill={isMax ? 'rgba(59,130,246,0.85)' : 'rgba(59,130,246,0.18)'}
-                            stroke={isMax ? '#3b82f6' : 'rgba(59,130,246,0.35)'}
-                            strokeWidth="1.5" rx="6"
-                          />
-                          <text x={x} y={y - 8} textAnchor="middle" fontSize="11" fontWeight="700" fill={textMain}>
-                            {month.value}
-                          </text>
-                          <text x={x} y="192" textAnchor="middle" fontSize="10" fontWeight="600" fill={textMuted}>
-                            {month.label}
-                          </text>
-                        </g>
-                      )
-                    })}
-                    {/* Trend line */}
-                    {chartData.length > 1 && (() => {
-                      const points = chartData.map((month, i) => {
-                        const x = 30 + i * 60 + 30
-                        const y = 175 - (month.value / maxVal) * 150
-                        return `${x},${y}`
-                      }).join(' ')
-                      return (
-                        <polyline points={points} fill="none" stroke="#f59e0b" strokeWidth="2" strokeDasharray="5,4" strokeLinecap="round" strokeLinejoin="round" />
-                      )
-                    })()}
-                  </svg>
-                </div>
-              )
-            })()}
-          </div>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.8rem', fontWeight: '600', color: textMain }}>
+            <i className="bi bi-bar-chart-line" style={{ color: '#3b82f6' }} /> Statistik Unit Masuk {new Date().getFullYear()}
+          </span>
+          <span style={{ fontSize: '.7rem', color: textMuted }}>
+            Total <strong style={{ color: textMain }}>{stats.total_tahun || 0}</strong> unit
+          </span>
         </div>
-
-        {/* Merk Populer */}
-        <div style={{
-          background: surface, borderRadius: '12px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-          border: `1px solid ${border}`, overflow: 'hidden'
-        }}>
-          <div style={{
-            padding: '12px 16px',
-            background: isDark ? '#1f2937' : '#f9fafb',
-            borderBottom: `1px solid ${border}`
-          }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '.875rem', fontWeight: '600', color: textMain }}>
-              <i className="bi bi-phone" style={{ color: '#3b82f6' }} /> Merk Populer
-            </span>
-          </div>
-          <div>
-            {stats.merk_populer && stats.merk_populer.length > 0 ? stats.merk_populer.slice(0, 5).map((merk, i) => {
-              const colors = ['#3b82f6', '#8b5cf6', '#06b6d4', '#f59e0b', '#64748b']
-              return (
-                <div key={i} style={{
-                  padding: '12px 16px', borderBottom: `1px solid ${border}`,
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{
-                      width: '28px', height: '28px', borderRadius: '8px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontWeight: '800', fontSize: '.75rem',
-                      background: `${colors[i]}20`, color: colors[i]
-                    }}>
-                      {i + 1}
-                    </div>
-                    <span style={{ fontWeight: '600', fontSize: '.875rem', color: textMain }}>{merk.merk_hp}</span>
-                  </div>
-                  <span style={{
-                    background: `${colors[i]}20`, color: colors[i],
-                    fontSize: '.7rem', fontWeight: '700',
-                    padding: '4px 10px', borderRadius: '999px'
-                  }}>
-                    {merk.total} unit
-                  </span>
-                </div>
-              )
-            }) : (
-              <div style={{ padding: '20px', textAlign: 'center', color: textMuted, fontSize: '.8rem' }}>
-                Belum ada data
-              </div>
-            )}
-          </div>
+        <div style={{ padding: '16px' }}>
+          {chartData.length > 0 ? (
+            <div style={{ height: '200px', position: 'relative' }}>
+              <svg width="100%" height="200" viewBox={`0 0 ${chartData.length * 50 + 30} 200`} preserveAspectRatio="xMidYMid meet" style={{ overflow: 'visible' }}>
+                {/* Grid lines */}
+                {[0, 40, 80, 120, 160].map((y) => (
+                  <line key={y} x1="20" y1={y + 10} x2={chartData.length * 50 + 20} y2={y + 10} stroke={border} strokeWidth="1" strokeDasharray="3,3" />
+                ))}
+                {chartData.map((month, i) => {
+                  const x = 20 + i * 50 + 25
+                  const barHeight = (month.value / maxVal) * 130
+                  const y = 170 - barHeight
+                  const isMax = month.value === maxVal
+                  return (
+                    <g key={i}>
+                      <rect
+                        x={x - 12} y={y} width="24" height={barHeight}
+                        fill={isMax ? 'rgba(59,130,246,0.85)' : 'rgba(59,130,246,0.18)'}
+                        stroke={isMax ? '#3b82f6' : 'rgba(59,130,246,0.35)'}
+                        strokeWidth="1" rx="4"
+                      />
+                      <text x={x} y={y - 6} textAnchor="middle" fontSize="9" fontWeight="700" fill={textMain}>
+                        {month.value}
+                      </text>
+                      <text x={x} y="186" textAnchor="middle" fontSize="8" fontWeight="600" fill={textMuted}>
+                        {month.label}
+                      </text>
+                    </g>
+                  )
+                })}
+                {/* Trend line */}
+                {chartData.length > 1 && (() => {
+                  const points = chartData.map((month, i) => {
+                    const x = 20 + i * 50 + 25
+                    const y = 170 - (month.value / maxVal) * 130
+                    return `${x},${y}`
+                  }).join(' ')
+                  return (
+                    <polyline points={points} fill="none" stroke="#f59e0b" strokeWidth="2" strokeDasharray="4,3" strokeLinecap="round" strokeLinejoin="round" />
+                  )
+                })()}
+              </svg>
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '32px', color: textMuted }}>
+              <i className="bi bi-bar-chart-line" style={{ fontSize: '1.5rem', opacity: 0.3 }} />
+              <p style={{ margin: '6px 0 0', fontSize: '.8rem' }}>Belum ada data grafik</p>
+            </div>
+          )}
         </div>
       </div>
     </AppLayout>
