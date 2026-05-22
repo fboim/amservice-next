@@ -139,10 +139,18 @@ export default function Dashboard() {
   const textMain = isDark ? '#f3f4f6' : '#1f2937'
   const textMuted = isDark ? '#9ca3af' : '#6b7280'
 
+  // Safe formatRupiah wrapper to prevent crashes
+  const safeFormatRupiah = (value) => {
+    try {
+      return formatRupiah(value)
+    } catch (e) {
+      return 'Rp 0'
+    }
+  }
+
   // Prepare chart data - all 12 months
   const chartData = stats.monthly_data || []
-  const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
-  const maxVal = Math.max(...chartData.map(m => m.value), 1)
+  const maxVal = Math.max(...chartData.map(m => m.value || 0), 1)
 
   return (
     <AppLayout>
@@ -249,7 +257,7 @@ export default function Dashboard() {
               Omzet Hari Ini
             </div>
             <div style={{ fontSize: '1rem', fontWeight: '800', color: textMain, lineHeight: 1.2, margin: '2px 0' }}>
-              {formatRupiah(stats.omzet_hari)}
+              {safeFormatRupiah(stats.omzet_hari)}
             </div>
             <div style={{ fontSize: '.65rem', color: textMuted }}>
               {stats.selesai} transaksi selesai
@@ -274,7 +282,7 @@ export default function Dashboard() {
               Omzet Bulan Ini
             </div>
             <div style={{ fontSize: '1rem', fontWeight: '800', color: textMain, lineHeight: 1.2, margin: '2px 0' }}>
-              {formatRupiah(stats.omzet_bulan)}
+              {safeFormatRupiah(stats.omzet_bulan)}
             </div>
             <div style={{ fontSize: '.65rem', color: textMuted }}>
               {new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
@@ -357,7 +365,7 @@ export default function Dashboard() {
                       </span>
                     </td>
                     <td style={{ padding: '10px', textAlign: 'right', fontWeight: '600', color: textMain }}>
-                      {formatRupiah(s.estimasi_biaya)}
+                      {safeFormatRupiah(s.estimasi_biaya)}
                     </td>
                     <td style={{ padding: '10px', textAlign: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
