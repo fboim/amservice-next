@@ -54,14 +54,16 @@ export async function GET(request) {
       gagal: servis?.filter(s => s.status === 'Tidak Bisa').length || 0,
     }
 
-    // Calculate omzet
+    // Calculate omzet - only count items with status "Sudah Diambil"
     let omzet = 0
     servis?.forEach(s => {
-      const biaya = parseInt((s.estimasi_biaya || '0').toString().replace(/\D/g, ''))
-      omzet += biaya
+      if (s.status === 'Sudah Diambil') {
+        const biaya = parseInt((s.estimasi_biaya || '0').toString().replace(/\D/g, ''))
+        omzet += biaya
+      }
     })
 
-    // Group by date for chart
+    // Group by date for chart - only "Sudah Diambil" for omzet
     const byDate = {}
     servis?.forEach(s => {
       const date = s.tanggal
@@ -69,10 +71,12 @@ export async function GET(request) {
         byDate[date] = { total: 0, omzet: 0, count: 0 }
       }
       byDate[date].count++
-      byDate[date].omzet += parseInt((s.estimasi_biaya || '0').toString().replace(/\D/g, ''))
+      if (s.status === 'Sudah Diambil') {
+        byDate[date].omzet += parseInt((s.estimasi_biaya || '0').toString().replace(/\D/g, ''))
+      }
     })
 
-    // Group by merk
+    // Group by merk - only "Sudah Diambil" for omzet
     const byMerk = {}
     servis?.forEach(s => {
       const merk = s.merk_hp || 'Lainnya'
@@ -80,7 +84,9 @@ export async function GET(request) {
         byMerk[merk] = { count: 0, omzet: 0 }
       }
       byMerk[merk].count++
-      byMerk[merk].omzet += parseInt((s.estimasi_biaya || '0').toString().replace(/\D/g, ''))
+      if (s.status === 'Sudah Diambil') {
+        byMerk[merk].omzet += parseInt((s.estimasi_biaya || '0').toString().replace(/\D/g, ''))
+      }
     })
 
     // Sort byMerk by count

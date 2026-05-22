@@ -15,8 +15,8 @@ export async function GET(request) {
 
     let query = supabase
       .from('admin')
-      .select('id, username, role, created_at', { count: 'exact' })
-      .order('created_at', { ascending: false })
+      .select('id, username, role', { count: 'exact' })
+      .order('id', { ascending: false })
 
     if (search) {
       query = query.ilike('username', `%${search}%`)
