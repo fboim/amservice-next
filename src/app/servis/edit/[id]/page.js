@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
 
 export default function EditServis() {
@@ -11,19 +12,17 @@ export default function EditServis() {
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [sendingWA, setSendingWA] = useState(false)
-  const [sparepartList, setSparepartList] = useState([])
   const [form, setForm] = useState({
     nama_pelanggan: '',
     no_hp: '',
     merk_hp: '',
     tipe_hp: '',
     keluhan: '',
+    modal_sparepart: '',
     estimasi_biaya: '',
     status: 'Antrean',
+    garansi: 'Tidak Ada',
     teknisi: '',
-    catatan: '',
-    sparepart_digunakan: [],
   })
 
   useEffect(() => {
@@ -32,25 +31,17 @@ export default function EditServis() {
       router.push('/login')
       return
     }
-    fetchData()
+    fetchServis()
   }, [id])
 
-  const fetchData = async () => {
+  const fetchServis = async () => {
     try {
-      // Fetch servis
       const servisRes = await fetch(`/api/servis?id=${id}`)
       const servisData = await servisRes.json()
 
       if (servisData.error) throw new Error(servisData.error)
 
-      // API returns data directly for single item, not wrapped in {servis: ...}
       const servis = servisData
-
-      // Parse sparepart if exists
-      let sparepartParsed = []
-      try {
-        sparepartParsed = JSON.parse(servis.sparepart_json || '[]')
-      } catch (e) {}
 
       setForm({
         nama_pelanggan: servis.nama_pelanggan || '',
@@ -58,17 +49,12 @@ export default function EditServis() {
         merk_hp: servis.merk_hp || '',
         tipe_hp: servis.tipe_hp || '',
         keluhan: servis.keluhan || '',
+        modal_sparepart: servis.modal_sparepart || '',
         estimasi_biaya: servis.estimasi_biaya || '',
         status: servis.status || 'Antrean',
+        garansi: servis.garansi || 'Tidak Ada',
         teknisi: servis.teknisi || '',
-        catatan: servis.catatan || '',
-        sparepart_digunakan: sparepartParsed,
       })
-
-      // Fetch sparepart list
-      const sparepartRes = await fetch('/api/sparepart')
-      const sparepartData = await sparepartRes.json()
-      setSparepartList(sparepartData.sparepart || [])
     } catch (err) {
       alert('Gagal memuat data: ' + err.message)
       router.push('/servis/data')
@@ -82,49 +68,23 @@ export default function EditServis() {
     setForm(prev => ({ ...prev, [name]: value }))
   }
 
-  const toggleSparepart = (sp) => {
-    setForm(prev => {
-      const exists = prev.sparepart_digunakan.find(s => s.id === sp.id)
-      if (exists) {
-        return {
-          ...prev,
-          sparepart_digunakan: prev.sparepart_digunakan.filter(s => s.id !== sp.id)
-        }
-      }
-      return {
-        ...prev,
-        sparepart_digunakan: [...prev.sparepart_digunakan, { ...sp, qty: 1 }]
-      }
-    })
+  const formatNumber = (value) => {
+    const num = parseInt(value.replace(/\D/g, '')) || 0
+    return num.toLocaleString('id-ID')
   }
 
-  const updateSparepartQty = (spId, qty) => {
-    setForm(prev => ({
-      ...prev,
-      sparepart_digunakan: prev.sparepart_digunakan.map(sp =>
-        sp.id === spId ? { ...sp, qty: parseInt(qty) || 1 } : sp
-      )
-    }))
+  const parseNumber = (value) => {
+    return parseInt(value.replace(/\D/g, '')) || 0
   }
 
-  const removeSparepart = (spId) => {
-    setForm(prev => ({
-      ...prev,
-      sparepart_digunakan: prev.sparepart_digunakan.filter(sp => sp.id !== spId)
-    }))
+  const handleBiayaChange = (e) => {
+    const raw = e.target.value.replace(/\D/g, '')
+    setForm(prev => ({ ...prev, estimasi_biaya: raw }))
   }
 
-  const calculateTotal = () => {
-    const sparepartTotal = form.sparepart_digunakan.reduce((sum, sp) => {
-      return sum + (parseInt(sp.harga) * sp.qty)
-    }, 0)
-    const biayaStr = String(form.estimasi_biaya || '0')
-    const biayaLain = parseInt(biayaStr.replace(/\D/g, '')) || 0
-    return sparepartTotal + biayaLain
-  }
-
-  const formatRupiah = (num) => {
-    return 'Rp ' + num.toLocaleString('id-ID')
+  const handleModalChange = (e) => {
+    const raw = e.target.value.replace(/\D/g, '')
+    setForm(prev => ({ ...prev, modal_sparepart: raw }))
   }
 
   const handleSubmit = async (e) => {
@@ -132,16 +92,12 @@ export default function EditServis() {
     setSaving(true)
 
     try {
-      const totalBiaya = calculateTotal()
-
       const res = await fetch('/api/servis', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id,
           ...form,
-          estimasi_biaya: formatRupiah(totalBiaya),
-          sparepart_json: JSON.stringify(form.sparepart_digunakan),
         })
       })
 
@@ -157,55 +113,14 @@ export default function EditServis() {
     }
   }
 
-  const handleDelete = async () => {
-    if (!confirm('Yakin hapus servis ini?')) return
-
-    try {
-      const res = await fetch(`/api/servis?id=${id}`, { method: 'DELETE' })
-      const data = await res.json()
-
-      if (data.error) throw new Error(data.error)
-
-      router.push('/servis/data')
-    } catch (err) {
-      alert('Gagal menghapus: ' + err.message)
-    }
-  }
-
-  const handleSendWA = async (waType = 'status') => {
-    setSendingWA(true)
-    try {
-      const res = await fetch('/api/whatsapp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, type: waType })
-      })
-      const data = await res.json()
-
-      if (data.note) {
-        // Show message for manual sending
-        const confirmed = confirm(`API WhatsApp belum aktif. Salin pesan berikut?\n\n${data.message}`)
-        if (confirmed) {
-          navigator.clipboard.writeText(data.message)
-          alert('Pesan berhasil disalin!')
-        }
-      } else if (data.success) {
-        alert('Notifikasi WhatsApp berhasil dikirim!')
-      } else {
-        alert('Gagal mengirim: ' + (data.error || 'Unknown error'))
-      }
-    } catch (err) {
-      alert('Gagal mengirim: ' + err.message)
-    } finally {
-      setSendingWA(false)
-    }
-  }
-
   if (loading) {
     return (
       <AppLayout>
         <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="spinner" style={{ width: 40, height: 40 }} />
+          <div style={{ textAlign: 'center', color: 'var(--am-text-muted)' }}>
+            <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
+            <p style={{ marginTop: '8px' }}>Memuat data...</p>
+          </div>
         </div>
       </AppLayout>
     )
@@ -213,8 +128,15 @@ export default function EditServis() {
 
   return (
     <AppLayout>
-    <div style={{ minHeight: '100vh', padding: '0' }}>
+    <div className="page-wrapper">
       <div style={{ maxWidth: 800, margin: '0 auto' }}>
+        {/* Back Button */}
+        <div style={{ marginBottom: '1rem' }}>
+          <Link href="/servis/data" className="am-btn am-btn-secondary am-btn-sm">
+            <i className="bi bi-arrow-left" /> Kembali
+          </Link>
+        </div>
+
         <form onSubmit={handleSubmit}>
           {/* Data Pelanggan */}
           <div className="section-card" style={{ marginBottom: '1rem' }}>
@@ -254,6 +176,7 @@ export default function EditServis() {
                   value={form.teknisi}
                   onChange={handleChange}
                   className="am-input"
+                  placeholder="Nama teknisi"
                 />
               </div>
             </div>
@@ -302,106 +225,6 @@ export default function EditServis() {
             </div>
           </div>
 
-          {/* Sparepart */}
-          <div className="section-card" style={{ marginBottom: '1rem' }}>
-            <div className="card-header">
-              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <i className="bi bi-box-seam" style={{ color: '#10b981' }} />
-                Sparepart Digunakan
-              </span>
-            </div>
-            <div style={{ padding: '1rem' }}>
-              <div style={{ marginBottom: '1rem' }}>
-                <label className="am-label">Pilih Sparepart</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {sparepartList.map(sp => (
-                    <button
-                      key={sp.id}
-                      type="button"
-                      onClick={() => toggleSparepart(sp)}
-                      style={{
-                        padding: '6px 12px',
-                        borderRadius: 6,
-                        border: '1px solid',
-                        borderColor: form.sparepart_digunakan.find(s => s.id === sp.id)
-                          ? '#3b82f6'
-                          : '#334155',
-                        background: form.sparepart_digunakan.find(s => s.id === sp.id)
-                          ? 'rgba(59, 130, 246, 0.2)'
-                          : 'transparent',
-                        color: '#f1f5f9',
-                        fontSize: '.75rem',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {sp.nama_sparepart} - Rp {parseInt(sp.harga).toLocaleString('id-ID')}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {form.sparepart_digunakan.length > 0 && (
-                <div>
-                  <label className="am-label">Sparepart Terpilih</label>
-                  <table className="am-table" style={{ marginTop: 8 }}>
-                    <thead>
-                      <tr>
-                        <th>Nama</th>
-                        <th>Harga</th>
-                        <th>Qty</th>
-                        <th>Subtotal</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {form.sparepart_digunakan.map(sp => (
-                        <tr key={sp.id}>
-                          <td>{sp.nama_sparepart}</td>
-                          <td>Rp {parseInt(sp.harga).toLocaleString('id-ID')}</td>
-                          <td>
-                            <input
-                              type="number"
-                              min="1"
-                              value={sp.qty}
-                              onChange={(e) => updateSparepartQty(sp.id, e.target.value)}
-                              style={{
-                                width: 60,
-                                padding: '4px 8px',
-                                background: '#0f172a',
-                                border: '1px solid #334155',
-                                borderRadius: 4,
-                                color: '#f1f5f9',
-                                textAlign: 'center'
-                              }}
-                            />
-                          </td>
-                          <td style={{ fontWeight: 600 }}>
-                            Rp {(parseInt(sp.harga) * sp.qty).toLocaleString('id-ID')}
-                          </td>
-                          <td>
-                            <button
-                              type="button"
-                              onClick={() => removeSparepart(sp.id)}
-                              style={{
-                                background: 'transparent',
-                                border: 'none',
-                                color: '#ef4444',
-                                cursor: 'pointer',
-                                fontSize: '1rem'
-                              }}
-                            >
-                              ×
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
-
           {/* Biaya & Status */}
           <div className="section-card" style={{ marginBottom: '1rem' }}>
             <div className="card-header">
@@ -412,13 +235,25 @@ export default function EditServis() {
             </div>
             <div style={{ padding: '1.5rem', display: 'grid', gap: '1rem', gridTemplateColumns: '1fr 1fr' }}>
               <div>
-                <label className="am-label">Biaya Servis (Rp)</label>
+                <label className="am-label">Modal Sparepart (Rp)</label>
+                <input
+                  type="text"
+                  name="modal_sparepart"
+                  value={form.modal_sparepart ? formatNumber(form.modal_sparepart) : ''}
+                  onChange={handleModalChange}
+                  className="am-input"
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <label className="am-label">Total Biaya Servis (Rp)</label>
                 <input
                   type="text"
                   name="estimasi_biaya"
-                  value={form.estimasi_biaya}
-                  onChange={handleChange}
+                  value={form.estimasi_biaya ? formatNumber(form.estimasi_biaya) : ''}
+                  onChange={handleBiayaChange}
                   className="am-input"
+                  placeholder="0"
                 />
               </div>
               <div>
@@ -431,28 +266,21 @@ export default function EditServis() {
                   <option value="Tidak Bisa">Tidak Bisa</option>
                 </select>
               </div>
-              <div style={{ gridColumn: '1 / -1' }}>
-                <label className="am-label">Catatan</label>
-                <textarea
-                  name="catatan"
-                  value={form.catatan}
-                  onChange={handleChange}
-                  className="am-input"
-                  rows={2}
-                />
+              <div>
+                <label className="am-label">Garansi</label>
+                <select name="garansi" value={form.garansi} onChange={handleChange} className="am-input">
+                  <option value="Tidak Ada">Tidak Ada</option>
+                  <option value="7 Hari">7 Hari</option>
+                  <option value="14 Hari">14 Hari</option>
+                  <option value="30 Hari">30 Hari</option>
+                </select>
               </div>
             </div>
           </div>
 
-          {/* Total & Submit */}
+          {/* Submit */}
           <div className="section-card" style={{ marginBottom: '1.5rem', background: 'rgba(59, 130, 246, 0.1)', borderColor: '#3b82f6' }}>
-            <div style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <span style={{ color: '#64748b', fontSize: '.875rem' }}>Total Biaya</span>
-                <div style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f1f5f9' }}>
-                  {formatRupiah(calculateTotal())}
-                </div>
-              </div>
+            <div style={{ padding: '1.5rem', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
               <button
                 type="submit"
                 disabled={saving}
@@ -460,7 +288,7 @@ export default function EditServis() {
                 style={{ padding: '12px 32px', fontSize: '1rem' }}
               >
                 {saving ? (
-                  <><span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} /> Menyimpan...</>
+                  <><i className="bi bi-arrow-repeat" style={{ animation: 'spin 1s linear infinite' }} /> Menyimpan...</>
                 ) : (
                   <><i className="bi bi-check-circle" /> Simpan Perubahan</>
                 )}
