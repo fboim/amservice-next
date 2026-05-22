@@ -1,6 +1,8 @@
 // Currency formatting
 export function formatRupiah(angka) {
-  if (angka === undefined || angka === null || angka === '') return 'Rp 0'
+  if (angka === undefined || angka === null) return 'Rp 0'
+  if (typeof angka !== 'string' && typeof angka !== 'number') return 'Rp 0'
+  if (typeof angka === 'string' && angka.trim() === '') return 'Rp 0'
   const num = typeof angka === 'string' ? parseInt(angka.replace(/\D/g, '')) : Number(angka)
   if (isNaN(num)) return 'Rp 0'
   return 'Rp ' + num.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
