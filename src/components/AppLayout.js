@@ -70,12 +70,6 @@ function SidebarWrapper({ children }) {
     )
   }
 
-  const getRoleLabel = () => {
-    if (!user) return 'Pengunjung'
-    return user.role?.toLowerCase() === 'admin' ? 'Admin' :
-           user.role?.toLowerCase() === 'teknisi' ? 'Teknisi' : 'Pengunjung'
-  }
-
   const getPageTitle = () => {
     const page = pathname.split('/').pop() || 'dashboard'
 
@@ -127,48 +121,31 @@ function SidebarWrapper({ children }) {
         {/* Desktop Header */}
         <div className="header-bar">
           {/* Left - Page Title & User Info */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             {/* Page Icon */}
             <div style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: '14px',
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
               background: 'linear-gradient(135deg, var(--am-primary), #6366f1)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 16px rgba(59,130,246,.4)',
               flexShrink: 0
             }}>
-              <i className={`bi ${getPageIcon()}`} style={{ color: '#fff', fontSize: '1.2rem' }} />
+              <i className={`bi ${getPageIcon()}`} style={{ color: '#fff', fontSize: '0.9rem' }} />
             </div>
             <div>
-              <h4 style={{ fontWeight: '800', fontSize: '1.15rem', color: 'var(--am-text)', margin: '0 0 3px', letterSpacing: '-0.02em' }}>
+              <h4 style={{ fontWeight: '700', fontSize: '0.9rem', color: 'var(--am-text)', margin: '0' }}>
                 {getPageTitle()}
               </h4>
-              <p style={{ fontSize: '.72rem', color: 'var(--am-text-muted)', margin: 0 }}>
-                Halo, <strong style={{ color: 'var(--am-primary)', fontWeight: '700' }}>{user?.nama || 'User'}</strong>
-              </p>
             </div>
           </div>
 
           {/* Right - Actions */}
           <div className="header-actions">
-            {/* Role Badge */}
-            <span className="role-badge">
-              <i className="bi bi-shield-fill" />
-              {getRoleLabel().toUpperCase()}
-            </span>
-
             {/* New Service Button */}
-            <Link
-              href="/servis/tambah"
-              className="am-btn am-btn-primary am-btn-pill am-btn-sm"
-              style={{
-                boxShadow: '0 4px 16px rgba(59,130,246,.4)',
-                fontWeight: '700'
-              }}
-            >
+            <Link href="/servis/tambah" className="am-btn am-btn-primary am-btn-pill am-btn-sm">
               <i className="bi bi-plus-circle-fill" /> Servis Baru
             </Link>
           </div>

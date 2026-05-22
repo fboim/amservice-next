@@ -820,13 +820,12 @@ body {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 24px;
-  padding: 20px 24px;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 12px 16px;
   background: var(--am-surface);
-  border-radius: var(--am-radius-lg);
+  border-radius: var(--am-radius);
   border: 1px solid var(--am-border);
-  box-shadow: var(--am-shadow);
 }
 
 /* Mobile header bar - hidden (using sidebar mobile topbar instead) */
