@@ -14,13 +14,17 @@ export default function Dashboard() {
   const [servisTerbaru, setServisTerbaru] = useState([])
   const [lowStock, setLowStock] = useState([])
   const [user, setUser] = useState(null)
-  const [selectedKeluhan, setSelectedKeluhan] = useState(null)
-  const [openPrintId, setOpenPrintId] = useState(null)
-  const [openWaId, setOpenWaId] = useState(null)
-  const printRefs = useRef({})
-  const waRefs = useRef({})
+  const [modalKeluhan, setModalKeluhan] = useState(null)
+  const [openDropdown, setOpenDropdown] = useState(null)
+  const [isDark, setIsDark] = useState(false)
+  const dropdownRefs = useRef({})
 
   useEffect(() => {
+    // Check dark mode
+    const savedTheme = localStorage.getItem('theme')
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    setIsDark(savedTheme === 'dark' || (!savedTheme && systemDark))
+
     const token = localStorage.getItem('ams_token') || sessionStorage.getItem('ams_token')
     const userData = localStorage.getItem('ams_user') || sessionStorage.getItem('ams_user')
 
@@ -42,11 +46,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      Object.values(printRefs.current).forEach(ref => {
-        if (ref && !ref.contains(e.target)) setOpenPrintId(null)
-      })
-      Object.values(waRefs.current).forEach(ref => {
-        if (ref && !ref.contains(e.target)) setOpenWaId(null)
+      Object.values(dropdownRefs.current).forEach(ref => {
+        if (ref && !ref.contains(e.target)) {
+          setOpenDropdown(null)
+        }
       })
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -80,21 +83,21 @@ export default function Dashboard() {
   const isAdmin = user?.role?.toLowerCase() === 'admin'
   const isPengunjung = user?.role?.toLowerCase() === 'pengunjung'
 
-  const getBadgeClass = (status) => {
-    const map = {
-      'Antrean': 'badge-antrean',
-      'Proses': 'badge-proses',
-      'Siap Diambil': 'badge-siap',
-      'Sudah Diambil': 'badge-selesai',
-      'Tidak Bisa': 'badge-gagal'
+  const statusBadge = (status) => {
+    const classes = {
+      'Antrean': 'bg-slate-100 text-slate-600',
+      'Proses': 'bg-amber-100 text-amber-700',
+      'Siap Diambil': 'bg-cyan-100 text-cyan-700',
+      'Sudah Diambil': 'bg-emerald-100 text-emerald-700',
+      'Tidak Bisa': 'bg-red-100 text-red-600'
     }
-    return map[status] || 'badge-antrean'
+    return classes[status] || 'bg-gray-100 text-gray-600'
   }
 
-  const getBadgeText = (status) => {
+  const statusText = (status) => {
     const map = {
       'Antrean': 'Antrean',
-      'Proses': 'Dikerjakan',
+      'Proses': 'Proses',
       'Siap Diambil': 'Siap',
       'Sudah Diambil': 'Selesai',
       'Tidak Bisa': 'Gagal'
@@ -118,17 +121,6 @@ export default function Dashboard() {
     return `https://wa.me/${phone}`
   }
 
-  const getNotifStatusText = (servis) => {
-    const statusMsg = {
-      'Antrean': 'Sedang antre',
-      'Proses': 'Sedang dikerjakan',
-      'Siap Diambil': 'Sudah siap diambil',
-      'Sudah Diambil': 'Sudah diambil',
-    }
-    const msg = statusMsg[servis.status] || servis.status
-    return `Halo ${servis.nama_pelanggan}, servis ${servis.merk_hp} ${servis.tipe_hp} Anda: ${msg}. No Servis: ${servis.no_servis}`
-  }
-
   if (loading) {
     return (
       <AppLayout>
@@ -142,226 +134,343 @@ export default function Dashboard() {
     )
   }
 
-  const chartData = stats.monthly_data || []
-  const totalServis = chartData.reduce((sum, m) => sum + m.value, 0)
+  const surface = isDark ? '#1f2937' : '#ffffff'
+  const border = isDark ? '#374151' : '#e5e7eb'
+  const bg = isDark ? '#111827' : '#f9fafb'
+  const textMain = isDark ? '#f3f4f6' : '#1f2937'
+  const textMuted = isDark ? '#9ca3af' : '#6b7280'
 
   return (
     <AppLayout>
-      {/* Modal for Keluhan Detail */}
-      {selectedKeluhan && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)',
-          backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 9999, padding: '16px'
-        }} onClick={() => setSelectedKeluhan(null)}>
-          <div style={{
-            background: 'var(--am-surface)', borderRadius: '12px', padding: '20px', maxWidth: '500px',
-            width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
-          }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <span style={{ fontWeight: '700', color: 'var(--am-text)' }}>Detail Keluhan</span>
-              <button onClick={() => setSelectedKeluhan(null)} style={{
-                background: 'none', border: 'none', cursor: 'pointer', color: 'var(--am-text-muted)',
-                fontSize: '1.2rem', padding: '4px'
-              }}>
-                <i className="bi bi-x-lg" />
+      {/* Modal Keluhan */}
+      {modalKeluhan && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            backdropFilter: 'blur(4px)'
+          }}
+          onClick={() => setModalKeluhan(null)}
+        >
+          <div
+            style={{
+              background: surface, borderRadius: '16px', padding: '24px', maxWidth: '480px',
+              width: '90%', boxShadow: '0 25px 50px rgba(0,0,0,0.25)', border: `1px solid ${border}`
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+              <div>
+                <div style={{ fontWeight: '700', fontSize: '1rem', color: textMain }}>{modalKeluhan.hp}</div>
+                <div style={{ fontSize: '.875rem', color: textMuted, marginTop: '4px' }}>{modalKeluhan.nama}</div>
+              </div>
+              <button
+                onClick={() => setModalKeluhan(null)}
+                style={{ background: 'none', border: 'none', fontSize: '1.5rem', color: textMuted, cursor: 'pointer', lineHeight: 1 }}
+              >
+                ×
               </button>
             </div>
             <div style={{
-              background: 'var(--am-bg)', borderRadius: '8px', padding: '16px', fontSize: '.875rem',
-              color: 'var(--am-text)', lineHeight: '1.6', whiteSpace: 'pre-wrap'
+              background: isDark ? '#374151' : '#f3f4f6',
+              borderRadius: '12px', padding: '16px',
+              border: `1px solid ${border}`
             }}>
-              {selectedKeluhan}
+              <div style={{ fontSize: '.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted, marginBottom: '8px' }}>
+                Keluhan
+              </div>
+              <div style={{ fontSize: '.875rem', lineHeight: 1.6, color: textMain, whiteSpace: 'pre-wrap' }}>
+                {modalKeluhan.keluhan}
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Header with date and user info */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-        <div style={{ fontSize: '.8rem', color: 'var(--am-text-muted)' }}>
-          {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '20px' }}>
+        <div>
+          <h4 style={{ fontWeight: '700', fontSize: '1.125rem', color: textMain }}>Dashboard</h4>
+          <p style={{ fontSize: '.875rem', color: textMuted }}>
+            <span style={{ marginRight: '4px' }}>📅</span>
+            {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+            {' · '}Halo, <strong style={{ color: textMain }}>{user?.username || 'User'}</strong>
+          </p>
         </div>
-        {user && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '.8rem', fontWeight: '600', color: 'var(--am-text)' }}>{user.username}</span>
-            <span style={{
-              fontSize: '.65rem', padding: '2px 8px', borderRadius: '999px',
-              background: isAdmin ? 'rgba(139,92,246,.15)' : 'rgba(59,130,246,.15)',
-              color: isAdmin ? '#7c3aed' : '#2563eb', fontWeight: '700', textTransform: 'uppercase'
-            }}>
-              {user.role}
-            </span>
-          </div>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: '4px',
+            fontSize: '.75rem', fontWeight: '700', padding: '6px 12px', borderRadius: '999px',
+            background: isDark ? '#374151' : '#f3f4f6',
+            border: `1px solid ${border}`,
+            color: textMuted, textTransform: 'uppercase'
+          }}>
+            👤 {user?.role || 'User'}
+          </span>
+          <Link href="/servis/tambah" style={{
+            display: 'inline-flex', alignItems: 'center', gap: '6px',
+            padding: '8px 16px', background: '#3b82f6', color: '#fff',
+            fontSize: '.875rem', fontWeight: '600', borderRadius: '999px',
+            textDecoration: 'none', boxShadow: '0 4px 12px rgba(59,130,246,0.3)',
+            transition: 'all 0.2s'
+          }}>
+            <i className="bi bi-plus-lg" /> Servis Baru
+          </Link>
+        </div>
       </div>
 
-      {/* Status Cards - 4 columns tight gap */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginBottom: '8px' }}>
+      {/* Status Cards - 4 Kolom */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '12px' }}>
         {[
-          { label: 'Antrean', value: stats.antrean, sub: 'Unit hari ini', icon: 'bi-person-plus-fill', color: '#64748b', bg: 'rgba(148,163,184,.15)' },
-          { label: 'Dikerjakan', value: stats.proses, sub: 'Sedang proses', icon: 'bi-tools', color: '#d97706', bg: 'rgba(245,158,11,.15)' },
-          { label: 'Siap Diambil', value: stats.siap, sub: 'Tunggu pelanggan', icon: 'bi-bag-check-fill', color: '#0891b2', bg: 'rgba(6,182,212,.15)' },
-          { label: 'Selesai', value: stats.selesai, sub: 'Diambil hari ini', icon: 'bi-check-circle-fill', color: '#059669', bg: 'rgba(16,185,129,.15)' },
+          { label: 'Antrean', value: stats.antrean, sub: 'Unit hari ini', icon: 'bi-clock-fill', color: '#3b82f6', border: '#3b82f6' },
+          { label: 'Dikerjakan', value: stats.proses, sub: 'Sedang diproses', icon: 'bi-tools', color: '#d97706', border: '#f59e0b' },
+          { label: 'Siap Diambil', value: stats.siap, sub: 'Tunggu pelanggan', icon: 'bi-box-seam-fill', color: '#0891b2', border: '#06b6d4' },
+          { label: 'Selesai', value: stats.selesai, sub: 'Diambil hari ini', icon: 'bi-check-circle-fill', color: '#059669', border: '#10b981' },
         ].map((card) => (
-          <div key={card.label} style={{
-            background: 'var(--am-surface)', border: '1px solid var(--am-border)',
-            borderRadius: '10px', borderLeft: `3px solid ${card.color}`,
-            padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '12px'
-          }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: card.bg, color: card.color, fontSize: '1rem', flexShrink: 0 }}>
+          <div
+            key={card.label}
+            style={{
+              background: surface, borderRadius: '12px', padding: '16px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+              border: `1px solid ${border}`, borderLeft: `4px solid ${card.border}`,
+              display: 'flex', alignItems: 'center', gap: '12px',
+              transition: 'all 0.2s', cursor: 'default'
+            }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+          >
+            <div style={{
+              width: '44px', height: '44px', borderRadius: '10px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: `${card.color}18`, color: card.color, fontSize: '1.125rem', flexShrink: 0
+            }}>
               <i className={`bi ${card.icon}`} />
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: '.62rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.3px' }}>{card.label}</div>
-              <div style={{ fontSize: '1.3rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1 }}>{card.value}</div>
-              <div style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>{card.sub}</div>
+              <div style={{ fontSize: '.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted }}>
+                {card.label}
+              </div>
+              <div style={{ fontSize: '1.5rem', fontWeight: '800', color: textMain, lineHeight: 1.2, margin: '4px 0' }}>
+                {card.value}
+              </div>
+              <div style={{ fontSize: '.75rem', color: textMuted }}>{card.sub}</div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Omzet Cards - 2 columns tight gap */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginBottom: '8px' }}>
-        <div style={{ background: 'var(--am-surface)', border: '1px solid var(--am-border)', borderRadius: '10px', borderLeft: '3px solid #8b5cf6', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(139,92,246,.15)', color: '#7c3aed', fontSize: '1rem', flexShrink: 0 }}>
-            <i className="bi bi-cash-stack" />
+      {/* Omzet Cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '16px' }}>
+        <div style={{
+          background: surface, borderRadius: '12px', padding: '16px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          border: `1px solid ${border}`, borderLeft: '4px solid #8b5cf6',
+          display: 'flex', alignItems: 'center', gap: '12px'
+        }}>
+          <div style={{
+            width: '44px', height: '44px', borderRadius: '10px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(139,92,246,0.12)', color: '#7c3aed', fontSize: '1.125rem'
+          }}>
+            <i className="bi bi-currency-dollar" />
           </div>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ fontSize: '.62rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.3px' }}>Omzet Hari Ini</div>
-            <div style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1 }}>{formatRupiah(stats.omzet_hari)}</div>
-            <div style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>{stats.selesai} transaksi selesai</div>
+          <div>
+            <div style={{ fontSize: '.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted }}>
+              Omzet Hari Ini
+            </div>
+            <div style={{ fontSize: '1.125rem', fontWeight: '800', color: textMain, lineHeight: 1.2, margin: '4px 0' }}>
+              {formatRupiah(stats.omzet_hari)}
+            </div>
+            <div style={{ fontSize: '.75rem', color: textMuted }}>
+              {stats.selesai} transaksi selesai
+            </div>
           </div>
         </div>
-        <div style={{ background: 'var(--am-surface)', border: '1px solid var(--am-border)', borderRadius: '10px', borderLeft: '3px solid #f43f5e', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(244,63,94,.15)', color: '#e11d48', fontSize: '1rem', flexShrink: 0 }}>
+        <div style={{
+          background: surface, borderRadius: '12px', padding: '16px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          border: `1px solid ${border}`, borderLeft: '4px solid #f43f5e',
+          display: 'flex', alignItems: 'center', gap: '12px'
+        }}>
+          <div style={{
+            width: '44px', height: '44px', borderRadius: '10px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(244,63,94,0.12)', color: '#e11d48', fontSize: '1.125rem'
+          }}>
             <i className="bi bi-graph-up-arrow" />
           </div>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ fontSize: '.62rem', fontWeight: '700', color: 'var(--am-text-muted)', textTransform: 'uppercase', letterSpacing: '.3px' }}>Omzet Bulan Ini</div>
-            <div style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--am-text)', lineHeight: 1 }}>{formatRupiah(stats.omzet_bulan)}</div>
-            <div style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>{new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</div>
+          <div>
+            <div style={{ fontSize: '.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted }}>
+              Omzet Bulan Ini
+            </div>
+            <div style={{ fontSize: '1.125rem', fontWeight: '800', color: textMain, lineHeight: 1.2, margin: '4px 0' }}>
+              {formatRupiah(stats.omzet_bulan)}
+            </div>
+            <div style={{ fontSize: '.75rem', color: textMuted }}>
+              {new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Servis Table + Sidebar */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '8px', marginBottom: '8px' }}>
+      {/* Table & Sidebar */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px', marginBottom: '16px' }}>
         {/* Servis Table */}
-        <div style={{ background: 'var(--am-surface)', border: '1px solid var(--am-border)', borderRadius: '10px', overflow: 'hidden' }}>
-          <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--am-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.8rem', fontWeight: '600', color: 'var(--am-text)' }}>
+        <div style={{
+          background: surface, borderRadius: '12px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          border: `1px solid ${border}`, overflow: 'hidden'
+        }}>
+          <div style={{
+            padding: '12px 16px',
+            background: isDark ? '#1f2937' : '#f9fafb',
+            borderBottom: `1px solid ${border}`,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+          }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '.875rem', fontWeight: '600', color: textMain }}>
               <i className="bi bi-clock-history" style={{ color: '#3b82f6' }} /> Servis Terbaru
             </span>
-            <Link href="/servis/data" style={{ fontSize: '.72rem', color: 'var(--am-primary)', textDecoration: 'none', fontWeight: '600' }}>
+            <Link href="/servis/data" style={{
+              fontSize: '.75rem', color: '#3b82f6', fontWeight: '600',
+              textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px'
+            }}>
               Lihat Semua <i className="bi bi-arrow-right" />
             </Link>
           </div>
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.875rem' }}>
               <thead>
-                <tr>
-                  <th style={{ padding: '6px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.3px', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', textAlign: 'center', background: 'var(--am-bg)' }}>#</th>
-                  <th style={{ padding: '6px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.3px', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', textAlign: 'left', background: 'var(--am-bg)' }}>Pelanggan</th>
-                  <th style={{ padding: '6px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.3px', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', textAlign: 'left', background: 'var(--am-bg)' }}>Unit HP</th>
-                  <th style={{ padding: '6px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.3px', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', textAlign: 'left', background: 'var(--am-bg)' }}>Keluhan</th>
-                  <th style={{ padding: '6px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.3px', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', textAlign: 'center', background: 'var(--am-bg)' }}>Status</th>
-                  <th style={{ padding: '6px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.3px', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', textAlign: 'right', background: 'var(--am-bg)' }}>Biaya</th>
-                  <th style={{ padding: '6px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.3px', color: 'var(--am-text-muted)', borderBottom: '1px solid var(--am-border)', textAlign: 'center', background: 'var(--am-bg)' }}>Aksi</th>
+                <tr style={{ background: isDark ? '#1f2937' : '#f9fafb' }}>
+                  <th style={{ padding: '10px 12px', fontSize: '.7rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'center' }}>No</th>
+                  <th style={{ padding: '10px 12px', fontSize: '.7rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'left' }}>Pelanggan</th>
+                  <th style={{ padding: '10px 12px', fontSize: '.7rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'left' }}>Unit HP</th>
+                  <th style={{ padding: '10px 12px', fontSize: '.7rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'left' }}>Keluhan</th>
+                  <th style={{ padding: '10px 12px', fontSize: '.7rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'center' }}>Status</th>
+                  <th style={{ padding: '10px 12px', fontSize: '.7rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'right' }}>Biaya</th>
+                  <th style={{ padding: '10px 12px', fontSize: '.7rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.5px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'center' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {servisTerbaru.length > 0 ? servisTerbaru.map((s, i) => (
-                  <tr key={s.id} style={{ borderBottom: '1px solid var(--am-border)' }}>
-                    <td style={{ padding: '8px 10px', fontSize: '.75rem', color: 'var(--am-text-muted)', textAlign: 'center', fontWeight: '700' }}>{i + 1}</td>
-                    <td style={{ padding: '8px 10px', fontSize: '.75rem', textAlign: 'left' }}>
-                      <div style={{ fontWeight: '600' }}>{s.nama_pelanggan}</div>
-                      <div style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>{s.no_servis}</div>
+                  <tr key={s.id} style={{ borderBottom: `1px solid ${border}` }}>
+                    <td style={{ padding: '12px', textAlign: 'center', fontSize: '.75rem', color: textMuted, fontWeight: '700' }}>{i + 1}</td>
+                    <td style={{ padding: '12px', textAlign: 'left' }}>
+                      <div style={{ fontWeight: '600', color: textMain }}>{s.nama_pelanggan}</div>
+                      <div style={{ fontSize: '.75rem', color: textMuted }}>{s.no_servis}</div>
                     </td>
-                    <td style={{ padding: '8px 10px', fontSize: '.75rem', textAlign: 'left' }}>
-                      <div>{s.merk_hp} {s.tipe_hp}</div>
+                    <td style={{ padding: '12px', textAlign: 'left' }}>
+                      <div style={{ fontWeight: '600', color: textMain }}>{s.merk_hp} {s.tipe_hp}</div>
+                      <div style={{ fontSize: '.75rem', color: textMuted }}>
+                        {new Date(s.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </div>
                     </td>
-                    <td style={{ padding: '8px 10px', fontSize: '.72rem', textAlign: 'left', cursor: 'pointer' }} onClick={() => setSelectedKeluhan(s.keluhan)}>
-                      <div style={{ color: 'var(--am-text)', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.keluhan}</div>
-                      <div style={{ fontSize: '.6rem', color: 'var(--am-primary)' }}><i className="bi bi-cursor-text" /> detail</div>
+                    <td style={{ padding: '12px', textAlign: 'left', maxWidth: '200px' }}>
+                      {s.keluhan ? (
+                        <span
+                          style={{ fontSize: '.75rem', color: '#3b82f6', cursor: 'pointer', textDecoration: 'underline dotted' }}
+                          onClick={() => setModalKeluhan({ hp: `${s.merk_hp} ${s.tipe_hp}`, nama: s.nama_pelanggan, keluhan: s.keluhan })}
+                        >
+                          {s.keluhan.length > 40 ? s.keluhan.substring(0, 40) + '…' : s.keluhan}
+                        </span>
+                      ) : (
+                        <span style={{ color: textMuted }}>-</span>
+                      )}
                     </td>
-                    <td style={{ padding: '8px 10px', textAlign: 'center' }}>
-                      <span className={`badge-soft ${getBadgeClass(s.status)}`} style={{ fontSize: '.62rem', fontWeight: '700', padding: '2px 7px', borderRadius: '999px' }}>
-                        {getBadgeText(s.status)}
+                    <td style={{ padding: '12px', textAlign: 'center' }}>
+                      <span className={statusBadge(s.status)} style={{
+                        display: 'inline-flex', alignItems: 'center',
+                        padding: '4px 10px', borderRadius: '999px',
+                        fontSize: '.7rem', fontWeight: '700'
+                      }}>
+                        {statusText(s.status)}
                       </span>
                     </td>
-                    <td style={{ padding: '8px 10px', fontSize: '.75rem', textAlign: 'right', fontWeight: '600' }}>{formatRupiah(s.estimasi_biaya)}</td>
-                    <td style={{ padding: '8px 10px', textAlign: 'center' }}>
-                      <div style={{ display: 'flex', gap: '2px', justifyContent: 'center', alignItems: 'center' }}>
+                    <td style={{ padding: '12px', textAlign: 'right', fontWeight: '600', color: textMain }}>
+                      {formatRupiah(s.estimasi_biaya)}
+                    </td>
+                    <td style={{ padding: '12px', textAlign: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                         {!isPengunjung && (
-                          <Link href={`/servis/edit/${s.id}`} className="btn-act btn-act-blue" title="Edit" style={{ padding: '4px 6px' }}>
+                          <Link href={`/servis/edit/${s.id}`} style={{
+                            padding: '6px', borderRadius: '6px', color: '#3b82f6',
+                            background: 'rgba(59,130,246,0.1)', display: 'flex', alignItems: 'center'
+                          }} title="Edit">
                             <i className="bi bi-pencil-square" />
                           </Link>
                         )}
-                        <div style={{ position: 'relative' }} ref={el => printRefs.current[s.id] = el}>
+                        <div style={{ position: 'relative' }} ref={el => dropdownRefs.current[s.id] = el}>
                           <button
-                            className="btn-act btn-act-dark"
-                            title="Cetak"
-                            style={{ padding: '4px 6px', color: '#fff', background: '#1f2937', border: '1px solid #374151' }}
-                            onClick={() => setOpenPrintId(openPrintId === s.id ? null : s.id)}
+                            onClick={() => setOpenDropdown(openDropdown === s.id ? null : s.id)}
+                            style={{
+                              padding: '6px', borderRadius: '6px',
+                              color: textMain, background: isDark ? '#374151' : '#f3f4f6',
+                              display: 'flex', alignItems: 'center', border: `1px solid ${border}`
+                            }}
                           >
-                            <i className="bi bi-printer" />
+                            <i className="bi bi-chevron-down" style={{ fontSize: '.75rem' }} />
                           </button>
-                          {openPrintId === s.id && (
+                          {openDropdown === s.id && (
                             <div style={{
                               position: 'absolute', right: 0, top: '100%', marginTop: '4px',
-                              background: 'var(--am-surface)', border: '1px solid var(--am-border)',
-                              borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                              minWidth: '160px', zIndex: 100, overflow: 'hidden'
-                            }}>
-                              <Link href={`/nota/${s.id}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', fontSize: '.75rem', color: 'var(--am-text)', textDecoration: 'none', borderBottom: '1px solid var(--am-border)' }}>
-                                <i className="bi bi-receipt" style={{ color: '#059669' }} /> Nota
-                              </Link>
-                              <Link href={`/nota/${s.id}/penerimaan`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', fontSize: '.75rem', color: 'var(--am-text)', textDecoration: 'none', borderBottom: '1px solid var(--am-border)' }}>
-                                <i className="bi bi-qr-code" style={{ color: '#2563eb' }} /> QR Code
-                              </Link>
-                              <Link href={`/nota/${s.id}/garansi`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', fontSize: '.75rem', color: 'var(--am-text)', textDecoration: 'none', borderBottom: '1px solid var(--am-border)' }}>
-                                <i className="bi bi-shield-check" style={{ color: '#f59e0b' }} /> Nota Garansi
-                              </Link>
-                              <Link href={`/nota/${s.id}/label`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', fontSize: '.75rem', color: 'var(--am-text)', textDecoration: 'none', borderBottom: '1px solid var(--am-border)' }}>
-                                <i className="bi bi-tag" style={{ color: '#8b5cf6' }} /> Label
-                              </Link>
-                              <a href={`/nota/${s.id}/penerimaan?pdf=1`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', fontSize: '.75rem', color: 'var(--am-text)', textDecoration: 'none', borderBottom: '1px solid var(--am-border)' }}>
-                                <i className="bi bi-file-earmark-pdf" style={{ color: '#ef4444' }} /> PDF Nota
-                              </a>
-                              <a href={`/nota/${s.id}/garansi?pdf=1`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', fontSize: '.75rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                <i className="bi bi-file-earmark-pdf" style={{ color: '#dc2626' }} /> PDF Garansi
-                              </a>
-                            </div>
-                          )}
-                        </div>
-                        <div style={{ position: 'relative' }} ref={el => waRefs.current[s.id] = el}>
-                          <button
-                            className="btn-act"
-                            title="WhatsApp"
-                            style={{ padding: '4px 6px', color: '#25d366', background: 'rgba(37,211,102,.1)', border: '1px solid rgba(37,211,102,.3)' }}
-                            onClick={() => setOpenWaId(openWaId === s.id ? null : s.id)}
-                          >
-                            <i className="bi bi-whatsapp" />
-                          </button>
-                          {openWaId === s.id && (
-                            <div style={{
-                              position: 'absolute', right: 0, top: '100%', marginTop: '4px',
-                              background: 'var(--am-surface)', border: '1px solid var(--am-border)',
-                              borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                              background: surface, border: `1px solid ${border}`,
+                              borderRadius: '10px', boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
                               minWidth: '180px', zIndex: 100, overflow: 'hidden'
                             }}>
-                              <a href={getWhatsAppUrl(s)} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', fontSize: '.75rem', color: 'var(--am-text)', textDecoration: 'none', borderBottom: '1px solid var(--am-border)' }}>
-                                <i className="bi bi-chat-left-text" style={{ color: '#25d366' }} /> Notif Status
+                              <Link href={`/nota/${s.id}`} target="_blank" style={{
+                                display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px',
+                                fontSize: '.8rem', color: textMain, textDecoration: 'none',
+                                borderBottom: `1px solid ${border}`
+                              }}>
+                                <i className="bi bi-receipt" style={{ color: '#059669' }} /> Nota Offline
+                              </Link>
+                              <Link href={`/nota/${s.id}/penerimaan`} target="_blank" style={{
+                                display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px',
+                                fontSize: '.8rem', color: textMain, textDecoration: 'none',
+                                borderBottom: `1px solid ${border}`
+                              }}>
+                                <i className="bi bi-qr-code" style={{ color: '#2563eb' }} /> QR Code
+                              </Link>
+                              <Link href={`/nota/${s.id}/garansi`} target="_blank" style={{
+                                display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px',
+                                fontSize: '.8rem', color: textMain, textDecoration: 'none',
+                                borderBottom: `1px solid ${border}`
+                              }}>
+                                <i className="bi bi-shield-check" style={{ color: '#f59e0b' }} /> Nota Garansi
+                              </Link>
+                              <Link href={`/nota/${s.id}/label`} target="_blank" style={{
+                                display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px',
+                                fontSize: '.8rem', color: textMain, textDecoration: 'none',
+                                borderBottom: `1px solid ${border}`
+                              }}>
+                                <i className="bi bi-tag" style={{ color: '#8b5cf6' }} /> Label
+                              </Link>
+                              <div style={{ height: '1px', background: border }} />
+                              <a href={`/nota/${s.id}/penerimaan?pdf=1`} target="_blank" style={{
+                                display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px',
+                                fontSize: '.8rem', color: '#0ea5e9', textDecoration: 'none'
+                              }}>
+                                <i className="bi bi-download" /> PDF Penerimaan
                               </a>
-                              <a href={`${getWhatsAppUrl(s)}?text=${encodeURIComponent(getNotifStatusText(s))}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', fontSize: '.75rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                <i className="bi bi-send" style={{ color: '#25d366' }} /> Kirim Status
+                              <a href={`/nota/${s.id}/garansi?pdf=1`} target="_blank" style={{
+                                display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px',
+                                fontSize: '.8rem', color: '#0ea5e9', textDecoration: 'none'
+                              }}>
+                                <i className="bi bi-download" /> PDF Garansi
                               </a>
                             </div>
                           )}
                         </div>
+                        <a href={getWhatsAppUrl(s)} target="_blank" style={{
+                          padding: '6px', borderRadius: '6px', color: '#25d366',
+                          background: 'rgba(37,211,102,0.1)', display: 'flex', alignItems: 'center'
+                        }} title="WhatsApp">
+                          <i className="bi bi-whatsapp" />
+                        </a>
                         {isAdmin && (
-                          <button onClick={() => handleDelete(s.id)} className="btn-act btn-act-red" title="Hapus" style={{ padding: '4px 6px' }}>
+                          <button onClick={() => handleDelete(s.id)} style={{
+                            padding: '6px', borderRadius: '6px', color: '#ef4444',
+                            background: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center'
+                          }} title="Hapus">
                             <i className="bi bi-trash" />
                           </button>
                         )}
@@ -370,8 +479,8 @@ export default function Dashboard() {
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan="7" style={{ textAlign: 'center', padding: '24px', color: 'var(--am-text-muted)' }}>
-                      <i className="bi bi-inbox" style={{ fontSize: '1.2rem', display: 'block', marginBottom: '6px', opacity: 0.3 }} />
+                    <td colSpan="7" style={{ textAlign: 'center', padding: '40px', color: textMuted }}>
+                      <i className="bi bi-inbox" style={{ fontSize: '2rem', display: 'block', marginBottom: '8px', opacity: 0.3 }} />
                       Belum ada data servis
                     </td>
                   </tr>
@@ -381,124 +490,199 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Sidebar: Merk Populer + Low Stock */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignSelf: 'start' }}>
-          {/* Low Stock Alert */}
-          <div style={{ background: 'var(--am-surface)', border: '1px solid var(--am-border)', borderRadius: '10px', overflow: 'hidden' }}>
-            <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--am-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.78rem', fontWeight: '600', color: 'var(--am-text)' }}>
-                <i className="bi bi-exclamation-triangle-fill" style={{ color: '#ef4444' }} />Stok Rendah
+        {/* Sidebar - Stok Menipis */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignSelf: 'start' }}>
+          <div style={{
+            background: surface, borderRadius: '12px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            border: `1px solid ${border}`, overflow: 'hidden'
+          }}>
+            <div style={{
+              padding: '12px 16px',
+              background: isDark ? '#1f2937' : '#f9fafb',
+              borderBottom: `1px solid ${border}`,
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+            }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '.875rem', fontWeight: '600', color: textMain }}>
+                <i className="bi bi-exclamation-triangle-fill" style={{ color: '#ef4444' }} /> Stok Menipis
               </span>
-              <span style={{ fontSize: '.6rem', color: 'var(--am-text-muted)' }}>≤5 unit</span>
-            </div>
-            <div>
-              {lowStock.length > 0 ? lowStock.map((sp, i) => (
-                <div key={sp.id} style={{ padding: '6px 14px', borderBottom: '1px solid var(--am-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '.72rem', fontWeight: '500', color: 'var(--am-text)' }}>{sp.nama_sparepart}</span>
-                  <span style={{
-                    fontSize: '.6rem', fontWeight: '800', padding: '2px 6px', borderRadius: '4px',
-                    background: sp.stok <= 2 ? 'rgba(239,68,68,.15)' : 'rgba(245,158,11,.15)',
-                    color: sp.stok <= 2 ? '#dc2626' : '#d97706'
-                  }}>
-                    {sp.stok}
-                  </span>
-                </div>
-              )) : (
-                <div style={{ padding: '12px', textAlign: 'center', color: 'var(--am-text-muted)', fontSize: '.72rem' }}>
-                  <i className="bi bi-check-circle" style={{ color: '#059669', marginRight: '4px' }} />Stok aman
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Merk Populer */}
-          <div style={{ background: 'var(--am-surface)', border: '1px solid var(--am-border)', borderRadius: '10px', overflow: 'hidden' }}>
-            <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--am-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.78rem', fontWeight: '600', color: 'var(--am-text)' }}>
-                <i className="bi bi-trophy-fill" style={{ color: '#f59e0b' }} />Merk Populer
+              <span style={{
+                background: '#ef4444', color: '#fff',
+                fontSize: '.7rem', fontWeight: '700',
+                padding: '2px 8px', borderRadius: '999px'
+              }}>
+                {lowStock.length}
               </span>
-              <span style={{ fontSize: '.6rem', color: 'var(--am-text-muted)' }}>All Time</span>
             </div>
-            <div>
-              {stats.merk_populer && stats.merk_populer.length > 0 ? stats.merk_populer.slice(0, 5).map((merk, i) => {
-                const maxTotal = Math.max(...stats.merk_populer.map(m => m.total), 1)
-                const pct = (merk.total / maxTotal) * 100
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+              {lowStock.length > 0 ? lowStock.map((sp) => {
+                const dotColor = sp.stok === 0 ? '#ef4444' : sp.stok <= 2 ? '#f97316' : '#f59e0b'
                 return (
-                  <div key={i} style={{ padding: '6px 14px', borderBottom: '1px solid var(--am-border)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-                      <span style={{ fontSize: '.72rem', fontWeight: '600' }}>{merk.merk_hp}</span>
-                      <span style={{ fontSize: '.65rem', color: 'var(--am-text-muted)' }}>{merk.total}x</span>
+                  <li key={sp.id} style={{
+                    padding: '10px 16px', borderBottom: `1px solid ${border}`,
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
+                      <span style={{
+                        width: '8px', height: '8px', borderRadius: '50%',
+                        background: dotColor, flexShrink: 0
+                      }} />
+                      <span style={{ fontSize: '.8rem', color: textMain, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {sp.nama_sparepart}
+                      </span>
                     </div>
-                    <div style={{ height: '3px', background: 'var(--am-border)', borderRadius: '2px', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #3b82f6, #6366f1)', borderRadius: '2px' }} />
-                    </div>
-                  </div>
+                    <span style={{
+                      background: dotColor, color: '#fff',
+                      fontSize: '.7rem', fontWeight: '700',
+                      padding: '2px 8px', borderRadius: '6px', marginLeft: '8px', flexShrink: 0
+                    }}>
+                      {sp.stok}
+                    </span>
+                  </li>
                 )
               }) : (
-                <div style={{ padding: '12px', textAlign: 'center', color: 'var(--am-text-muted)', fontSize: '.72rem' }}>
-                  Belum ada data
-                </div>
+                <li style={{ padding: '20px', textAlign: 'center', color: textMuted, fontSize: '.8rem' }}>
+                  Stok aman
+                </li>
               )}
+            </ul>
+            <div style={{ padding: '12px' }}>
+              <Link href="/sparepart" style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                width: '100%', padding: '10px', borderRadius: '999px',
+                border: `1px solid #ef4444`, color: '#ef4444',
+                fontSize: '.8rem', fontWeight: '600', textDecoration: 'none',
+                transition: 'all 0.2s'
+              }}>
+                <i className="bi bi-tag" /> Kelola Sparepart
+              </Link>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Chart - Bar Chart with Trend Line */}
-      <div style={{ background: 'var(--am-surface)', border: '1px solid var(--am-border)', borderRadius: '10px', overflow: 'hidden' }}>
-        <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--am-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.8rem', fontWeight: '600', color: 'var(--am-text)' }}>
-            <i className="bi bi-bar-chart-line" style={{ color: '#3b82f6' }} /> Statistik Unit Masuk {new Date().getFullYear()}
-          </span>
-          <span style={{ fontSize: '.72rem', color: 'var(--am-text-muted)' }}>
-            Total <strong style={{ color: 'var(--am-text)' }}>{stats.total_tahun || totalServis}</strong> unit
-          </span>
+      {/* Chart & Merk Populer */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px', marginBottom: '16px' }}>
+        {/* Chart */}
+        <div style={{
+          background: surface, borderRadius: '12px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          border: `1px solid ${border}`, overflow: 'hidden'
+        }}>
+          <div style={{
+            padding: '12px 16px',
+            background: isDark ? '#1f2937' : '#f9fafb',
+            borderBottom: `1px solid ${border}`,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+          }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '.875rem', fontWeight: '600', color: textMain }}>
+              <i className="bi bi-bar-chart-line" style={{ color: '#3b82f6' }} /> Statistik Unit Masuk {new Date().getFullYear()}
+            </span>
+            <span style={{ fontSize: '.75rem', color: textMuted }}>
+              Total <strong style={{ color: textMain }}>{stats.total_tahun || 0}</strong> unit
+            </span>
+          </div>
+          <div style={{ padding: '20px' }}>
+            {(() => {
+              const chartData = stats.monthly_data || []
+              const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+              const maxVal = Math.max(...chartData.map(m => m.value), 1)
+              return (
+                <div style={{ height: '220px', position: 'relative' }}>
+                  <svg width="100%" height="220" viewBox={`0 0 ${chartData.length * 60 + 40} 220`} preserveAspectRatio="xMidYMid meet" style={{ overflow: 'visible' }}>
+                    {/* Grid lines */}
+                    {[0, 55, 110, 165].map((y) => (
+                      <line key={y} x1="30" y1={y + 10} x2={chartData.length * 60 + 30} y2={y + 10} stroke={border} strokeWidth="1" strokeDasharray="4,4" />
+                    ))}
+                    {chartData.map((month, i) => {
+                      const x = 30 + i * 60 + 30
+                      const barHeight = (month.value / maxVal) * 150
+                      const y = 175 - barHeight
+                      const isMax = month.value === maxVal
+                      return (
+                        <g key={i}>
+                          <rect
+                            x={x - 15} y={y} width="30" height={barHeight}
+                            fill={isMax ? 'rgba(59,130,246,0.85)' : 'rgba(59,130,246,0.18)'}
+                            stroke={isMax ? '#3b82f6' : 'rgba(59,130,246,0.35)'}
+                            strokeWidth="1.5" rx="6"
+                          />
+                          <text x={x} y={y - 8} textAnchor="middle" fontSize="11" fontWeight="700" fill={textMain}>
+                            {month.value}
+                          </text>
+                          <text x={x} y="192" textAnchor="middle" fontSize="10" fontWeight="600" fill={textMuted}>
+                            {month.label}
+                          </text>
+                        </g>
+                      )
+                    })}
+                    {/* Trend line */}
+                    {chartData.length > 1 && (() => {
+                      const points = chartData.map((month, i) => {
+                        const x = 30 + i * 60 + 30
+                        const y = 175 - (month.value / maxVal) * 150
+                        return `${x},${y}`
+                      }).join(' ')
+                      return (
+                        <polyline points={points} fill="none" stroke="#f59e0b" strokeWidth="2" strokeDasharray="5,4" strokeLinecap="round" strokeLinejoin="round" />
+                      )
+                    })()}
+                  </svg>
+                </div>
+              )
+            })()}
+          </div>
         </div>
-        <div style={{ padding: '14px' }}>
-          {chartData.length > 0 ? (
-            <div style={{ height: '160px', position: 'relative' }}>
-              <svg width="100%" height="160" viewBox={`0 0 ${chartData.length * 55 + 30} 160`} preserveAspectRatio="xMidYMid meet" style={{ overflow: 'visible' }}>
-                {/* Grid lines */}
-                {[0, 40, 80, 120].map((y) => (
-                  <line key={y} x1="25" y1={y + 10} x2={chartData.length * 55 + 25} y2={y + 10} stroke="var(--am-border)" strokeWidth="1" strokeDasharray="3,3" />
-                ))}
-                {chartData.map((month, i) => {
-                  const maxVal = Math.max(...chartData.map(m => m.value), 1)
-                  const x = 25 + i * 55 + 27
-                  const barHeight = (month.value / maxVal) * 110
-                  const y = 130 - barHeight
-                  return (
-                    <g key={i}>
-                      {/* Bar */}
-                      <rect x={x - 12} y={y} width="24" height={barHeight} fill="rgba(59,130,246,.2)" rx="3" />
-                      <rect x={x - 12} y={y} width="24" height={barHeight} fill="#3b82f6" rx="3" opacity="0.8" />
-                      {/* Value on top */}
-                      <text x={x} y={y - 5} textAnchor="middle" fontSize="9" fontWeight="700" fill="var(--am-text)">{month.value}</text>
-                      {/* Month label */}
-                      <text x={x} y="148" textAnchor="middle" fontSize="8" fontWeight="600" fill="var(--am-text-muted)">{month.label}</text>
-                    </g>
-                  )
-                })}
-                {/* Trend line */}
-                {chartData.length > 1 && (() => {
-                  const maxVal = Math.max(...chartData.map(m => m.value), 1)
-                  const points = chartData.map((month, i) => {
-                    const x = 25 + i * 55 + 27
-                    const y = 130 - (month.value / maxVal) * 110
-                    return `${x},${y}`
-                  }).join(' ')
-                  return (
-                    <polyline points={points} fill="none" stroke="#f43f5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  )
-                })()}
-              </svg>
-            </div>
-          ) : (
-            <div style={{ textAlign: 'center', padding: '30px', color: 'var(--am-text-muted)' }}>
-              <i className="bi bi-bar-chart-line" style={{ fontSize: '1.5rem', opacity: 0.3 }} />
-              <p style={{ margin: '6px 0 0', fontSize: '.8rem' }}>Belum ada data grafik</p>
-            </div>
-          )}
+
+        {/* Merk Populer */}
+        <div style={{
+          background: surface, borderRadius: '12px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          border: `1px solid ${border}`, overflow: 'hidden'
+        }}>
+          <div style={{
+            padding: '12px 16px',
+            background: isDark ? '#1f2937' : '#f9fafb',
+            borderBottom: `1px solid ${border}`
+          }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '.875rem', fontWeight: '600', color: textMain }}>
+              <i className="bi bi-phone" style={{ color: '#3b82f6' }} /> Merk Populer
+            </span>
+          </div>
+          <div>
+            {stats.merk_populer && stats.merk_populer.length > 0 ? stats.merk_populer.slice(0, 5).map((merk, i) => {
+              const colors = ['#3b82f6', '#8b5cf6', '#06b6d4', '#f59e0b', '#64748b']
+              return (
+                <div key={i} style={{
+                  padding: '12px 16px', borderBottom: `1px solid ${border}`,
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{
+                      width: '28px', height: '28px', borderRadius: '8px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontWeight: '800', fontSize: '.75rem',
+                      background: `${colors[i]}20`, color: colors[i]
+                    }}>
+                      {i + 1}
+                    </div>
+                    <span style={{ fontWeight: '600', fontSize: '.875rem', color: textMain }}>{merk.merk_hp}</span>
+                  </div>
+                  <span style={{
+                    background: `${colors[i]}20`, color: colors[i],
+                    fontSize: '.7rem', fontWeight: '700',
+                    padding: '4px 10px', borderRadius: '999px'
+                  }}>
+                    {merk.total} unit
+                  </span>
+                </div>
+              )
+            }) : (
+              <div style={{ padding: '20px', textAlign: 'center', color: textMuted, fontSize: '.8rem' }}>
+                Belum ada data
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </AppLayout>
