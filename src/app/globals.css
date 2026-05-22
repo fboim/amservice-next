@@ -5,8 +5,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* AM Service CSS Variables (Light Mode) */
-  --am-bg: #f1f5f9;
+  /* AM Service CSS Variables (Light Mode) - Match PHP */
+  --am-bg: #f0f4f8;
   --am-surface: #ffffff;
   --am-surface-2: #f8fafc;
   --am-border: #e2e8f0;
@@ -14,16 +14,16 @@
   --am-text: #0f172a;
   --am-text-muted: #64748b;
   --am-text-subtle: #94a3b8;
-  --am-sidebar-bg: #1e293b;
+  --am-sidebar-bg: #161627;
   --am-primary: #3b82f6;
   --am-primary-dark: #2563eb;
-  --am-shadow: 0 2px 8px rgba(15,23,42,.06), 0 1px 3px rgba(15,23,42,.04);
-  --am-shadow-md: 0 8px 24px rgba(15,23,42,.08), 0 4px 8px rgba(15,23,42,.04);
-  --am-shadow-lg: 0 16px 40px rgba(15,23,42,.12), 0 8px 16px rgba(15,23,42,.06);
-  --am-radius: 12px;
-  --am-radius-lg: 16px;
-  --am-radius-xl: 20px;
-  --am-sidebar-w: 240px;
+  --am-shadow: 0 1px 3px rgba(15,23,42,.06);
+  --am-shadow-md: 0 4px 16px rgba(15,23,42,.08);
+  --am-shadow-lg: 0 12px 32px rgba(15,23,42,.12);
+  --am-radius: 10px;
+  --am-radius-lg: 14px;
+  --am-radius-xl: 18px;
+  --am-sidebar-w: 232px;
 
   /* Colors */
   --am-success: #10b981;
@@ -33,21 +33,21 @@
 
 /* Dark Mode - Match PHP reference */
 [data-theme="dark"] {
-  --am-bg: #0f172a;
-  --am-surface: #1f2937;
-  --am-surface-2: #111827;
-  --am-border: #374151;
-  --am-border-soft: #1f2937;
-  --am-text: #f9fafb;
-  --am-text-muted: #9ca3af;
-  --am-text-subtle: #6b7280;
-  --am-sidebar-bg: #1f2937;
+  --am-bg: #0a0a14;
+  --am-surface: #13131f;
+  --am-surface-2: #1a1a2e;
+  --am-border: #1e1e35;
+  --am-border-soft: #181828;
+  --am-text: #e8edf5;
+  --am-text-muted: #8899b4;
+  --am-text-subtle: #4d5f7a;
+  --am-sidebar-bg: #161627;
 }
 
 /* Dark sidebar */
 [data-theme="dark"] .am-sidebar-container {
-  background: #111827;
-  border-right: 1px solid rgba(255,255,255,.06);
+  background: #13131f;
+  border-right: 1px solid #1e1e35;
 }
 
 * {
