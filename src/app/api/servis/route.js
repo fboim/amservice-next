@@ -147,14 +147,14 @@ export async function PUT(request) {
 
     // Only include valid columns for servis table
     const validData = {}
-    const validColumns = ['nama_pelanggan', 'no_hp', 'merk_hp', 'tipe_hp', 'keluhan', 'estimasi_biaya', 'modal_sparepart', 'status', 'garansi', 'foto_hp', 'deleted_at']
+    const validColumns = ['nama_pelanggan', 'no_hp', 'merk_hp', 'tipe_hp', 'keluhan', 'estimasi_biaya', 'modal_sparepart', 'status', 'garansi', 'foto_hp', 'deleted_at', 'tanggal']
     for (const key of validColumns) {
       if (key in updateData) {
         const val = updateData[key]
-        // Handle integer fields - convert empty/null to null, otherwise parseInt
+        // Handle integer fields - convert empty/null to 0
         if (key === 'estimasi_biaya' || key === 'modal_sparepart') {
           if (val === '' || val === null || val === undefined) {
-            validData[key] = 0 // Use 0 instead of null for NOT NULL columns
+            validData[key] = 0
           } else {
             const parsed = parseInt(val)
             validData[key] = isNaN(parsed) ? 0 : parsed
@@ -163,6 +163,11 @@ export async function PUT(request) {
           validData[key] = val
         }
       }
+    }
+
+    // When status changes to "Sudah Diambil", update tanggal to today
+    if (updateData.status === 'Sudah Diambil') {
+      validData.tanggal = new Date().toISOString().split('T')[0]
     }
 
     console.log('Updating servis:', id, validData)
