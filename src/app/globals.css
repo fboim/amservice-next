@@ -55,19 +55,16 @@
 }
 
 /* Page transition - smooth fade effect */
-#__next,
-main {
-  animation: pageEnter 0.3s ease-out;
+body.page-transitioning .am-main {
+  animation: pageEnter 0.25s ease-out;
 }
 
 @keyframes pageEnter {
   from {
-    opacity: 0.6;
-    transform: translateY(4px);
+    opacity: 0.5;
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 

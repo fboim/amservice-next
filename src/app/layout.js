@@ -1,5 +1,6 @@
 import './globals.css'
 import { SidebarProvider } from '@/components/SidebarContext'
+import PageTransition from '@/components/PageTransition'
 
 export const metadata = {
   title: 'AM Service Kulon Progo | Repair Center HP & Gadget',
@@ -34,6 +35,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className="antialiased">
         <SidebarProvider>
+          <PageTransition />
           {children}
         </SidebarProvider>
       </body>
