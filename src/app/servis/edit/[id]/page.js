@@ -127,31 +127,27 @@ export default function EditServis() {
     <div className="page-wrapper">
       <div style={{ maxWidth: 800, margin: '0 auto' }}>
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <div>
-            <h4 style={{ marginBottom: '4px', fontWeight: '600', fontSize: '1.125rem' }}>Edit Data Servis</h4>
-          </div>
-          <Link href="/servis/data" className="am-btn am-btn-secondary am-btn-pill am-btn-sm">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <h4 style={{ margin: 0, fontWeight: '600', fontSize: '1rem' }}>Edit Servis</h4>
+          <Link href="/servis/data" className="am-btn am-btn-secondary am-btn-sm">
             <i className="bi bi-arrow-left" /> Kembali
           </Link>
         </div>
 
         <form onSubmit={handleSubmit}>
           {/* Card 1: Pelanggan & Perangkat */}
-          <div className="section-card" style={{ marginBottom: '1rem', overflow: 'hidden' }}>
-            <div className="card-header">
-              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <i className="bi bi-person-badge" style={{ color: '#3b82f6' }} />
-                Informasi Pelanggan & Perangkat
-              </span>
+          <div style={{ background: 'var(--am-card-bg)', border: '1px solid var(--am-border)', borderRadius: '8px', padding: '12px 16px', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', fontWeight: '600', fontSize: '0.875rem' }}>
+              <i className="bi bi-person-badge" style={{ color: '#3b82f6' }} />
+              <span>Pelanggan & Perangkat</span>
             </div>
-            <div style={{ padding: '1.5rem', display: 'grid', gap: '1rem', gridTemplateColumns: '1fr 1fr' }}>
-              <div style={{ gridColumn: '1 / -1' }}>
+            <div style={{ display: 'grid', gap: '10px', gridTemplateColumns: '2fr 1fr' }}>
+              <div>
                 <label className="am-label">Nama Pelanggan</label>
                 <input type="text" name="nama_pelanggan" value={form.nama_pelanggan} onChange={handleChange} className="am-input" required />
               </div>
               <div>
-                <label className="am-label">Nomor HP</label>
+                <label className="am-label">No. HP</label>
                 <input type="text" name="no_hp" value={form.no_hp} onChange={handleChange} className="am-input" />
               </div>
               <div>
@@ -170,23 +166,20 @@ export default function EditServis() {
           </div>
 
           {/* Card 2: Perbaikan & Biaya */}
-          <div className="section-card" style={{ marginBottom: '1rem', overflow: 'hidden' }}>
-            <div className="card-header">
-              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <i className="bi bi-tools" style={{ color: '#d97706' }} />
-                Perbaikan & Biaya
-              </span>
+          <div style={{ background: 'var(--am-card-bg)', border: '1px solid var(--am-border)', borderRadius: '8px', padding: '12px 16px', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', fontWeight: '600', fontSize: '0.875rem' }}>
+              <i className="bi bi-tools" style={{ color: '#d97706' }} />
+              <span>Perbaikan & Biaya</span>
             </div>
-            <div style={{ padding: '1.5rem', display: 'grid', gap: '1rem', gridTemplateColumns: '1fr 1fr' }}>
+            <div style={{ display: 'grid', gap: '10px', gridTemplateColumns: '1fr 1fr' }}>
               <div>
-                <label className="am-label" style={{ color: '#dc2626' }}>Modal Sparepart (Rp)</label>
+                <label className="am-label" style={{ color: '#dc2626' }}>Modal (Rp)</label>
                 <input
                   type="text"
                   value={form.modal_sparepart ? fmt(form.modal_sparepart) : ''}
                   onChange={handleModalChange}
                   className="am-input"
                   placeholder="0"
-                  style={{ fontWeight: '700' }}
                 />
               </div>
               <div>
@@ -197,11 +190,10 @@ export default function EditServis() {
                   onChange={handleBiayaChange}
                   className="am-input"
                   placeholder="0"
-                  style={{ fontWeight: '800', fontSize: '1.1rem', color: '#059669' }}
                 />
               </div>
               <div>
-                <label className="am-label">Status Servis</label>
+                <label className="am-label">Status</label>
                 <select name="status" value={form.status} onChange={handleChange} className="am-input">
                   {['Antrean', 'Proses', 'Siap Diambil', 'Sudah Diambil', 'Tidak Bisa'].map(s => (
                     <option key={s} value={s}>{s}</option>
@@ -220,9 +212,9 @@ export default function EditServis() {
           </div>
 
           {/* Submit */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '1rem 0' }}>
-            <button type="submit" disabled={saving} className="am-btn am-btn-primary am-btn-pill" style={{ padding: '10px 28px' }}>
-              {saving ? <><i className="bi bi-arrow-repeat" style={{ animation: 'spin 1s linear infinite' }} /> Menyimpan...</> : <><i className="bi bi-save" /> Simpan Update</>}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 0' }}>
+            <button type="submit" disabled={saving} className="am-btn am-btn-primary am-btn-pill">
+              {saving ? <><i className="bi bi-arrow-repeat" style={{ animation: 'spin 1s linear infinite' }} /> Menyimpan...</> : <><i className="bi bi-save" /> Simpan</>}
             </button>
           </div>
         </form>
