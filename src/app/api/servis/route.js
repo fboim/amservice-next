@@ -107,14 +107,22 @@ export async function POST(request) {
 
     const noServis = `${prefix}${String(urutan).padStart(3, '0')}`
 
+    // Only include valid columns for servis table
     const { data, error } = await supabaseAdmin
       .from('servis')
       .insert({
-        ...body,
         no_servis: noServis,
         tanggal: body.tanggal || new Date().toISOString().split('T')[0],
+        nama_pelanggan: body.nama_pelanggan,
+        no_hp: body.no_hp,
+        merk_hp: body.merk_hp,
+        tipe_hp: body.tipe_hp,
+        keluhan: body.keluhan,
+        estimasi_biaya: body.estimasi_biaya,
+        modal_sparepart: body.modal_sparepart,
         status: body.status || 'Antrean',
         garansi: body.garansi || 'Tidak Ada',
+        foto_hp: body.foto_hp,
       })
       .select()
       .single()
@@ -137,9 +145,18 @@ export async function PUT(request) {
       return Response.json({ error: 'ID diperlukan' }, { status: 400 })
     }
 
+    // Only include valid columns for servis table
+    const validData = {}
+    const validColumns = ['nama_pelanggan', 'no_hp', 'merk_hp', 'tipe_hp', 'keluhan', 'estimasi_biaya', 'modal_sparepart', 'status', 'garansi', 'foto_hp', 'deleted_at', 'teknisi']
+    for (const key of validColumns) {
+      if (key in updateData) {
+        validData[key] = updateData[key]
+      }
+    }
+
     const { data, error } = await supabaseAdmin
       .from('servis')
-      .update(updateData)
+      .update(validData)
       .eq('id', id)
       .select()
       .single()
