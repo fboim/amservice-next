@@ -76,9 +76,7 @@ export default function TambahServis() {
     <AppLayout>
     <div className="page-wrapper">
       <div style={{ maxWidth: 800, margin: '0 auto' }}>
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <h4 style={{ margin: 0, fontWeight: '600', fontSize: '1rem' }}>Tambah Servis</h4>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px' }}>
           <Link href="/servis/data" className="am-btn am-btn-secondary am-btn-sm">
             <i className="bi bi-arrow-left" /> Kembali
           </Link>
