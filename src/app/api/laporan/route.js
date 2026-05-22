@@ -58,7 +58,7 @@ export async function GET(request) {
     let omzet = 0
     servis?.forEach(s => {
       if (s.status === 'Sudah Diambil') {
-        const biaya = parseInt((s.estimasi_biaya || '0').toString().replace(/\D/g, ''))
+        const biaya = parseInt(String(s.estimasi_biaya || '0').replace(/\D/g, ''))
         omzet += biaya
       }
     })
@@ -72,7 +72,7 @@ export async function GET(request) {
       }
       byDate[date].count++
       if (s.status === 'Sudah Diambil') {
-        byDate[date].omzet += parseInt((s.estimasi_biaya || '0').toString().replace(/\D/g, ''))
+        byDate[date].omzet += parseInt(String(s.estimasi_biaya || '0').replace(/\D/g, ''))
       }
     })
 
@@ -85,7 +85,7 @@ export async function GET(request) {
       }
       byMerk[merk].count++
       if (s.status === 'Sudah Diambil') {
-        byMerk[merk].omzet += parseInt((s.estimasi_biaya || '0').toString().replace(/\D/g, ''))
+        byMerk[merk].omzet += parseInt(String(s.estimasi_biaya || '0').replace(/\D/g, ''))
       }
     })
 

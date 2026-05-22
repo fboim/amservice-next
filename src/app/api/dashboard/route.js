@@ -50,8 +50,7 @@ export async function GET(request) {
       .is('deleted_at', null)
 
     const omzetHari = servisToday?.reduce((sum, s) => {
-      const biayaStr = String(s.estimasi_biaya || '0')
-      const biaya = parseInt(biayaStr.replace(/\D/g, ''))
+      const biaya = parseInt(String(s.estimasi_biaya || '0').replace(/\D/g, ''))
       return sum + biaya
     }, 0) || 0
 
@@ -65,8 +64,7 @@ export async function GET(request) {
       .is('deleted_at', null)
 
     const omzetBulan = servisBulanIni?.reduce((sum, s) => {
-      const biayaStr = String(s.estimasi_biaya || '0')
-      const biaya = parseInt(biayaStr.replace(/\D/g, ''))
+      const biaya = parseInt(String(s.estimasi_biaya || '0').replace(/\D/g, ''))
       return sum + biaya
     }, 0) || 0
 

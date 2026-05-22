@@ -340,7 +340,7 @@ export default function NotaServis() {
 
   if (!servis) return null
 
-  const totalBiaya = parseInt((servis.estimasi_biaya || '0').replace(/\D/g, ''))
+  const totalBiaya = parseInt(String(servis.estimasi_biaya || '0').replace(/\D/g, ''))
 
   return (
     <div style={{ minHeight: '100vh', background: '#e2e8f0', padding: '2rem' }}>
