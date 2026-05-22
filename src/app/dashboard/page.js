@@ -133,11 +133,11 @@ export default function Dashboard() {
     )
   }
 
-  const surface = isDark ? '#1f2937' : '#ffffff'
-  const border = isDark ? '#374151' : '#e5e7eb'
-  const bg = isDark ? '#111827' : '#f9fafb'
-  const textMain = isDark ? '#f3f4f6' : '#1f2937'
-  const textMuted = isDark ? '#9ca3af' : '#6b7280'
+  const surface = 'var(--am-surface)'
+  const border = 'var(--am-border)'
+  const bg = 'var(--am-bg)'
+  const textMain = 'var(--am-text)'
+  const textMuted = 'var(--am-text-muted)'
 
   // Safe formatRupiah wrapper to prevent crashes
   const safeFormatRupiah = (value) => {
@@ -184,7 +184,7 @@ export default function Dashboard() {
               </button>
             </div>
             <div style={{
-              background: isDark ? '#374151' : '#f3f4f5',
+              background: 'var(--am-surface-2)',
               borderRadius: '8px', padding: '14px',
               border: `1px solid ${border}`
             }}>
@@ -301,7 +301,7 @@ export default function Dashboard() {
         }}>
           <div style={{
             padding: '10px 14px',
-            background: isDark ? '#1f2937' : '#f9fafb',
+            background: 'var(--am-surface-2)',
             borderBottom: `1px solid ${border}`,
             display: 'flex', justifyContent: 'space-between', alignItems: 'center'
           }}>
@@ -318,7 +318,7 @@ export default function Dashboard() {
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.8rem' }}>
               <thead>
-                <tr style={{ background: isDark ? '#1f2937' : '#f9fafb' }}>
+                <tr style={{ background: 'var(--am-surface-2)' }}>
                   <th style={{ padding: '8px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'center' }}>No</th>
                   <th style={{ padding: '8px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'left' }}>Pelanggan</th>
                   <th style={{ padding: '8px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'left' }}>Unit HP</th>
@@ -330,7 +330,7 @@ export default function Dashboard() {
               </thead>
               <tbody>
                 {servisTerbaru.length > 0 ? servisTerbaru.map((s, i) => (
-                  <tr key={s.id} className={i % 2 === 0 ? (isDark ? 'bg-gray-800/30' : 'bg-gray-50/50') : ''} style={{ borderBottom: `1px solid ${border}` }}>
+                  <tr key={s.id} style={{ background: i % 2 === 0 ? 'var(--am-surface-2)' : 'transparent', borderBottom: `1px solid ${border}` }}>
                     <td style={{ padding: '10px', textAlign: 'center', color: textMuted, fontWeight: '700' }}>{i + 1}</td>
                     <td style={{ padding: '10px', textAlign: 'left' }}>
                       <div style={{ fontWeight: '600', color: textMain }}>{s.nama_pelanggan}</div>
@@ -460,7 +460,7 @@ export default function Dashboard() {
           }}>
             <div style={{
               padding: '10px 14px',
-              background: isDark ? '#1f2937' : '#f9fafb',
+              background: 'var(--am-surface-2)',
               borderBottom: `1px solid ${border}`,
               display: 'flex', justifyContent: 'space-between', alignItems: 'center'
             }}>
@@ -527,7 +527,7 @@ export default function Dashboard() {
           }}>
             <div style={{
               padding: '10px 14px',
-              background: isDark ? '#1f2937' : '#f9fafb',
+              background: 'var(--am-surface-2)',
               borderBottom: `1px solid ${border}`
             }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '.8rem', fontWeight: '600', color: textMain }}>
@@ -580,7 +580,7 @@ export default function Dashboard() {
       }}>
         <div style={{
           padding: '10px 14px',
-          background: isDark ? '#1f2937' : '#f9fafb',
+          background: 'var(--am-surface-2)',
           borderBottom: `1px solid ${border}`,
           display: 'flex', justifyContent: 'space-between', alignItems: 'center'
         }}>
