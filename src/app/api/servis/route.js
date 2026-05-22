@@ -150,14 +150,22 @@ export async function PUT(request) {
     const validColumns = ['nama_pelanggan', 'no_hp', 'merk_hp', 'tipe_hp', 'keluhan', 'estimasi_biaya', 'modal_sparepart', 'status', 'garansi', 'foto_hp', 'deleted_at']
     for (const key of validColumns) {
       if (key in updateData) {
-        // Handle integer fields - convert empty strings to null
+        const val = updateData[key]
+        // Handle integer fields - convert empty/null to null, otherwise parseInt
         if (key === 'estimasi_biaya' || key === 'modal_sparepart') {
-          validData[key] = updateData[key] === '' || updateData[key] == null ? null : parseInt(updateData[key])
+          if (val === '' || val === null || val === undefined) {
+            validData[key] = null
+          } else {
+            const parsed = parseInt(val)
+            validData[key] = isNaN(parsed) ? null : parsed
+          }
         } else {
-          validData[key] = updateData[key]
+          validData[key] = val
         }
       }
     }
+
+    console.log('Updating servis:', id, validData)
 
     const { data, error } = await supabaseAdmin
       .from('servis')
@@ -166,7 +174,10 @@ export async function PUT(request) {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase update error:', error)
+      return Response.json({ error: error.message, details: error }, { status: 500 })
+    }
 
     return Response.json({ success: true, servis: data })
   } catch (error) {
