@@ -319,56 +319,56 @@ export default function Dashboard() {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.8rem' }}>
               <thead>
                 <tr style={{ background: 'var(--am-surface-2)' }}>
-                  <th style={{ padding: '8px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'center' }}>No</th>
-                  <th style={{ padding: '8px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'left' }}>Pelanggan</th>
-                  <th style={{ padding: '8px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'left' }}>Unit HP</th>
-                  <th style={{ padding: '8px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'left' }}>Keluhan</th>
-                  <th style={{ padding: '8px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'center' }}>Status</th>
-                  <th style={{ padding: '8px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'right' }}>Biaya</th>
-                  <th style={{ padding: '8px 10px', fontSize: '.6rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.4px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'center' }}>Aksi</th>
+                  <th style={{ padding: '6px 8px', fontSize: '.55rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.3px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'center' }}>No</th>
+                  <th style={{ padding: '6px 8px', fontSize: '.55rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.3px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'left' }}>Pelanggan</th>
+                  <th style={{ padding: '6px 8px', fontSize: '.55rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.3px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'left' }}>Unit HP</th>
+                  <th style={{ padding: '6px 8px', fontSize: '.55rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.3px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'left' }}>Keluhan</th>
+                  <th style={{ padding: '6px 8px', fontSize: '.55rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.3px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'center' }}>Status</th>
+                  <th style={{ padding: '6px 8px', fontSize: '.55rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.3px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'right' }}>Biaya</th>
+                  <th style={{ padding: '6px 8px', fontSize: '.55rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '.3px', color: textMuted, borderBottom: `1px solid ${border}`, textAlign: 'center' }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {servisTerbaru.length > 0 ? servisTerbaru.map((s, i) => (
                   <tr key={s.id} style={{ background: i % 2 === 0 ? 'var(--am-surface-2)' : 'transparent', borderBottom: `1px solid ${border}` }}>
-                    <td style={{ padding: '10px', textAlign: 'center', color: textMuted, fontWeight: '700' }}>{i + 1}</td>
-                    <td style={{ padding: '10px', textAlign: 'left' }}>
-                      <div style={{ fontWeight: '600', color: textMain }}>{s.nama_pelanggan}</div>
-                      <div style={{ fontSize: '.65rem', color: textMuted }}>{s.no_servis}</div>
+                    <td style={{ padding: '6px 8px', textAlign: 'center', color: textMuted, fontWeight: '700', fontSize: '.75rem' }}>{i + 1}</td>
+                    <td style={{ padding: '6px 8px', textAlign: 'left' }}>
+                      <div style={{ fontWeight: '600', color: textMain, fontSize: '.8rem' }}>{s.nama_pelanggan}</div>
+                      <div style={{ fontSize: '.6rem', color: textMuted }}>{s.no_servis}</div>
                     </td>
-                    <td style={{ padding: '10px', textAlign: 'left' }}>
-                      <div style={{ fontWeight: '600', color: textMain }}>{s.merk_hp} {s.tipe_hp}</div>
-                      <div style={{ fontSize: '.65rem', color: textMuted }}>
+                    <td style={{ padding: '6px 8px', textAlign: 'left' }}>
+                      <div style={{ fontWeight: '600', color: textMain, fontSize: '.8rem' }}>{s.merk_hp} {s.tipe_hp}</div>
+                      <div style={{ fontSize: '.6rem', color: textMuted }}>
                         {new Date(s.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </div>
                     </td>
-                    <td style={{ padding: '10px', textAlign: 'left', maxWidth: '160px', cursor: 'pointer' }}>
+                    <td style={{ padding: '6px 8px', textAlign: 'left', maxWidth: '140px', cursor: 'pointer' }}>
                       {s.keluhan ? (
                         <span
                           className="keluhan-cell"
-                          style={{ color: '#3b82f6', textDecoration: 'underline dotted', textUnderlineOffset: '3px' }}
+                          style={{ color: '#3b82f6', textDecoration: 'underline dotted', textUnderlineOffset: '3px', fontSize: '.75rem' }}
                           onClick={() => setModalKeluhan({ hp: `${s.merk_hp} ${s.tipe_hp}`, nama: s.nama_pelanggan, keluhan: s.keluhan })}
                         >
-                          {s.keluhan.length > 30 ? s.keluhan.substring(0, 30) + '…' : s.keluhan}
+                          {s.keluhan.length > 25 ? s.keluhan.substring(0, 25) + '…' : s.keluhan}
                         </span>
                       ) : (
-                        <span style={{ color: textMuted }}>-</span>
+                        <span style={{ color: textMuted, fontSize: '.75rem' }}>-</span>
                       )}
                     </td>
-                    <td style={{ padding: '10px', textAlign: 'center' }}>
+                    <td style={{ padding: '6px 8px', textAlign: 'center' }}>
                       <span className={`badge-soft ${statusBadge(s.status)}`} style={{
                         display: 'inline-flex', alignItems: 'center',
-                        padding: '3px 8px', borderRadius: '999px',
-                        fontSize: '.65rem', fontWeight: '700'
+                        padding: '2px 6px', borderRadius: '999px',
+                        fontSize: '.6rem', fontWeight: '700'
                       }}>
                         {statusText(s.status)}
                       </span>
                     </td>
-                    <td style={{ padding: '10px', textAlign: 'right', fontWeight: '600', color: textMain }}>
+                    <td style={{ padding: '6px 8px', textAlign: 'right', fontWeight: '600', color: textMain, fontSize: '.8rem' }}>
                       {safeFormatRupiah(s.estimasi_biaya)}
                     </td>
-                    <td style={{ padding: '10px', textAlign: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+                    <td style={{ padding: '6px 8px', textAlign: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
                         {!isPengunjung && (
                           <Link href={`/servis/edit/${s.id}`} className="btn-act btn-act-blue" title="Edit">
                             <i className="bi bi-pencil-square" />
