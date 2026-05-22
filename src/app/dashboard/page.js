@@ -191,37 +191,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Header - PHP Style (no Dashboard title) */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
-        <div>
-          <p style={{ fontSize: '.8rem', color: textMuted }}>
-            <span style={{ marginRight: '4px' }}>📅</span>
-            {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
-            {' · '}Halo, <strong style={{ color: textMain }}>{user?.username || 'User'}</strong>
-          </p>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: '4px',
-            fontSize: '.7rem', fontWeight: '700', padding: '4px 10px', borderRadius: '999px',
-            background: isDark ? '#374151' : '#f3f4f5',
-            border: `1px solid ${border}`,
-            color: textMuted, textTransform: 'uppercase'
-          }}>
-            👤 {user?.role || 'User'}
-          </span>
-          <Link href="/servis/tambah" style={{
-            display: 'inline-flex', alignItems: 'center', gap: '6px',
-            padding: '8px 16px', background: '#3b82f6', color: '#fff',
-            fontSize: '.8rem', fontWeight: '600', borderRadius: '999px',
-            textDecoration: 'none', boxShadow: '0 4px 12px rgba(59,130,246,0.25)',
-            transition: 'all 0.2s'
-          }}>
-            <i className="bi bi-plus-lg" /> Servis Baru
-          </Link>
-        </div>
-      </div>
-
       {/* Status Cards - 4 Kolom */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '10px' }}>
         {[
