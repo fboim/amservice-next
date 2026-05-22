@@ -31,23 +31,23 @@
   --am-danger: #ef4444;
 }
 
-/* Dark Mode Override - Softer premium slate */
+/* Dark Mode - Match PHP reference */
 [data-theme="dark"] {
   --am-bg: #0f172a;
-  --am-surface: #1e293b;
-  --am-surface-2: #0f172a;
-  --am-border: #334155;
-  --am-border-soft: #1e293b;
-  --am-text: #f1f5f9;
-  --am-text-muted: #94a3b8;
-  --am-text-subtle: #64748b;
-  --am-sidebar-bg: #1e293b;
+  --am-surface: #1f2937;
+  --am-surface-2: #111827;
+  --am-border: #374151;
+  --am-border-soft: #1f2937;
+  --am-text: #f9fafb;
+  --am-text-muted: #9ca3af;
+  --am-text-subtle: #6b7280;
+  --am-sidebar-bg: #1f2937;
 }
 
-/* Dark sidebar with premium look */
+/* Dark sidebar */
 [data-theme="dark"] .am-sidebar-container {
-  background: #0f172a;
-  border-right: 1px solid rgba(255,255,255,.08);
+  background: #111827;
+  border-right: 1px solid rgba(255,255,255,.06);
 }
 
 * {
