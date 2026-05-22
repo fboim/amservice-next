@@ -18,7 +18,6 @@ export default function TambahServis() {
     estimasi_biaya: '',
     status: 'Antrean',
     garansi: 'Tidak Ada',
-    teknisi: '',
   })
 
   useEffect(() => {
@@ -120,17 +119,6 @@ export default function TambahServis() {
                   onChange={handleChange}
                   className="am-input"
                   placeholder="08xxxxxxxxxx"
-                />
-              </div>
-              <div>
-                <label className="am-label">Teknisi</label>
-                <input
-                  type="text"
-                  name="teknisi"
-                  value={form.teknisi}
-                  onChange={handleChange}
-                  className="am-input"
-                  placeholder="Nama teknisi"
                 />
               </div>
             </div>

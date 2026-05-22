@@ -22,7 +22,6 @@ export default function EditServis() {
     estimasi_biaya: '',
     status: 'Antrean',
     garansi: 'Tidak Ada',
-    teknisi: '',
   })
 
   useEffect(() => {
@@ -53,7 +52,6 @@ export default function EditServis() {
         estimasi_biaya: servis.estimasi_biaya || '',
         status: servis.status || 'Antrean',
         garansi: servis.garansi || 'Tidak Ada',
-        teknisi: servis.teknisi || '',
       })
     } catch (err) {
       alert('Gagal memuat data: ' + err.message)
@@ -166,17 +164,6 @@ export default function EditServis() {
                   value={form.no_hp}
                   onChange={handleChange}
                   className="am-input"
-                />
-              </div>
-              <div>
-                <label className="am-label">Teknisi</label>
-                <input
-                  type="text"
-                  name="teknisi"
-                  value={form.teknisi}
-                  onChange={handleChange}
-                  className="am-input"
-                  placeholder="Nama teknisi"
                 />
               </div>
             </div>

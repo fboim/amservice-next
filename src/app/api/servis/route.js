@@ -147,7 +147,7 @@ export async function PUT(request) {
 
     // Only include valid columns for servis table
     const validData = {}
-    const validColumns = ['nama_pelanggan', 'no_hp', 'merk_hp', 'tipe_hp', 'keluhan', 'estimasi_biaya', 'modal_sparepart', 'status', 'garansi', 'foto_hp', 'deleted_at', 'teknisi']
+    const validColumns = ['nama_pelanggan', 'no_hp', 'merk_hp', 'tipe_hp', 'keluhan', 'estimasi_biaya', 'modal_sparepart', 'status', 'garansi', 'foto_hp', 'deleted_at']
     for (const key of validColumns) {
       if (key in updateData) {
         validData[key] = updateData[key]
