@@ -88,12 +88,20 @@ export default function EditServis() {
     setSaving(true)
 
     try {
-      // When status is "Sudah Diambil", force tanggal to today
+      let tanggalValue = undefined
+
+      if (form.status === 'Sudah Diambil') {
+        // When status is "Sudah Diambil", set tanggal to today
+        tanggalValue = new Date().toISOString().split('T')[0]
+      } else {
+        // When status is NOT "Sudah Diambil", set tanggal to old date (1970) so it won't count in omzet
+        tanggalValue = '1970-01-01'
+      }
+
       const submitData = {
         id,
         ...form,
-        tanggal: form.status === 'Sudah Diambil' ? new Date().toISOString().split('T')[0] : undefined,
-        force_tanggal: form.status === 'Sudah Diambil' ? true : undefined
+        tanggal: tanggalValue
       }
 
       const res = await fetch('/api/servis', {
