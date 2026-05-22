@@ -145,21 +145,6 @@ export default function TambahServis() {
 
     <div className="page-wrapper">
       <div style={{ maxWidth: 800, margin: '0 auto' }}>
-        {/* Header */}
-        <div className="pg-header fade-in">
-          <div>
-            <h4 className="pg-title">
-              <i className="bi bi-plus-circle" style={{ color: '#3b82f6', marginRight: 8 }} />
-              Servis Baru
-            </h4>
-            <p className="pg-subtitle">Tambah data servis baru</p>
-          </div>
-          <a href="/servis/data" className="am-btn am-btn-secondary am-btn-sm">
-            <i className="bi bi-arrow-left" />
-            Kembali
-          </a>
-        </div>
-
         <form onSubmit={handleSubmit}>
           {/* Data Pelanggan */}
           <div className="section-card" style={{ marginBottom: '1rem' }}>

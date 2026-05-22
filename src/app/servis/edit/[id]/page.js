@@ -215,41 +215,6 @@ export default function EditServis() {
     <AppLayout>
     <div style={{ minHeight: '100vh', padding: '0' }}>
       <div style={{ maxWidth: 800, margin: '0 auto' }}>
-        {/* Header */}
-        <div className="pg-header" style={{ marginBottom: '1.5rem' }}>
-          <div>
-            <h4 className="pg-title">
-              <i className="bi bi-pencil" style={{ color: '#3b82f6', marginRight: 8 }} />
-              Edit Servis
-            </h4>
-            <p className="pg-subtitle">Edit data servis</p>
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button
-              onClick={() => handleSendWA('status')}
-              disabled={sendingWA || !form.no_hp}
-              className="am-btn am-btn-secondary am-btn-sm"
-              style={{ background: '#25D366', borderColor: '#25D366' }}
-              title={!form.no_hp ? 'Nomor HP belum diisi' : 'Kirim notifikasi WhatsApp'}
-            >
-              <i className="bi bi-whatsapp" />
-              {sendingWA ? 'Mengirim...' : 'WA'}
-            </button>
-            <button
-              onClick={handleDelete}
-              className="am-btn am-btn-secondary am-btn-sm"
-              style={{ background: '#ef4444', borderColor: '#ef4444' }}
-            >
-              <i className="bi bi-trash" />
-              Hapus
-            </button>
-            <a href="/servis/data" className="am-btn am-btn-secondary am-btn-sm">
-              <i className="bi bi-arrow-left" />
-              Kembali
-            </a>
-          </div>
-        </div>
-
         <form onSubmit={handleSubmit}>
           {/* Data Pelanggan */}
           <div className="section-card" style={{ marginBottom: '1rem' }}>

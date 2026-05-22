@@ -114,31 +114,6 @@ export default function EditSparepart() {
     <AppLayout>
     <div style={{ minHeight: '100vh', padding: '0' }}>
       <div style={{ maxWidth: 600, margin: '0 auto' }}>
-        {/* Header */}
-        <div className="pg-header" style={{ marginBottom: '1.5rem' }}>
-          <div>
-            <h4 className="pg-title">
-              <i className="bi bi-pencil" style={{ color: '#3b82f6', marginRight: 8 }} />
-              Edit Sparepart
-            </h4>
-            <p className="pg-subtitle">Edit data sparepart</p>
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button
-              onClick={handleDelete}
-              className="am-btn am-btn-secondary am-btn-sm"
-              style={{ background: '#ef4444', borderColor: '#ef4444' }}
-            >
-              <i className="bi bi-trash" />
-              Hapus
-            </button>
-            <a href="/sparepart" className="am-btn am-btn-secondary am-btn-sm">
-              <i className="bi bi-arrow-left" />
-              Kembali
-            </a>
-          </div>
-        </div>
-
         <form onSubmit={handleSubmit}>
           <div className="section-card" style={{ marginBottom: '1rem' }}>
             <div style={{ padding: '1.5rem', display: 'grid', gap: '1rem' }}>

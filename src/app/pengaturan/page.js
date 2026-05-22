@@ -108,19 +108,6 @@ export default function Pengaturan() {
       `}</style>
 
       <div className="page-wrapper">
-        {/* Header */}
-        <div className="pg-header fade-in">
-          <div>
-            <h4 className="pg-title">
-              <i className="bi bi-gear" style={{ color: '#64748b', marginRight: 8 }} />
-              Pengaturan Toko
-            </h4>
-            <p className="pg-subtitle">
-              Atur informasi toko dan syarat ketentuan
-            </p>
-          </div>
-        </div>
-
         {/* Message */}
         {message && (
           <div className="fade-in" style={{

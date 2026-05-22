@@ -94,20 +94,6 @@ export default function PelangganManagement() {
 
   return (
     <AppLayout>
-      {/* Page Header */}
-      <div className="pg-header fade-in">
-        <div>
-          <h4 className="pg-title">
-            <i className="bi bi-person-lines-fill" style={{ color: '#3b82f6', marginRight: 8 }} />
-            Data Pelanggan
-          </h4>
-          <p className="pg-subtitle">Kelola semua data pelanggan &mdash; {total.toLocaleString('id-ID')} pelanggan</p>
-        </div>
-        <Link href="/pelanggan/tambah" className="am-btn am-btn-primary am-btn-pill am-btn-sm" style={{ boxShadow: '0 2px 10px rgba(59,130,246,.25)' }}>
-          <i className="bi bi-person-plus" /> Tambah Pelanggan
-        </Link>
-      </div>
-
       {/* Search */}
       <div className="section-card" style={{ marginBottom: '20px', padding: '16px' }}>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>

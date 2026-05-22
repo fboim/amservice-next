@@ -72,17 +72,6 @@ export default function TambahPelanggan() {
   return (
     <AppLayout>
       <div style={{ minHeight: '100vh', padding: '0' }}>
-        {/* Header */}
-        <div className="pg-header">
-          <div>
-            <h4 className="pg-title">
-              <i className="bi bi-person-plus" style={{ color: '#10b981', marginRight: 8 }} />
-              Tambah Pelanggan Baru
-            </h4>
-            <p className="pg-subtitle">Tambahkan data pelanggan</p>
-          </div>
-        </div>
-
         {/* Form */}
         <div className="section-card" style={{ maxWidth: 500 }}>
           <form onSubmit={handleSubmit}>

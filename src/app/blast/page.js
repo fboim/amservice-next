@@ -118,19 +118,6 @@ export default function BlastPage() {
       `}</style>
 
       <div className="page-wrapper">
-        {/* Header */}
-        <div className="pg-header fade-in">
-          <div>
-            <h4 className="pg-title">
-              <i className="bi bi-whatsapp" style={{ color: '#25D366', marginRight: 8 }} />
-              WhatsApp Blast
-            </h4>
-            <p className="pg-subtitle">
-              Kirim pesan massal ke pelanggan
-            </p>
-          </div>
-        </div>
-
         <div className="dashboard-two-col fade-in" style={{ marginBottom: '20px' }}>
           {/* Left: Target Selection */}
           <div>

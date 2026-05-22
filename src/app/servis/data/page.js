@@ -175,22 +175,6 @@ function DataServisContent() {
 
   return (
     <AppLayout>
-      {/* Page Header */}
-      <div className="pg-header fade-in">
-        <div>
-          <h4 className="pg-title">
-            <i className="bi bi-tools" style={{ color: '#3b82f6', marginRight: 8 }} />
-            Data Servis
-          </h4>
-          <p className="pg-subtitle">
-            Kelola semua riwayat perbaikan HP &mdash; {total.toLocaleString('id-ID')} data
-          </p>
-        </div>
-        <Link href="/servis/tambah" className="am-btn am-btn-primary am-btn-pill am-btn-sm" style={{ boxShadow: '0 2px 10px rgba(59,130,246,.25)' }}>
-          <i className="bi bi-plus-circle" /> Servis Baru
-        </Link>
-      </div>
-
       {/* Search + Filter */}
       <div className="section-card fade-in" style={{ marginBottom: '16px', padding: '12px' }}>
         <form onSubmit={handleSearch} style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>

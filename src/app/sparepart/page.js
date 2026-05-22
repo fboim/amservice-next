@@ -87,22 +87,6 @@ function DataSparepartContent() {
         }
       `}</style>
 
-      {/* Page Header */}
-      <div className="pg-header fade-in">
-        <div>
-          <h4 className="pg-title">
-            <i className="bi bi-box-seam" style={{ color: '#3b82f6', marginRight: 8 }} />
-            Data Sparepart
-          </h4>
-          <p className="pg-subtitle">
-            Kelola semua sparepart &mdash; {total.toLocaleString('id-ID')} item
-          </p>
-        </div>
-        <Link href="/sparepart/tambah" className="am-btn am-btn-primary am-btn-pill am-btn-sm" style={{ boxShadow: '0 2px 10px rgba(59,130,246,.25)' }}>
-          <i className="bi bi-plus-circle" /> Tambah Sparepart
-        </Link>
-      </div>
-
       {/* Search */}
       <div className="section-card" style={{ marginBottom: '16px', padding: '12px' }}>
         <form onSubmit={handleSearch} style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>

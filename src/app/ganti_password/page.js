@@ -111,19 +111,6 @@ export default function GantiPassword() {
       `}</style>
 
       <div className="page-wrapper">
-        {/* Header */}
-        <div className="pg-header fade-in">
-          <div>
-            <h4 className="pg-title">
-              <i className="bi bi-key" style={{ color: '#3b82f6', marginRight: 8 }} />
-              Ganti Password
-            </h4>
-            <p className="pg-subtitle">
-              Ubah password akun Anda
-            </p>
-          </div>
-        </div>
-
         <div className="section-card fade-in" style={{ maxWidth: '500px' }}>
           <div className="card-header">
             <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

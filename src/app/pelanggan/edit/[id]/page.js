@@ -111,17 +111,6 @@ export default function EditPelanggan() {
   return (
     <AppLayout>
       <div style={{ minHeight: '100vh', padding: '0' }}>
-        {/* Header */}
-        <div className="pg-header">
-          <div>
-            <h4 className="pg-title">
-              <i className="bi bi-pencil" style={{ color: '#10b981', marginRight: 8 }} />
-              Edit Pelanggan
-            </h4>
-            <p className="pg-subtitle">Edit data pelanggan</p>
-          </div>
-        </div>
-
         {/* Form */}
         <div className="section-card" style={{ maxWidth: 500 }}>
           <form onSubmit={handleSubmit}>

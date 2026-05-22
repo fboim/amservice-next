@@ -119,26 +119,6 @@ export default function TestimoniPage() {
       `}</style>
 
       <div className="page-wrapper">
-        {/* Header */}
-        <div className="pg-header fade-in">
-          <div>
-            <h4 className="pg-title">
-              <i className="bi bi-chat-quote" style={{ color: '#f59e0b', marginRight: 8 }} />
-              Testimoni
-            </h4>
-            <p className="pg-subtitle">
-              Kelola testimoni pelanggan &mdash; {testimonials.length} testimoni
-            </p>
-          </div>
-          <button
-            onClick={() => { resetForm(); setShowModal(true) }}
-            className="am-btn am-btn-primary am-btn-pill am-btn-sm"
-            style={{ boxShadow: '0 2px 10px rgba(59,130,246,.25)' }}
-          >
-            <i className="bi bi-plus-circle" /> Tambah Testimoni
-          </button>
-        </div>
-
         {loading ? (
           <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--am-text-muted)' }}>
             <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />

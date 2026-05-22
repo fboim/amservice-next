@@ -120,19 +120,6 @@ export default function BackupPage() {
       `}</style>
 
       <div className="page-wrapper">
-        {/* Header */}
-        <div className="pg-header fade-in">
-          <div>
-            <h4 className="pg-title">
-              <i className="bi bi-cloud-arrow-up" style={{ color: '#3b82f6', marginRight: 8 }} />
-              Backup Database
-            </h4>
-            <p className="pg-subtitle">
-              Download backup data Servis, Pelanggan, Sparepart
-            </p>
-          </div>
-        </div>
-
         {/* Message */}
         {message && (
           <div className="fade-in" style={{

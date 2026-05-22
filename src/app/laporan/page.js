@@ -103,17 +103,6 @@ export default function Laporan() {
 
   return (
     <AppLayout>
-      {/* Page Header */}
-      <div className="pg-header fade-in">
-        <div>
-          <h4 className="pg-title">
-            <i className="bi bi-file-earmark-bar-graph" style={{ color: '#3b82f6', marginRight: 8 }} />
-            Laporan Keuangan
-          </h4>
-          <p className="pg-subtitle">Lihat statistik dan laporan keuangan bisnis</p>
-        </div>
-      </div>
-
       {/* Period Selector */}
       <div className="section-card" style={{ marginBottom: '20px', padding: '16px' }}>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>

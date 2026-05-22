@@ -79,17 +79,6 @@ export default function TambahUser() {
   return (
     <AppLayout>
       <div style={{ minHeight: '100vh', padding: '0' }}>
-        {/* Header */}
-        <div className="pg-header">
-          <div>
-            <h4 className="pg-title">
-              <i className="bi bi-person-plus" style={{ color: '#6366f1', marginRight: 8 }} />
-              Tambah User Baru
-            </h4>
-            <p className="pg-subtitle">Tambahkan user baru (teknisi/admin)</p>
-          </div>
-        </div>
-
         {/* Form */}
         <div className="section-card" style={{ maxWidth: 500 }}>
           <form onSubmit={handleSubmit}>
