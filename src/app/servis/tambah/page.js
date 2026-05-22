@@ -235,7 +235,7 @@ export default function TambahServis() {
                 {loading ? (
                   <><i className="bi bi-arrow-repeat" style={{ animation: 'spin 1s linear infinite' }} /> Menyimpan...</>
                 ) : (
-                  <><i className="bi bi-check-circle" /> Simpan Servis
+                  <><i className="bi bi-check-circle" /> Simpan Servis</>
                 )}
               </button>
             </div>
