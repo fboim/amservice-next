@@ -118,8 +118,8 @@ export async function POST(request) {
         merk_hp: body.merk_hp,
         tipe_hp: body.tipe_hp,
         keluhan: body.keluhan,
-        estimasi_biaya: body.estimasi_biaya ? parseInt(body.estimasi_biaya) : null,
-        modal_sparepart: body.modal_sparepart ? parseInt(body.modal_sparepart) : null,
+        estimasi_biaya: body.estimasi_biaya ? parseInt(body.estimasi_biaya) : 0,
+        modal_sparepart: body.modal_sparepart ? parseInt(body.modal_sparepart) : 0,
         status: body.status || 'Antrean',
         garansi: body.garansi || 'Tidak Ada',
         foto_hp: body.foto_hp,
@@ -154,10 +154,10 @@ export async function PUT(request) {
         // Handle integer fields - convert empty/null to null, otherwise parseInt
         if (key === 'estimasi_biaya' || key === 'modal_sparepart') {
           if (val === '' || val === null || val === undefined) {
-            validData[key] = null
+            validData[key] = 0 // Use 0 instead of null for NOT NULL columns
           } else {
             const parsed = parseInt(val)
-            validData[key] = isNaN(parsed) ? null : parsed
+            validData[key] = isNaN(parsed) ? 0 : parsed
           }
         } else {
           validData[key] = val
