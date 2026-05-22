@@ -67,21 +67,21 @@ export default function EditServis() {
   }
 
   const formatNumber = (value) => {
-    const num = parseInt(value.replace(/\D/g, '')) || 0
+    const num = parseInt(String(value).replace(/\D/g, '')) || 0
     return num.toLocaleString('id-ID')
   }
 
   const parseNumber = (value) => {
-    return parseInt(value.replace(/\D/g, '')) || 0
+    return parseInt(String(value).replace(/\D/g, '')) || 0
   }
 
   const handleBiayaChange = (e) => {
-    const raw = e.target.value.replace(/\D/g, '')
+    const raw = String(e.target.value).replace(/\D/g, '')
     setForm(prev => ({ ...prev, estimasi_biaya: raw }))
   }
 
   const handleModalChange = (e) => {
-    const raw = e.target.value.replace(/\D/g, '')
+    const raw = String(e.target.value).replace(/\D/g, '')
     setForm(prev => ({ ...prev, modal_sparepart: raw }))
   }
 

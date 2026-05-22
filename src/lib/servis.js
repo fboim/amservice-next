@@ -45,7 +45,7 @@ export async function getDashboardStats() {
     .not('deleted_at', 'neq', null)
 
   const omzetHari = servisToday?.reduce((sum, s) => {
-    const biaya = parseInt((s.estimasi_biaya || '0').replace(/\D/g, ''))
+    const biaya = parseInt(String(s.estimasi_biaya || '0').replace(/\D/g, ''))
     return sum + biaya
   }, 0) || 0
 
