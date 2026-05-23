@@ -53,8 +53,11 @@ export async function GET(request) {
 
     const omzetHari = servisToday?.reduce((sum, s) => {
       const biaya = parseInt(String(s.estimasi_biaya || '0').replace(/\D/g, ''))
+      console.log('Daily servis:', s.no_servis, 'biaya:', s.estimasi_biaya, '-> parsed:', biaya)
       return sum + biaya
     }, 0) || 0
+
+    console.log('Total omzet Hari:', omzetHari)
 
     // Get monthly omzet (bulan ini saja, bukan tahun ini)
     const monthStart = `${currentYear}-${currentMonth}-01`
@@ -69,8 +72,11 @@ export async function GET(request) {
 
     const omzetBulan = servisBulanIni?.reduce((sum, s) => {
       const biaya = parseInt(String(s.estimasi_biaya || '0').replace(/\D/g, ''))
+      console.log('Monthly servis:', s.no_servis, 'biaya:', s.estimasi_biaya, '-> parsed:', biaya)
       return sum + biaya
     }, 0) || 0
+
+    console.log('Total omzet Bulan:', omzetBulan)
 
     // Get merk populer from ALL servis (not just latest)
     const { data: allServis } = await supabase

@@ -170,12 +170,16 @@ export async function PUT(request) {
       validData.tanggal = updateData.tanggal
     }
 
+    console.log('Final validData:', JSON.stringify(validData))
+
     const { data, error } = await supabaseAdmin
       .from('servis')
       .update(validData)
       .eq('id', id)
       .select()
       .single()
+
+    console.log('Update result:', { data, error })
 
     if (error) {
       console.error('Supabase update error:', error)
