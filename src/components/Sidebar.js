@@ -120,14 +120,14 @@ export default function Sidebar() {
           </div>
 
           <div className="topbar-actions">
-            <Link href="/servis/tambah" className="topbar-btn" title="Servis Baru" style={{ background: 'var(--am-primary)', color: '#fff' }}>
-              <i className="bi bi-plus-circle-fill" />
+            <Link href="/servis/tambah" className="topbar-btn" title="Servis Baru" style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', boxShadow: '0 2px 8px rgba(16,185,129,.35)' }}>
+              <i className="bi bi-plus-lg" />
             </Link>
             <button onClick={toggleTheme} title="Ganti Tema" className="topbar-btn">
               <i className={`bi ${theme === 'dark' ? 'bi-moon-stars' : 'bi-sun'}`} />
             </button>
             <button onClick={handleLogout} className="topbar-logout">
-              <i className="bi bi-power" />
+              <i className="bi bi-box-arrow-right" />
               <span>Keluar</span>
             </button>
           </div>
@@ -204,8 +204,8 @@ export default function Sidebar() {
               </Link>
             </li>
             <li>
-              <button onClick={handleLogout} className="nav-link nav-logout" style={{ width: '100%', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer' }}>
-                <i className="bi bi-box-arrow-right" />
+              <button onClick={handleLogout} className="nav-link nav-logout" style={{ width: '100%', textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer', color: '#ef4444', fontWeight: '600' }}>
+                <i className="bi bi-box-arrow-right" style={{ color: '#ef4444' }} />
                 <span>Logout ({user?.nama || 'User'})</span>
               </button>
             </li>

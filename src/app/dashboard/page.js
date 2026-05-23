@@ -387,7 +387,8 @@ export default function Dashboard() {
                             className="btn-act btn-act-dark"
                             onClick={() => setOpenDropdown(openDropdown === s.id ? null : s.id)}
                           >
-                            <i className="bi bi-chevron-down" style={{ fontSize: '.7rem' }} />
+                            <i className="bi bi-printer" style={{ fontSize: '.85rem' }} />
+                            <i className="bi bi-chevron-down" style={{ fontSize: '.6rem', marginLeft: '1px' }} />
                           </button>
                           {openDropdown === s.id && (
                             <div style={{
@@ -401,20 +402,20 @@ export default function Dashboard() {
                                 fontSize: '.75rem', color: textMain, textDecoration: 'none',
                                 borderBottom: `1px solid ${border}`
                               }}>
-                                <i className="bi bi-tag" style={{ color: '#8b5cf6' }} /> Label
+                                <i className="bi bi-tag-fill" style={{ color: '#8b5cf6', width: '16px', textAlign: 'center' }} /> Label
                               </Link>
                               <Link href={`/nota/${s.id}/penerimaan`} target="_blank" style={{
                                 display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
                                 fontSize: '.75rem', color: textMain, textDecoration: 'none',
                                 borderBottom: `1px solid ${border}`
                               }}>
-                                <i className="bi bi-qr-code" style={{ color: '#2563eb' }} /> Nota Penerimaan
+                                <i className="bi bi-receipt" style={{ color: '#2563eb', width: '16px', textAlign: 'center' }} /> Nota Penerimaan
                               </Link>
                               <Link href={`/nota/${s.id}/garansi`} target="_blank" style={{
                                 display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
                                 fontSize: '.75rem', color: textMain, textDecoration: 'none'
                               }}>
-                                <i className="bi bi-shield-check" style={{ color: '#f59e0b' }} /> Nota Garansi
+                                <i className="bi bi-shield-check" style={{ color: '#f59e0b', width: '16px', textAlign: 'center' }} /> Nota Garansi
                               </Link>
                             </div>
                           )}
