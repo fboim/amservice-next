@@ -397,27 +397,6 @@ export default function Dashboard() {
                               borderRadius: '8px', boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
                               minWidth: '160px', zIndex: 100, overflow: 'hidden'
                             }}>
-                              <Link href={`/nota/${s.id}`} target="_blank" style={{
-                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
-                                fontSize: '.75rem', color: textMain, textDecoration: 'none',
-                                borderBottom: `1px solid ${border}`
-                              }}>
-                                <i className="bi bi-receipt" style={{ color: '#059669' }} /> Nota Offline
-                              </Link>
-                              <Link href={`/nota/${s.id}/penerimaan`} target="_blank" style={{
-                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
-                                fontSize: '.75rem', color: textMain, textDecoration: 'none',
-                                borderBottom: `1px solid ${border}`
-                              }}>
-                                <i className="bi bi-qr-code" style={{ color: '#2563eb' }} /> QR Code
-                              </Link>
-                              <Link href={`/nota/${s.id}/garansi`} target="_blank" style={{
-                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
-                                fontSize: '.75rem', color: textMain, textDecoration: 'none',
-                                borderBottom: `1px solid ${border}`
-                              }}>
-                                <i className="bi bi-shield-check" style={{ color: '#f59e0b' }} /> Nota Garansi
-                              </Link>
                               <Link href={`/nota/${s.id}/label`} target="_blank" style={{
                                 display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
                                 fontSize: '.75rem', color: textMain, textDecoration: 'none',
@@ -425,13 +404,19 @@ export default function Dashboard() {
                               }}>
                                 <i className="bi bi-tag" style={{ color: '#8b5cf6' }} /> Label
                               </Link>
-                              <div style={{ height: '1px', background: border }} />
-                              <a href={`/nota/${s.id}/penerimaan?pdf=1`} target="_blank" style={{
+                              <Link href={`/nota/${s.id}/penerimaan`} target="_blank" style={{
                                 display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
-                                fontSize: '.75rem', color: '#0ea5e9', textDecoration: 'none'
+                                fontSize: '.75rem', color: textMain, textDecoration: 'none',
+                                borderBottom: `1px solid ${border}`
                               }}>
-                                <i className="bi bi-download" /> PDF Penerimaan
-                              </a>
+                                <i className="bi bi-qr-code" style={{ color: '#2563eb' }} /> Nota Penerimaan
+                              </Link>
+                              <Link href={`/nota/${s.id}/garansi`} target="_blank" style={{
+                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
+                                fontSize: '.75rem', color: textMain, textDecoration: 'none'
+                              }}>
+                                <i className="bi bi-shield-check" style={{ color: '#f59e0b' }} /> Nota Garansi
+                              </Link>
                             </div>
                           )}
                         </div>
