@@ -1144,35 +1144,34 @@ a.topbar-btn:hover {
 
 /* Mobile Print Dropdown Fix */
 @media (max-width: 767px) {
-  .btn-group-act .print-dropdown {
-    left: 0;
-    right: auto;
+  .btn-group-act {
+    gap: 2px;
   }
-}
 
-/* Dashboard two column responsive */
-.dashboard-two-col {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-}
-
-@media (min-width: 1024px) {
-  .dashboard-two-col {
-    grid-template-columns: 2fr 1fr;
-    gap: 20px;
-  }
-}
-
-/* Mobile action improvements */
-@media (max-width: 767px) {
   .btn-group-act .btn-act {
-    padding: 6px 8px;
-    min-width: 32px;
-    justify-content: center;
+    padding: 5px 6px;
+    min-width: 30px;
   }
 
   .btn-group-act .btn-act i::before {
-    font-size: .9rem;
+    font-size: .85rem;
+  }
+
+  .btn-group-act .print-dropdown {
+    left: 0;
+    right: auto;
+    min-width: 160px;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .btn-group-act {
+    gap: 3px;
+  }
+
+  .btn-group-act .btn-act {
+    padding: 6px 8px;
+    min-width: 34px;
   }
 }

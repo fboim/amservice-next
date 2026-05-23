@@ -382,40 +382,39 @@ export default function Dashboard() {
                             <i className="bi bi-pencil-square" />
                           </Link>
                         )}
-                        <div style={{ position: 'relative' }} ref={el => dropdownRefs.current[s.id] = el}>
+                        <div style={{ position: 'relative' }} ref={el => dropdownRefs.current[s.id] = el} className="print-dropdown-wrap">
                           <button
-                            className="btn-act btn-act-dark"
-                            onClick={() => setOpenDropdown(openDropdown === s.id ? null : s.id)}
+                            className="btn-act btn-act-dark print-btn"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setOpenDropdown(openDropdown === s.id ? null : s.id)
+                            }}
                           >
-                            <i className="bi bi-printer" style={{ fontSize: '.85rem' }} />
-                            <i className="bi bi-chevron-down" style={{ fontSize: '.6rem', marginLeft: '1px' }} />
+                            <i className="bi bi-chevron-down" style={{ fontSize: '.7rem' }} />
                           </button>
                           {openDropdown === s.id && (
-                            <div style={{
-                              position: 'absolute', right: 0, top: '100%', marginTop: '4px',
-                              background: surface, border: `1px solid ${border}`,
-                              borderRadius: '8px', boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
-                              minWidth: '160px', zIndex: 100, overflow: 'hidden'
+                            <div className="print-dropdown" style={{
+                              right: 0, left: 'auto'
                             }}>
                               <Link href={`/nota/${s.id}/label`} target="_blank" style={{
                                 display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
                                 fontSize: '.75rem', color: textMain, textDecoration: 'none',
                                 borderBottom: `1px solid ${border}`
                               }}>
-                                <i className="bi bi-tag-fill" style={{ color: '#8b5cf6', width: '16px', textAlign: 'center' }} /> Label
+                                <i className="bi bi-tag" style={{ color: 'var(--am-text-muted)' }} /> Label
                               </Link>
                               <Link href={`/nota/${s.id}/penerimaan`} target="_blank" style={{
                                 display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
                                 fontSize: '.75rem', color: textMain, textDecoration: 'none',
                                 borderBottom: `1px solid ${border}`
                               }}>
-                                <i className="bi bi-receipt" style={{ color: '#2563eb', width: '16px', textAlign: 'center' }} /> Nota Penerimaan
+                                <i className="bi bi-qr-code" style={{ color: 'var(--am-text-muted)' }} /> Nota Penerimaan
                               </Link>
                               <Link href={`/nota/${s.id}/garansi`} target="_blank" style={{
                                 display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
                                 fontSize: '.75rem', color: textMain, textDecoration: 'none'
                               }}>
-                                <i className="bi bi-shield-check" style={{ color: '#f59e0b', width: '16px', textAlign: 'center' }} /> Nota Garansi
+                                <i className="bi bi-shield-check" style={{ color: 'var(--am-text-muted)' }} /> Nota Garansi
                               </Link>
                             </div>
                           )}

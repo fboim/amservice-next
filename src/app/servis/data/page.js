@@ -286,13 +286,13 @@ function DataServisContent() {
                                         </button>
                                         <div className="print-dropdown" style={{ display: 'none', position: 'absolute', right: 0, top: 'calc(100% + 4px)', zIndex: 50, width: '148px', background: 'var(--am-surface)', border: '1px solid var(--am-border)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,.15)', overflow: 'hidden' }}>
                                           <Link href={`/nota/${s.id}/label`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '7px 10px', fontSize: '.76rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                            <i className="bi bi-tag-fill" style={{ color: '#8b5cf6', width: '13px', textAlign: 'center' }} />Label
+                                            <i className="bi bi-tag-fill" style={{ color: 'var(--am-text-muted)', width: '13px', textAlign: 'center' }} />Label
                                           </Link>
                                           <Link href={`/nota/${s.id}/penerimaan`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '7px 10px', fontSize: '.76rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                            <i className="bi bi-receipt" style={{ color: '#2563eb', width: '13px', textAlign: 'center' }} />Nota Penerimaan
+                                            <i className="bi bi-qr-code" style={{ color: 'var(--am-text-muted)', width: '13px', textAlign: 'center' }} />Nota Penerimaan
                                           </Link>
                                           <Link href={`/nota/${s.id}/garansi`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '7px 10px', fontSize: '.76rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                            <i className="bi bi-shield-check" style={{ color: '#f59e0b', width: '13px', textAlign: 'center' }} />Nota Garansi
+                                            <i className="bi bi-shield-check" style={{ color: 'var(--am-text-muted)', width: '13px', textAlign: 'center' }} />Nota Garansi
                                           </Link>
                                         </div>
                                       </div>
@@ -392,13 +392,13 @@ function DataServisContent() {
                                         </button>
                                         <div className="print-dropdown" style={{ display: 'none', position: 'absolute', right: 0, top: 'calc(100% + 4px)', zIndex: 50, width: '148px', background: 'var(--am-surface)', border: '1px solid var(--am-border)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,.15)', overflow: 'hidden' }}>
                                           <Link href={`/nota/${s.id}/label`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '7px 10px', fontSize: '.76rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                            <i className="bi bi-tag-fill" style={{ color: '#8b5cf6', width: '13px', textAlign: 'center' }} />Label
+                                            <i className="bi bi-tag-fill" style={{ color: 'var(--am-text-muted)', width: '13px', textAlign: 'center' }} />Label
                                           </Link>
                                           <Link href={`/nota/${s.id}/penerimaan`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '7px 10px', fontSize: '.76rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                            <i className="bi bi-receipt" style={{ color: '#2563eb', width: '13px', textAlign: 'center' }} />Nota Penerimaan
+                                            <i className="bi bi-qr-code" style={{ color: 'var(--am-text-muted)', width: '13px', textAlign: 'center' }} />Nota Penerimaan
                                           </Link>
                                           <Link href={`/nota/${s.id}/garansi`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '7px 10px', fontSize: '.76rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                            <i className="bi bi-shield-check" style={{ color: '#f59e0b', width: '13px', textAlign: 'center' }} />Nota Garansi
+                                            <i className="bi bi-shield-check" style={{ color: 'var(--am-text-muted)', width: '13px', textAlign: 'center' }} />Nota Garansi
                                           </Link>
                                         </div>
                                       </div>
