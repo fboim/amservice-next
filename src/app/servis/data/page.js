@@ -82,6 +82,13 @@ function DataServisContent() {
         })
       })
 
+      // Stop propagation on dropdown content clicks
+      document.querySelectorAll('.print-dropdown').forEach(function(d) {
+        d.addEventListener('click', function(e) {
+          e.stopPropagation()
+        })
+      })
+
       document.addEventListener('click', function() {
         document.querySelectorAll('.print-dropdown').forEach(function(d) {
           d.style.display = 'none'

@@ -45,15 +45,14 @@ export default function Dashboard() {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      Object.values(dropdownRefs.current).forEach(ref => {
-        if (ref && !ref.contains(e.target)) {
-          setOpenDropdown(null)
-        }
-      })
+      if (openDropdown === null) return
+      const ref = dropdownRefs.current[openDropdown]
+      if (ref && ref.contains(e.target)) return
+      setOpenDropdown(null)
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  }, [openDropdown])
 
   const fetchDashboard = async () => {
     try {
