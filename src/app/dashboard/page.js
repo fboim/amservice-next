@@ -515,24 +515,24 @@ export default function Dashboard() {
               Total <strong style={{ color: 'var(--am-text)' }}>{stats.total_tahun || 0}</strong> servis
             </span>
           </div>
-          <div style={{ padding: '12px' }}>
+          <div style={{ padding: '12px', minHeight: '140px' }}>
             {chartData.length > 0 ? (
-              <div style={{ position: 'relative', height: '120px' }}>
-                <svg width="100%" height="120" viewBox={`0 0 ${chartData.length * 40 + 16} 120`} style={{ overflow: 'visible' }}>
+              <div style={{ position: 'relative', width: '100%', height: '140px' }}>
+                <svg width="100%" height="140" viewBox={`0 0 500 140`} preserveAspectRatio="xMidYMid meet" style={{ overflow: 'visible' }}>
                   {/* Grid lines */}
-                  {[20, 50, 80].map((y) => (
-                    <line key={y} x1="8" y1={y} x2={chartData.length * 40 + 8} y2={y} stroke="var(--am-border)" strokeWidth="1" strokeDasharray="2,2" />
+                  {[25, 60, 95].map((y) => (
+                    <line key={y} x1="30" y1={y} x2="490" y2={y} stroke="var(--am-border)" strokeWidth="1" strokeDasharray="2,2" />
                   ))}
                   {/* Bars */}
                   {chartData.map((month, i) => {
-                    const x = 12 + i * 40
-                    const barH = maxVal > 0 ? (month.value / maxVal) * 80 : 0
-                    const y = 100 - barH
+                    const x = 38 + i * 38
+                    const barH = maxVal > 0 ? (month.value / maxVal) * 85 : 0
+                    const y = 120 - barH
                     return (
                       <g key={i}>
-                        <rect x={x} y={y} width="16" height={barH} fill="rgba(59,130,246,0.25)" stroke="#3b82f6" strokeWidth="1" rx="2" />
-                        <text x={x + 8} y="115" textAnchor="middle" fontSize="7" fill="var(--am-text-muted)" fontWeight="600">{month.label}</text>
-                        <text x={x + 8} y={y - 4} textAnchor="middle" fontSize="9" fill="var(--am-text)" fontWeight="700">{month.value}</text>
+                        <rect x={x} y={y} width="20" height={barH} fill="rgba(59,130,246,0.25)" stroke="#3b82f6" strokeWidth="1" rx="2" />
+                        <text x={x + 10} y="135" textAnchor="middle" fontSize="8" fill="var(--am-text-muted)" fontWeight="600">{month.label}</text>
+                        <text x={x + 10} y={y - 5} textAnchor="middle" fontSize="10" fill="var(--am-text)" fontWeight="700">{month.value}</text>
                       </g>
                     )
                   })}
@@ -540,19 +540,19 @@ export default function Dashboard() {
                   {chartData.length > 1 && (
                     <polyline
                       points={chartData.map((month, i) => {
-                        const x = 12 + i * 40 + 8
-                        const barH = maxVal > 0 ? (month.value / maxVal) * 80 : 0
-                        const y = 100 - barH
+                        const x = 38 + i * 38 + 10
+                        const barH = maxVal > 0 ? (month.value / maxVal) * 85 : 0
+                        const y = 120 - barH
                         return `${x},${y}`
                       }).join(' ')}
-                      fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                      fill="none" stroke="#f59e0b" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
                     />
                   )}
                   {/* Dots */}
                   {chartData.map((month, i) => {
-                    const x = 12 + i * 40 + 8
-                    const barH = maxVal > 0 ? (month.value / maxVal) * 80 : 0
-                    const y = 100 - barH
+                    const x = 38 + i * 38 + 10
+                    const barH = maxVal > 0 ? (month.value / maxVal) * 85 : 0
+                    const y = 120 - barH
                     return (
                       <circle key={i} cx={x} cy={y} r="4" fill="#f59e0b" stroke="var(--am-surface)" strokeWidth="2" />
                     )
