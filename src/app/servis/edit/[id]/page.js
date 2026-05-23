@@ -88,9 +88,11 @@ export default function EditServis() {
     setSaving(true)
 
     try {
-      let tanggalValue = undefined
+      // Use e.target.elements to get current form values directly
+      const statusValue = e.target.elements.status?.value || form.status
 
-      if (form.status === 'Sudah Diambil') {
+      let tanggalValue
+      if (statusValue === 'Sudah Diambil') {
         // When status is "Sudah Diambil", set tanggal to today
         tanggalValue = new Date().toISOString().split('T')[0]
       } else {
@@ -101,6 +103,7 @@ export default function EditServis() {
       const submitData = {
         id,
         ...form,
+        status: statusValue,
         tanggal: tanggalValue
       }
 

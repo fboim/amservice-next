@@ -165,8 +165,8 @@ export async function PUT(request) {
       }
     }
 
-    // Always update tanggal if provided
-    if (updateData.tanggal) {
+    // Always update tanggal if provided in the request
+    if (updateData.tanggal !== undefined) {
       validData.tanggal = updateData.tanggal
     }
 
