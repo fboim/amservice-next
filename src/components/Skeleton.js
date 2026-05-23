@@ -7,7 +7,7 @@ export function Skeleton({ width = '100%', height = 20, borderRadius = 8 }) {
         borderRadius,
         background: 'linear-gradient(90deg, rgba(255,255,255,.05) 25%, rgba(255,255,255,.1) 50%, rgba(255,255,255,.05) 75%)',
         backgroundSize: '200% 100%',
-        animation: 'shimmer 1.5s infinite',
+        animation: 'shimmer 0.8s ease-in-out infinite',
       }}
     />
   )
@@ -97,17 +97,6 @@ export function SkeletonList({ items = 3 }) {
 export function DataServisSkeleton() {
   return (
     <div style={{ padding: '0' }}>
-      {/* Page Header Skeleton */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <div>
-          <Skeleton height={24} width={200} borderRadius={6} />
-          <div style={{ marginTop: 8 }}>
-            <Skeleton height={14} width={280} borderRadius={4} />
-          </div>
-        </div>
-        <Skeleton width={120} height={32} borderRadius={99} />
-      </div>
-
       {/* Search Card Skeleton */}
       <div style={{
         background: 'var(--am-surface)',
@@ -169,17 +158,6 @@ export function DataServisSkeleton() {
 export function SparepartSkeleton() {
   return (
     <div style={{ padding: '0' }}>
-      {/* Page Header Skeleton */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <div>
-          <Skeleton height={24} width={160} borderRadius={6} />
-          <div style={{ marginTop: 8 }}>
-            <Skeleton height={14} width={200} borderRadius={4} />
-          </div>
-        </div>
-        <Skeleton width={140} height={32} borderRadius={99} />
-      </div>
-
       {/* Search Card Skeleton */}
       <div style={{
         background: 'var(--am-surface)',
@@ -315,26 +293,12 @@ export function DashboardSkeleton() {
         <div style={{ marginBottom: 16 }}>
           <Skeleton height={14} width="30%" borderRadius={4} />
         </div>
-        <div style={{ height: 220, display: 'flex', alignItems: 'flex-end', gap: 8, padding: '0 8px' }}>
+        <div style={{ height: 140, display: 'flex', alignItems: 'flex-end', gap: 8, padding: '0 8px' }}>
           {[...Array(6)].map((_, i) => (
-            <div key={i} style={{
-              flex: 1,
-              height: `${30 + Math.random() * 60}%`,
-              background: 'linear-gradient(180deg, rgba(59,130,246,.3) 0%, rgba(59,130,246,.1) 100%)',
-              borderRadius: '4px 4px 0 0',
-              animation: 'shimmer 1.5s infinite',
-            }} />
+            <Skeleton key={i} height={`${30 + (i % 3) * 20}%`} borderRadius={4} style={{ flex: 1 }} />
           ))}
         </div>
       </div>
-
-      <style jsx global>{`
-        @keyframes shimmer {
-          0% { opacity: 0.6; }
-          50% { opacity: 1; }
-          100% { opacity: 0.6; }
-        }
-      `}</style>
     </div>
   )
 }

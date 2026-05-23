@@ -1,24 +1,17 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import Sidebar from './Sidebar'
 import { useSidebar } from './SidebarContext'
 
-// Simple cache for stats
-let statsCache = {
-  data: { antrean: 0, proses: 0, siap: 0, selesai: 0 },
-  timestamp: 0
-}
-const CACHE_DURATION = 30000 // 30 seconds
-
+// Simple cache for stats - client-side only
 function SidebarWrapper({ children }) {
   const { mobileOpen, onMobileClose, onMobileOpen } = useSidebar()
   const [user, setUser] = useState(null)
   const [isChecking, setIsChecking] = useState(true)
-  const [stats, setStats] = useState({ antrean: 0, proses: 0, siap: 0, selesai: 0 })
   const pathname = usePathname()
   const router = useRouter()
 
@@ -38,34 +31,14 @@ function SidebarWrapper({ children }) {
       }
     }
     setIsChecking(false)
-
-    // Check cache first
-    const now = Date.now()
-    if (now - statsCache.timestamp < CACHE_DURATION) {
-      setStats(statsCache.data)
-      return
-    }
-
-    // Fetch fresh stats
-    fetch('/api/dashboard', { cache: 'no-store' })
-      .then(res => res.json())
-      .then(data => {
-        const newStats = {
-          antrean: data.antrean || 0,
-          proses: data.proses || 0,
-          siap: data.siap || 0,
-          selesai: data.selesai || 0
-        }
-        statsCache = { data: newStats, timestamp: now }
-        setStats(newStats)
-      })
-      .catch(() => {})
   }, [pathname, router])
 
   if (isChecking) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'var(--am-bg)' }}>
+        <div style={{ textAlign: 'center' }}>
+          <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 0.8s linear infinite', color: 'var(--am-primary)' }} />
+        </div>
       </div>
     )
   }
