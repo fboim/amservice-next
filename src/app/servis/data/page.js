@@ -405,39 +405,6 @@ function DataServisContent() {
                     </table>
                   </div>
                 </div>
-                                        <div className="print-dropdown" style={{ display: 'none', position: 'absolute', right: 0, top: 'calc(100% + 4px)', zIndex: 60, width: '172px', background: 'var(--am-surface)', border: '1px solid var(--am-border)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,.15)', overflow: 'hidden' }}>
-                                          <a href={`https://wa.me/${hp}?text=${encodeURIComponent(wa_msg)}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '7px 10px', fontSize: '.76rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                            <i className="bi bi-chat-dots" style={{ color: 'var(--am-text-muted)', width: '13px', textAlign: 'center' }} />Notif Status
-                                          </a>
-                                        </div>
-                                      </div>
-                                    </>
-                                  )}
-                                  {isAdmin && (
-                                    showTrash ? (
-                                      <>
-                                        <button onClick={() => handleDelete(s.id)} className="btn-act btn-act-green" title="Pulihkan">
-                                          <i className="bi bi-arrow-counterclockwise" />
-                                        </button>
-                                        <button onClick={() => handleDelete(s.id)} className="btn-act btn-act-red" title="Hapus Permanen" style={{ fontSize: '.68rem', padding: '3px 6px' }}>
-                                          <i className="bi bi-trash3-fill" />
-                                        </button>
-                                      </>
-                                    ) : (
-                                      <button onClick={() => handleDelete(s.id)} className="btn-act btn-act-red" title="Hapus">
-                                        <i className="bi bi-trash" />
-                                      </button>
-                                    )
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
 
                 {/* Footer Info */}
                 <div style={{ borderTop: '2px solid var(--am-border)', background: 'var(--am-bg)', padding: '10px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px' }}>
