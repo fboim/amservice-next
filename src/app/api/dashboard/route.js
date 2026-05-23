@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 export async function GET(request) {
   const supabase = createClient(
@@ -132,6 +133,12 @@ export async function GET(request) {
       .select('*', { count: 'exact', head: true })
       .gte('tanggal', yearStart)
       .is('deleted_at', null)
+
+    console.log('Returning dashboard data:', {
+      antrean, proses, siap, selesai, selesai,
+      omzet_hari: omzetHari,
+      omzet_bulan: omzetBulan
+    })
 
     return Response.json({
       antrean: antrean || 0,
