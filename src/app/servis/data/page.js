@@ -1,7 +1,7 @@
 'use client'
 export const dynamic = 'force-dynamic'
 
-import { Suspense, useState, useEffect } from 'react'
+import { Suspense, useState, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
@@ -11,7 +11,6 @@ function DataServisContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [loading, setLoading] = useState(true)
-  const [initialLoad, setInitialLoad] = useState(true)
   const [servis, setServis] = useState([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -30,15 +29,12 @@ function DataServisContent() {
   }, [searchParams])
 
   useEffect(() => {
-    // Small delay for smooth transition
-    const timer = setTimeout(() => {
-      fetchServis()
-    }, 100)
-    return () => clearTimeout(timer)
+    fetchServis()
   }, [page, search, statusFilter, showTrash])
 
-  const fetchServis = async () => {
+  const fetchServis = useCallback(async () => {
     try {
+      setLoading(true)
       const params = new URLSearchParams({ page, limit: 12, search })
       if (statusFilter) params.set('status', statusFilter)
       if (showTrash) params.set('trash', '1')
@@ -52,12 +48,9 @@ function DataServisContent() {
     } catch (err) {
       console.error('Fetch error:', err)
     } finally {
-      setTimeout(() => {
-        setLoading(false)
-        setInitialLoad(false)
-      }, 200)
+      setLoading(false)
     }
-  }
+  }, [page, search, statusFilter, showTrash])
 
   // Handle click outside to close dropdowns
   useEffect(() => {
@@ -145,7 +138,7 @@ function DataServisContent() {
     }
   }
 
-  if (initialLoad || loading) {
+  if (loading) {
     return (
       <AppLayout>
         <DataServisSkeleton />
