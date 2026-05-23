@@ -59,44 +59,17 @@ function DataServisContent() {
     }
   }
 
-  // Handle dropdown toggles
+  // Handle click outside to close dropdowns
   useEffect(() => {
-    const initDropdowns = () => {
-      document.querySelectorAll('.print-btn').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-          e.stopPropagation()
-          const dropdown = btn.nextElementSibling
-          if (dropdown) {
-            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none'
-          }
-        })
-      })
-
-      document.querySelectorAll('.wa-drop-btn').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-          e.stopPropagation()
-          const dropdown = btn.nextElementSibling
-          if (dropdown) {
-            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none'
-          }
-        })
-      })
-
-      // Stop propagation on dropdown content clicks
-      document.querySelectorAll('.print-dropdown').forEach(function(d) {
-        d.addEventListener('click', function(e) {
-          e.stopPropagation()
-        })
-      })
-
-      document.addEventListener('click', function() {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.print-dropdown') && !e.target.closest('.btn-act')) {
         document.querySelectorAll('.print-dropdown').forEach(function(d) {
           d.style.display = 'none'
         })
-      })
+      }
     }
-
-    initDropdowns()
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
   }, [])
 
   const totalPages = Math.ceil(total / 12)
@@ -279,35 +252,30 @@ function DataServisContent() {
                                         <i className="bi bi-pencil-square" />
                                       </Link>
                                       {/* Print Dropdown */}
-                                      <div className="print-dropdown-wrap" style={{ position: 'relative' }}>
-                                        <button type="button" className="btn-act btn-act-dark print-btn" title="Cetak">
-                                          <i className="bi bi-printer" />
-                                          <i className="bi bi-chevron-down" style={{ fontSize: '5px', marginLeft: '1px' }} />
+                                      <div style={{ position: 'relative' }}>
+                                        <button type="button" className="btn-act btn-act-dark" title="Cetak" onClick={(e) => {
+                                          e.stopPropagation()
+                                          const dropdown = e.currentTarget.nextElementSibling
+                                          dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none'
+                                        }}>
+                                          <i className="bi bi-chevron-down" style={{ fontSize: '.7rem' }} />
                                         </button>
-                                        <div className="print-dropdown" style={{ display: 'none', position: 'absolute', right: 0, top: 'calc(100% + 4px)', zIndex: 50, width: '148px', background: 'var(--am-surface)', border: '1px solid var(--am-border)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,.15)', overflow: 'hidden' }}>
-                                          <Link href={`/nota/${s.id}/label`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '7px 10px', fontSize: '.76rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                            <i className="bi bi-tag-fill" style={{ color: 'var(--am-text-muted)', width: '13px', textAlign: 'center' }} />Label
+                                        <div className="print-dropdown" style={{ display: 'none', position: 'absolute', right: 0, top: 'calc(100% + 4px)', zIndex: 50, width: '160px', background: 'var(--am-surface)', border: '1px solid var(--am-border)', borderRadius: '8px', boxShadow: '0 8px 30px rgba(0,0,0,.12)', overflow: 'hidden' }}>
+                                          <Link href={`/nota/${s.id}/label`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', fontSize: '.75rem', color: 'var(--am-text)', textDecoration: 'none', borderBottom: '1px solid var(--am-border)' }}>
+                                            <i className="bi bi-tag" style={{ color: '#8b5cf6' }} />Label
                                           </Link>
-                                          <Link href={`/nota/${s.id}/penerimaan`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '7px 10px', fontSize: '.76rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                            <i className="bi bi-qr-code" style={{ color: 'var(--am-text-muted)', width: '13px', textAlign: 'center' }} />Nota Penerimaan
+                                          <Link href={`/nota/${s.id}/penerimaan`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', fontSize: '.75rem', color: 'var(--am-text)', textDecoration: 'none', borderBottom: '1px solid var(--am-border)' }}>
+                                            <i className="bi bi-qr-code" style={{ color: '#2563eb' }} />Nota Penerimaan
                                           </Link>
-                                          <Link href={`/nota/${s.id}/garansi`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '7px 10px', fontSize: '.76rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                            <i className="bi bi-shield-check" style={{ color: 'var(--am-text-muted)', width: '13px', textAlign: 'center' }} />Nota Garansi
+                                          <Link href={`/nota/${s.id}/garansi`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', fontSize: '.75rem', color: 'var(--am-text)', textDecoration: 'none' }}>
+                                            <i className="bi bi-shield-check" style={{ color: '#f59e0b' }} />Nota Garansi
                                           </Link>
                                         </div>
                                       </div>
-                                      {/* WA Dropdown */}
-                                      <div className="print-dropdown-wrap" style={{ position: 'relative' }}>
-                                        <button type="button" className="btn-act btn-act-green wa-drop-btn" title="Kirim WA">
-                                          <i className="bi bi-whatsapp" />
-                                          <i className="bi bi-chevron-down" style={{ fontSize: '5px', marginLeft: '1px' }} />
-                                        </button>
-                                        <div className="print-dropdown" style={{ display: 'none', position: 'absolute', right: 0, top: 'calc(100% + 4px)', zIndex: 60, width: '172px', background: 'var(--am-surface)', border: '1px solid var(--am-border)', borderRadius: '10px', boxShadow: '0 8px 24px rgba(0,0,0,.15)', overflow: 'hidden' }}>
-                                          <a href={`https://wa.me/${hp}?text=${encodeURIComponent(wa_msg)}`} target="_blank" style={{ display: 'flex', alignItems: 'center', gap: '7px', padding: '7px 10px', fontSize: '.76rem', color: 'var(--am-text)', textDecoration: 'none' }}>
-                                            <i className="bi bi-chat-dots" style={{ color: 'var(--am-text-muted)', width: '13px', textAlign: 'center' }} />Notif Status
-                                          </a>
-                                        </div>
-                                      </div>
+                                      {/* WA Button */}
+                                      <a href={`https://wa.me/${hp}?text=${encodeURIComponent(wa_msg)}`} target="_blank" className="btn-act btn-act-green" title="Kirim WA">
+                                        <i className="bi bi-whatsapp" />
+                                      </a>
                                     </>
                                   )}
                                   {isAdmin && (

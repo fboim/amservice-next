@@ -382,39 +382,39 @@ export default function Dashboard() {
                             <i className="bi bi-pencil-square" />
                           </Link>
                         )}
-                        <div style={{ position: 'relative' }} ref={el => dropdownRefs.current[s.id] = el} className="print-dropdown-wrap">
+                        <div style={{ position: 'relative' }} ref={el => dropdownRefs.current[s.id] = el}>
                           <button
-                            className="btn-act btn-act-dark print-btn"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setOpenDropdown(openDropdown === s.id ? null : s.id)
-                            }}
+                            className="btn-act btn-act-dark"
+                            onClick={() => setOpenDropdown(openDropdown === s.id ? null : s.id)}
                           >
                             <i className="bi bi-chevron-down" style={{ fontSize: '.7rem' }} />
                           </button>
                           {openDropdown === s.id && (
-                            <div className="print-dropdown" style={{
-                              right: 0, left: 'auto'
+                            <div style={{
+                              position: 'absolute', right: 0, top: '100%', marginTop: '4px',
+                              background: surface, border: `1px solid ${border}`,
+                              borderRadius: '8px', boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+                              minWidth: '160px', zIndex: 100, overflow: 'hidden'
                             }}>
                               <Link href={`/nota/${s.id}/label`} target="_blank" style={{
                                 display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
                                 fontSize: '.75rem', color: textMain, textDecoration: 'none',
                                 borderBottom: `1px solid ${border}`
                               }}>
-                                <i className="bi bi-tag" style={{ color: 'var(--am-text-muted)' }} /> Label
+                                <i className="bi bi-tag" style={{ color: '#8b5cf6' }} /> Label
                               </Link>
                               <Link href={`/nota/${s.id}/penerimaan`} target="_blank" style={{
                                 display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
                                 fontSize: '.75rem', color: textMain, textDecoration: 'none',
                                 borderBottom: `1px solid ${border}`
                               }}>
-                                <i className="bi bi-qr-code" style={{ color: 'var(--am-text-muted)' }} /> Nota Penerimaan
+                                <i className="bi bi-qr-code" style={{ color: '#2563eb' }} /> Nota Penerimaan
                               </Link>
                               <Link href={`/nota/${s.id}/garansi`} target="_blank" style={{
                                 display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
                                 fontSize: '.75rem', color: textMain, textDecoration: 'none'
                               }}>
-                                <i className="bi bi-shield-check" style={{ color: 'var(--am-text-muted)' }} /> Nota Garansi
+                                <i className="bi bi-shield-check" style={{ color: '#f59e0b' }} /> Nota Garansi
                               </Link>
                             </div>
                           )}
@@ -517,22 +517,22 @@ export default function Dashboard() {
           </div>
           <div style={{ padding: '12px' }}>
             {chartData.length > 0 ? (
-              <div style={{ position: 'relative', height: '96px' }}>
-                <svg width="100%" height="96" viewBox={`0 0 ${chartData.length * 40 + 16} 96`} style={{ overflow: 'visible' }}>
+              <div style={{ position: 'relative', height: '120px' }}>
+                <svg width="100%" height="120" viewBox={`0 0 ${chartData.length * 40 + 16} 120`} style={{ overflow: 'visible' }}>
                   {/* Grid lines */}
-                  {[16, 40, 64].map((y) => (
+                  {[20, 50, 80].map((y) => (
                     <line key={y} x1="8" y1={y} x2={chartData.length * 40 + 8} y2={y} stroke="var(--am-border)" strokeWidth="1" strokeDasharray="2,2" />
                   ))}
                   {/* Bars */}
                   {chartData.map((month, i) => {
                     const x = 12 + i * 40
-                    const barH = maxVal > 0 ? (month.value / maxVal) * 64 : 0
-                    const y = 80 - barH
+                    const barH = maxVal > 0 ? (month.value / maxVal) * 80 : 0
+                    const y = 100 - barH
                     return (
                       <g key={i}>
-                        <rect x={x} y={y} width="16" height={barH} fill="rgba(59,130,246,0.2)" stroke="#3b82f6" strokeWidth="1" rx="2" />
-                        <text x={x + 8} y="92" textAnchor="middle" fontSize="7" fill="var(--am-text-muted)" fontWeight="600">{month.label}</text>
-                        <text x={x + 8} y={y - 3} textAnchor="middle" fontSize="8" fill="var(--am-text)" fontWeight="700">{month.value}</text>
+                        <rect x={x} y={y} width="16" height={barH} fill="rgba(59,130,246,0.25)" stroke="#3b82f6" strokeWidth="1" rx="2" />
+                        <text x={x + 8} y="115" textAnchor="middle" fontSize="7" fill="var(--am-text-muted)" fontWeight="600">{month.label}</text>
+                        <text x={x + 8} y={y - 4} textAnchor="middle" fontSize="9" fill="var(--am-text)" fontWeight="700">{month.value}</text>
                       </g>
                     )
                   })}
@@ -541,20 +541,20 @@ export default function Dashboard() {
                     <polyline
                       points={chartData.map((month, i) => {
                         const x = 12 + i * 40 + 8
-                        const barH = maxVal > 0 ? (month.value / maxVal) * 64 : 0
-                        const y = 80 - barH
+                        const barH = maxVal > 0 ? (month.value / maxVal) * 80 : 0
+                        const y = 100 - barH
                         return `${x},${y}`
                       }).join(' ')}
-                      fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                      fill="none" stroke="#f59e0b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
                     />
                   )}
                   {/* Dots */}
                   {chartData.map((month, i) => {
                     const x = 12 + i * 40 + 8
-                    const barH = maxVal > 0 ? (month.value / maxVal) * 64 : 0
-                    const y = 80 - barH
+                    const barH = maxVal > 0 ? (month.value / maxVal) * 80 : 0
+                    const y = 100 - barH
                     return (
-                      <circle key={i} cx={x} cy={y} r="3" fill="#f59e0b" stroke="var(--am-surface)" strokeWidth="1.5" />
+                      <circle key={i} cx={x} cy={y} r="4" fill="#f59e0b" stroke="var(--am-surface)" strokeWidth="2" />
                     )
                   })}
                 </svg>
