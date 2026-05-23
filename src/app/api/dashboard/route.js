@@ -42,12 +42,14 @@ export async function GET(request) {
       .is('deleted_at', null)
 
     // Get daily omzet (hari ini - transaksi selesai)
-    const { data: servisToday } = await supabase
+    const { data: servisToday, error: errorToday } = await supabase
       .from('servis')
-      .select('estimasi_biaya')
+      .select('estimasi_biaya, status, tanggal')
       .eq('status', 'Sudah Diambil')
       .eq('tanggal', todayStr)
       .is('deleted_at', null)
+
+    console.log('Daily omzet query:', { todayStr, count: servisToday?.length, error: errorToday })
 
     const omzetHari = servisToday?.reduce((sum, s) => {
       const biaya = parseInt(String(s.estimasi_biaya || '0').replace(/\D/g, ''))
@@ -56,12 +58,14 @@ export async function GET(request) {
 
     // Get monthly omzet (bulan ini saja, bukan tahun ini)
     const monthStart = `${currentYear}-${currentMonth}-01`
-    const { data: servisBulanIni } = await supabase
+    const { data: servisBulanIni, error: errorBulan } = await supabase
       .from('servis')
-      .select('estimasi_biaya')
+      .select('estimasi_biaya, status, tanggal')
       .eq('status', 'Sudah Diambil')
       .gte('tanggal', monthStart)
       .is('deleted_at', null)
+
+    console.log('Monthly omzet query:', { monthStart, count: servisBulanIni?.length, error: errorBulan })
 
     const omzetBulan = servisBulanIni?.reduce((sum, s) => {
       const biaya = parseInt(String(s.estimasi_biaya || '0').replace(/\D/g, ''))
