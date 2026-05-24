@@ -17,6 +17,7 @@ export default function Dashboard() {
   const [modalKeluhan, setModalKeluhan] = useState(null)
   const [openDropdown, setOpenDropdown] = useState(null)
   const [isDark, setIsDark] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
   const dropdownRefs = useRef({})
 
   useEffect(() => {
@@ -41,7 +42,18 @@ export default function Dashboard() {
     }
 
     fetchDashboard()
-  }, [router])
+  }, [router, refreshKey])
+
+  // Refresh on tab visibility change
+  useEffect(() => {
+    const handleVisible = () => {
+      if (document.visibilityState === 'visible') {
+        setRefreshKey(k => k + 1)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisible)
+    return () => document.removeEventListener('visibilitychange', handleVisible)
+  }, [])
 
   useEffect(() => {
     const handleClickOutside = (e) => {

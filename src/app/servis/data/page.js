@@ -2,13 +2,14 @@
 export const dynamic = 'force-dynamic'
 
 import { Suspense, useState, useEffect, useCallback } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
 import { DataServisSkeleton } from '@/components/Skeleton'
 
 function DataServisContent() {
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
   const [loading, setLoading] = useState(true)
   const [servis, setServis] = useState([])
@@ -17,6 +18,7 @@ function DataServisContent() {
   const [search, setSearch] = useState(searchParams.get('cari') || '')
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '')
   const [showTrash, setShowTrash] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
     const userData = localStorage.getItem('ams_user') || sessionStorage.getItem('ams_user')
@@ -30,14 +32,15 @@ function DataServisContent() {
 
   useEffect(() => {
     fetchServis()
-  }, [page, search, statusFilter, showTrash])
+  }, [page, search, statusFilter, showTrash, refreshKey])
 
   const fetchServis = async () => {
     try {
       setLoading(true)
-      const params = new URLSearchParams({ page, limit: 12, search, t: Date.now() })
+      const params = new URLSearchParams({ page, limit: 12, search })
       if (statusFilter) params.set('status', statusFilter)
       if (showTrash) params.set('trash', '1')
+      params.set('_t', Date.now())
       const res = await fetch(`/api/servis?${params}`, {
         cache: 'no-store',
         headers: { 'Cache-Control': 'no-cache, no-transform' }
@@ -51,6 +54,17 @@ function DataServisContent() {
       setLoading(false)
     }
   }
+
+  // Refresh on tab visibility change
+  useEffect(() => {
+    const handleVisible = () => {
+      if (document.visibilityState === 'visible') {
+        setRefreshKey(k => k + 1)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisible)
+    return () => document.removeEventListener('visibilitychange', handleVisible)
+  }, [])
 
   // Handle click outside to close dropdowns
   useEffect(() => {
