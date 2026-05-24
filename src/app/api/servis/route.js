@@ -164,7 +164,16 @@ export async function POST(request) {
     return Response.json({ success: true, servis: data })
   } catch (error) {
     console.error('Create servis error:', error)
-    return Response.json({ error: error.message }, { status: 500 })
+    console.error('Error details:', {
+      message: error?.message,
+      code: error?.code,
+      details: error?.details,
+      hint: error?.hint
+    })
+    return Response.json({
+      error: error?.message || 'Terjadi kesalahan',
+      details: error
+    }, { status: 500 })
   }
 }
 
