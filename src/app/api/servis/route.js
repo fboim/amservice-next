@@ -99,12 +99,16 @@ export async function POST(request) {
     const prefix = `AM-${bulanIni}-`
 
     // Find existing numbers with single dash format
-    const { data: lastServis } = await supabaseAdmin
+    const { data: lastServis, error: lastError } = await supabaseAdmin
       .from('servis')
       .select('no_servis')
       .like('no_servis', `${prefix}%`)
       .order('id', { ascending: false })
       .limit(10)
+
+    if (lastError) {
+      console.error('Error fetching last servis:', lastError)
+    }
 
     let urutan = 1
     if (lastServis && lastServis.length > 0) {
@@ -120,6 +124,7 @@ export async function POST(request) {
     }
 
     const noServis = `${prefix}${String(urutan).padStart(3, '0')}`
+    console.log('Creating servis:', { noServis, body })
 
     // Build insert data - only include fields that exist
     const insertData = {
@@ -141,13 +146,20 @@ export async function POST(request) {
       insertData.foto_hp = body.foto_hp
     }
 
+    console.log('Insert data:', insertData)
+
     const { data, error } = await supabaseAdmin
       .from('servis')
       .insert(insertData)
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Insert error:', error)
+      throw error
+    }
+
+    console.log('Insert success:', data)
 
     return Response.json({ success: true, servis: data })
   } catch (error) {
