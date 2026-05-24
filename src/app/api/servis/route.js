@@ -96,37 +96,42 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    console.log('POST request received')
+    console.log('Request headers:', request.headers.get('content-type'))
+
     // Parse request body
     let body
     try {
       body = await request.json()
+      console.log('Parsed body:', JSON.stringify(body))
     } catch (e) {
-      return Response.json({ error: 'Invalid JSON in request body' }, { status: 400 })
+      console.error('JSON parse error:', e)
+      return Response.json({ error: 'Invalid JSON in request body', details: e.message }, { status: 400 })
     }
 
     // Check if body is valid
     if (!body || typeof body !== 'object') {
-      return Response.json({ error: 'Invalid request body' }, { status: 400 })
+      return Response.json({ error: 'Invalid request body', bodyType: typeof body }, { status: 400 })
     }
 
-    // Simple no_servis generation: AM-YYMM-NNN
+    // Generate no_servis
     const d = new Date()
     const tahun = String(d.getFullYear()).slice(2, 4)
     const bulan = String(d.getMonth() + 1).padStart(2, '0')
     const prefix = `AM-${tahun}${bulan}-`
+    console.log('Prefix:', prefix)
 
-    // Get count of existing records for this month to generate next number
+    // Count existing records
     const { count, error: countError } = await supabaseAdmin
       .from('servis')
       .select('*', { count: 'exact', head: true })
       .like('no_servis', `${prefix}%`)
 
-    if (countError) {
-      console.error('Count error:', countError)
-    }
+    console.log('Count result:', { count, error: countError })
 
     const nextNum = (count || 0) + 1
     const noServis = `${prefix}${String(nextNum).padStart(3, '0')}`
+    console.log('Generated no_servis:', noServis)
 
     // Build insert data
     const insertData = {
@@ -142,6 +147,7 @@ export async function POST(request) {
       status: body.status || 'Antrean',
       garansi: body.garansi || 'Tidak Ada',
     }
+    console.log('Insert data:', JSON.stringify(insertData))
 
     // Insert data
     const { data, error } = await supabaseAdmin
@@ -150,12 +156,15 @@ export async function POST(request) {
       .select()
       .single()
 
+    console.log('Insert result:', { data, error })
+
     if (error) {
-      console.error('Insert error:', error)
+      console.error('Insert error:', JSON.stringify(error))
       return Response.json({
         error: 'Gagal menyimpan data',
         details: error.message,
-        code: error.code
+        code: error.code,
+        hint: error.hint
       }, { status: 500 })
     }
 
