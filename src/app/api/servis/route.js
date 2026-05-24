@@ -96,6 +96,14 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
+    // Parse request body
+    let body
+    try {
+      body = await request.json()
+    } catch (e) {
+      return Response.json({ error: 'Invalid JSON in request body' }, { status: 400 })
+    }
+
     // Check if body is valid
     if (!body || typeof body !== 'object') {
       return Response.json({ error: 'Invalid request body' }, { status: 400 })
