@@ -98,18 +98,25 @@ export async function POST(request) {
     const bulanIni = tahun + bulan  // "2605"
     const prefix = `AM-${bulanIni}-`
 
+    // Find existing numbers with single dash format
     const { data: lastServis } = await supabaseAdmin
       .from('servis')
       .select('no_servis')
       .like('no_servis', `${prefix}%`)
       .order('id', { ascending: false })
-      .limit(1)
+      .limit(10)
 
     let urutan = 1
     if (lastServis && lastServis.length > 0) {
-      const lastNo = lastServis[0].no_servis
-      const num = parseInt(lastNo.replace(prefix, ''))
-      urutan = num + 1
+      // Extract number from no_servis - handle both old double dash and new single dash formats
+      for (const item of lastServis) {
+        // Match pattern: AM-YYMM-X or AM-YYMM--X (old format)
+        const match = item.no_servis.match(/AM-\d{4}--?(\d+)/)
+        if (match) {
+          urutan = parseInt(match[1]) + 1
+          break
+        }
+      }
     }
 
     const noServis = `${prefix}${String(urutan).padStart(3, '0')}`
