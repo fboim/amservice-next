@@ -15,7 +15,7 @@ export async function GET(request) {
     const currentYear = today.getFullYear()
     const currentMonth = String(today.getMonth() + 1).padStart(2, '0')
 
-    // Run all count queries in parallel
+    // Run all queries in parallel
     const [
       antreanResult,
       prosesResult,
@@ -31,9 +31,9 @@ export async function GET(request) {
       supabase.from('servis').select('*', { count: 'exact', head: true }).eq('status', 'Siap Diambil').is('deleted_at', null),
       supabase.from('servis').select('*', { count: 'exact', head: true }).eq('status', 'Sudah Diambil').eq('tanggal', todayStr).is('deleted_at', null),
       supabase.from('servis').select('estimasi_biaya').eq('status', 'Sudah Diambil').eq('tanggal', todayStr).is('deleted_at', null),
-      supabase.from('servis').select('estimasi_biaya').eq('status', 'Sudah Diambil').gte('tanggal', `${currentYear}-${currentMonth}-01`).is('deleted_at', null),
+      supabase.from('servis').select('estimasi_biaya').eq('status', 'Sudah Diambil').gte('tanggal', currentYear + '-' + currentMonth + '-01').is('deleted_at', null),
       supabase.from('servis').select('merk_hp').is('deleted_at', null),
-      supabase.from('servis').select('*', { count: 'exact', head: true }).gte('tanggal', `${currentYear}-01-01`).is('deleted_at', null)
+      supabase.from('servis').select('*', { count: 'exact', head: true }).gte('tanggal', currentYear + '-01-01').is('deleted_at', null)
     ])
 
     const antrean = antreanResult.count || 0
@@ -46,8 +46,14 @@ export async function GET(request) {
     const totalTahun = totalTahunResult.count || 0
 
     // Calculate omzet
-    const omzetHari = servisToday.reduce((sum, s) => sum + (parseInt(String(s.estimasi_biaya || '0').replace(/\D/g, '')) || 0, 0)
-    const omzetBulan = servisBulanIni.reduce((sum, s) => sum + (parseInt(String(s.estimasi_biaya || '0').replace(/\D/g, '')) || 0, 0)
+    const omzetHari = servisToday.reduce((sum, s) => {
+      const biaya = parseInt(String(s.estimasi_biaya || '0').replace(/\D/g, '')) || 0
+      return sum + biaya
+    }, 0)
+    const omzetBulan = servisBulanIni.reduce((sum, s) => {
+      const biaya = parseInt(String(s.estimasi_biaya || '0').replace(/\D/g, '')) || 0
+      return sum + biaya
+    }, 0)
 
     // Count merk
     const merkCount = {}
@@ -64,7 +70,7 @@ export async function GET(request) {
       const d = new Date(today.getFullYear(), today.getMonth() - i, 1)
       const year = d.getFullYear()
       const month = d.getMonth() + 1
-      const firstDay = `${year}-${String(month).padStart(2, '0')}-01`
+      const firstDay = year + '-' + String(month).padStart(2, '0') + '-01'
       const lastDay = new Date(year, month, 0).toISOString().split('T')[0]
       monthsQueries.push({
         label: monthNames[d.getMonth()],
