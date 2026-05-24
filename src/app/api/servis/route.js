@@ -51,6 +51,9 @@ export async function GET(request) {
   const status = searchParams.get('status') || ''
   const trash = searchParams.get('trash') === '1'
 
+  // Log for debugging
+  console.log('Servis API called:', { page, limit, search, status, trash })
+
   const offset = (page - 1) * limit
 
   let query = supabaseAdmin
@@ -75,9 +78,13 @@ export async function GET(request) {
 
   const { data, count, error } = await query.range(offset, offset + limit - 1)
 
+  console.log('Supabase result:', { dataCount: data?.length, count, error: error?.message })
+
   if (error) {
     return Response.json({ error: error.message }, { status: 500 })
   }
+
+  console.log('Returning servis:', data?.map(s => ({ id: s.id, no_servis: s.no_servis })))
 
   return Response.json({
     servis: data || [],
