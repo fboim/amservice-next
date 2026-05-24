@@ -5,11 +5,13 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
+import { DashboardSkeleton } from '@/components/Skeleton'
 import { formatRupiah } from '@/lib/utils'
 
 export default function Dashboard() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
+  const [initialLoad, setInitialLoad] = useState(true)
   const [stats, setStats] = useState({ antrean: 0, proses: 0, siap: 0, selesai: 0, omzet_hari: 0, omzet_bulan: 0, merk_populer: [], total_tahun: 0 })
   const [servisTerbaru, setServisTerbaru] = useState([])
   const [lowStock, setLowStock] = useState([])
@@ -86,7 +88,10 @@ export default function Dashboard() {
     } catch (err) {
       console.error('Fetch error:', err)
     } finally {
-      setLoading(false)
+      setTimeout(() => {
+        setLoading(false)
+        setInitialLoad(false)
+      }, 200)
     }
   }
 
@@ -135,15 +140,10 @@ export default function Dashboard() {
     return `https://wa.me/${phone}`
   }
 
-  if (loading) {
+  if (initialLoad || loading) {
     return (
       <AppLayout>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
-          <div style={{ textAlign: 'center', color: 'var(--am-text-muted)' }}>
-            <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
-            <p style={{ marginTop: '8px' }}>Memuat...</p>
-          </div>
-        </div>
+        <DashboardSkeleton />
       </AppLayout>
     )
   }

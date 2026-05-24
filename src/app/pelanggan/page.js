@@ -5,10 +5,12 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
+import { SkeletonTable } from '@/components/Skeleton'
 
 export default function PelangganManagement() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
+  const [initialLoad, setInitialLoad] = useState(true)
   const [pelanggan, setPelanggan] = useState([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -42,7 +44,10 @@ export default function PelangganManagement() {
     } catch (err) {
       console.error('Fetch error:', err)
     } finally {
-      setLoading(false)
+      setTimeout(() => {
+        setLoading(false)
+        setInitialLoad(false)
+      }, 200)
     }
   }, [page, search])
 
@@ -79,13 +84,17 @@ export default function PelangganManagement() {
 
   const totalPages = Math.ceil(total / 15)
 
-  if (loading) {
+  if (initialLoad || loading) {
     return (
       <AppLayout>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
-          <div style={{ textAlign: 'center', color: 'var(--am-text-muted)' }}>
-            <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
-            <p style={{ marginTop: '8px' }}>Memuat...</p>
+        <div style={{ padding: 0 }}>
+          <div style={{
+            background: 'var(--am-surface)',
+            border: '1px solid var(--am-border)',
+            borderRadius: 12,
+            padding: 16,
+          }}>
+            <SkeletonTable rows={8} cols={4} />
           </div>
         </div>
       </AppLayout>

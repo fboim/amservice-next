@@ -12,6 +12,7 @@ function DataServisContent() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [loading, setLoading] = useState(true)
+  const [initialLoad, setInitialLoad] = useState(true)
   const [servis, setServis] = useState([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -51,7 +52,10 @@ function DataServisContent() {
     } catch (err) {
       console.error('Fetch error:', err)
     } finally {
-      setLoading(false)
+      setTimeout(() => {
+        setLoading(false)
+        setInitialLoad(false)
+      }, 200)
     }
   }
 
@@ -160,7 +164,7 @@ function DataServisContent() {
     }
   }
 
-  if (loading) {
+  if (initialLoad || loading) {
     return (
       <AppLayout>
         <DataServisSkeleton />

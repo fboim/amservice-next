@@ -5,10 +5,12 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import AppLayout from '@/components/AppLayout'
+import { DashboardSkeleton } from '@/components/Skeleton'
 
 export default function Laporan() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
+  const [initialLoad, setInitialLoad] = useState(true)
   const [period, setPeriod] = useState('harian')
   const [customStart, setCustomStart] = useState('')
   const [customEnd, setCustomEnd] = useState('')
@@ -58,7 +60,10 @@ export default function Laporan() {
     } catch (err) {
       console.error('Fetch error:', err)
     } finally {
-      setLoading(false)
+      setTimeout(() => {
+        setLoading(false)
+        setInitialLoad(false)
+      }, 200)
     }
   }, [period, bulan, customStart, customEnd])
 
@@ -88,15 +93,10 @@ export default function Laporan() {
     return map[status] || 'badge-antrean'
   }
 
-  if (loading) {
+  if (initialLoad || loading) {
     return (
       <AppLayout>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
-          <div style={{ textAlign: 'center', color: 'var(--am-text-muted)' }}>
-            <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
-            <p style={{ marginTop: '8px' }}>Memuat data...</p>
-          </div>
-        </div>
+        <DashboardSkeleton />
       </AppLayout>
     )
   }

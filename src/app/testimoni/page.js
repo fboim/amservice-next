@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import AppLayout from '@/components/AppLayout'
+import { SkeletonList } from '@/components/Skeleton'
 import { ToastContainer, useToast } from '@/components/Toast'
 
 export default function TestimoniPage() {
   const [testimonials, setTestimonials] = useState([])
   const [loading, setLoading] = useState(true)
+  const [initialLoad, setInitialLoad] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingId, setEditingId] = useState(null)
   const { toasts, addToast, removeToast } = useToast()
@@ -30,7 +32,10 @@ export default function TestimoniPage() {
     } catch (error) {
       addToast('Gagal memuat testimoni', 'error')
     } finally {
-      setLoading(false)
+      setTimeout(() => {
+        setLoading(false)
+        setInitialLoad(false)
+      }, 200)
     }
   }
 
@@ -119,10 +124,16 @@ export default function TestimoniPage() {
       `}</style>
 
       <div className="page-wrapper">
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--am-text-muted)' }}>
-            <i className="bi bi-arrow-repeat" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }} />
-            <p style={{ marginTop: '8px' }}>Memuat...</p>
+        {initialLoad || loading ? (
+          <div style={{ padding: 0 }}>
+            <div style={{
+              background: 'var(--am-surface)',
+              border: '1px solid var(--am-border)',
+              borderRadius: 12,
+              padding: 16,
+            }}>
+              <SkeletonList items={5} />
+            </div>
           </div>
         ) : testimonials.length === 0 ? (
           <div className="section-card fade-in" style={{ textAlign: 'center', padding: '3rem' }}>
