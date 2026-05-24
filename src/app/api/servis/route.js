@@ -107,23 +107,29 @@ export async function POST(request) {
 
     const noServis = `${prefix}${String(urutan).padStart(3, '0')}`
 
-    // Only include valid columns for servis table
+    // Build insert data - only include fields that exist
+    const insertData = {
+      no_servis: noServis,
+      tanggal: body.tanggal || new Date().toISOString().split('T')[0],
+      nama_pelanggan: body.nama_pelanggan || '',
+      no_hp: body.no_hp || '',
+      merk_hp: body.merk_hp || '',
+      tipe_hp: body.tipe_hp || '',
+      keluhan: body.keluhan || '',
+      estimasi_biaya: body.estimasi_biaya ? parseInt(body.estimasi_biaya) : 0,
+      modal_sparepart: body.modal_sparepart ? parseInt(body.modal_sparepart) : 0,
+      status: body.status || 'Antrean',
+      garansi: body.garansi || 'Tidak Ada',
+    }
+
+    // Only add foto_hp if it has a value
+    if (body.foto_hp) {
+      insertData.foto_hp = body.foto_hp
+    }
+
     const { data, error } = await supabaseAdmin
       .from('servis')
-      .insert({
-        no_servis: noServis,
-        tanggal: body.tanggal || new Date().toISOString().split('T')[0],
-        nama_pelanggan: body.nama_pelanggan,
-        no_hp: body.no_hp,
-        merk_hp: body.merk_hp,
-        tipe_hp: body.tipe_hp,
-        keluhan: body.keluhan,
-        estimasi_biaya: body.estimasi_biaya ? parseInt(body.estimasi_biaya) : 0,
-        modal_sparepart: body.modal_sparepart ? parseInt(body.modal_sparepart) : 0,
-        status: body.status || 'Antrean',
-        garansi: body.garansi || 'Tidak Ada',
-        foto_hp: body.foto_hp,
-      })
+      .insert(insertData)
       .select()
       .single()
 
