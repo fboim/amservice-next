@@ -51,9 +51,6 @@ export async function GET(request) {
   const status = searchParams.get('status') || ''
   const trash = searchParams.get('trash') === '1'
 
-  // Log for debugging
-  console.log('Servis API called:', { page, limit, search, status, trash })
-
   const offset = (page - 1) * limit
 
   let query = supabaseAdmin
@@ -78,13 +75,9 @@ export async function GET(request) {
 
   const { data, count, error } = await query.range(offset, offset + limit - 1)
 
-  console.log('Supabase result:', { dataCount: data?.length, count, error: error?.message })
-
   if (error) {
     return Response.json({ error: error.message }, { status: 500 })
   }
-
-  console.log('Returning servis:', data?.map(s => ({ id: s.id, no_servis: s.no_servis })))
 
   return Response.json({
     servis: data || [],
@@ -98,7 +91,11 @@ export async function POST(request) {
   try {
     const body = await request.json()
 
-    const bulanIni = new Date().toISOString().slice(2, 8).replace('-', '')
+    // Generate month prefix: YYMM format (e.g., "2605" for May 2026)
+    const d = new Date()
+    const tahun = String(d.getFullYear()).slice(2, 4)  // "26"
+    const bulan = String(d.getMonth() + 1).padStart(2, '0')  // "05"
+    const bulanIni = tahun + bulan  // "2605"
     const prefix = `AM-${bulanIni}-`
 
     const { data: lastServis } = await supabaseAdmin
