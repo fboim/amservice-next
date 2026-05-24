@@ -142,12 +142,20 @@ function DataServisContent() {
 
   const handleDelete = async (id) => {
     if (!confirm('Yakin ingin menghapus servis ini?')) return
+
+    // Optimistic update - remove from UI immediately
+    setServis(prev => prev.filter(s => s.id !== id))
+
     try {
       const res = await fetch(`/api/servis?id=${id}`, { method: 'DELETE' })
-      if (res.ok) {
+      if (!res.ok) {
+        // Revert if failed
         fetchServis()
+        alert('Gagal menghapus data')
       }
     } catch (err) {
+      // Revert if error
+      fetchServis()
       console.error('Delete error:', err)
     }
   }
