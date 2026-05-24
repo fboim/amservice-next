@@ -1,6 +1,7 @@
 import './globals.css'
 import { SidebarProvider } from '@/components/SidebarContext'
 import PageTransition from '@/components/PageTransition'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 export const metadata = {
   title: 'AM Service Kulon Progo | Repair Center HP & Gadget',
@@ -36,7 +37,9 @@ export default function RootLayout({ children }) {
       <body className="antialiased">
         <SidebarProvider>
           <PageTransition />
-          {children}
+          <ErrorBoundary>
+            {children}
+          </ErrorBoundary>
         </SidebarProvider>
       </body>
     </html>
