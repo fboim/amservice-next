@@ -3,10 +3,17 @@ import { createClient } from '@supabase/supabase-js'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+// Initialize Supabase client
+const supabaseAdmin = (() => {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('Missing Supabase environment variables')
+    throw new Error('Missing Supabase environment variables')
+  }
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  )
+})()
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url)
@@ -89,7 +96,10 @@ export async function GET(request) {
 
 export async function POST(request) {
   try {
-    const body = await request.json()
+    // Check if body is valid
+    if (!body || typeof body !== 'object') {
+      return Response.json({ error: 'Invalid request body' }, { status: 400 })
+    }
 
     // Generate month prefix: YYMM format (e.g., "2605" for May 2026)
     const d = new Date()
@@ -98,7 +108,7 @@ export async function POST(request) {
     const bulanIni = tahun + bulan  // "2605"
     const prefix = `AM-${bulanIni}-`
 
-    // Find existing numbers with single dash format
+    // Find existing numbers
     const { data: lastServis, error: lastError } = await supabaseAdmin
       .from('servis')
       .select('no_servis')
@@ -108,13 +118,13 @@ export async function POST(request) {
 
     if (lastError) {
       console.error('Error fetching last servis:', lastError)
+      return Response.json({ error: 'Gagal mengambil data terakhir', details: lastError.message }, { status: 500 })
     }
 
     let urutan = 1
     if (lastServis && lastServis.length > 0) {
-      // Extract number from no_servis - handle both old double dash and new single dash formats
+      // Extract number from no_servis
       for (const item of lastServis) {
-        // Match pattern: AM-YYMM-X or AM-YYMM--X (old format)
         const match = item.no_servis.match(/AM-\d{4}--?(\d+)/)
         if (match) {
           urutan = parseInt(match[1]) + 1
@@ -124,9 +134,8 @@ export async function POST(request) {
     }
 
     const noServis = `${prefix}${String(urutan).padStart(3, '0')}`
-    console.log('Creating servis:', { noServis, body })
 
-    // Build insert data - only include fields that exist
+    // Build insert data
     const insertData = {
       no_servis: noServis,
       tanggal: body.tanggal || new Date().toISOString().split('T')[0],
@@ -146,8 +155,7 @@ export async function POST(request) {
       insertData.foto_hp = body.foto_hp
     }
 
-    console.log('Insert data:', insertData)
-
+    // Insert data
     const { data, error } = await supabaseAdmin
       .from('servis')
       .insert(insertData)
@@ -156,10 +164,12 @@ export async function POST(request) {
 
     if (error) {
       console.error('Insert error:', error)
-      throw error
+      return Response.json({
+        error: 'Gagal menyimpan data',
+        details: error.message,
+        code: error.code
+      }, { status: 500 })
     }
-
-    console.log('Insert success:', data)
 
     return Response.json({ success: true, servis: data })
   } catch (error) {
