@@ -109,39 +109,24 @@ export async function POST(request) {
       return Response.json({ error: 'Invalid request body' }, { status: 400 })
     }
 
-    // Generate month prefix: YYMM format (e.g., "2605" for May 2026)
+    // Simple no_servis generation: AM-YYMM-NNN
     const d = new Date()
-    const tahun = String(d.getFullYear()).slice(2, 4)  // "26"
-    const bulan = String(d.getMonth() + 1).padStart(2, '0')  // "05"
-    const bulanIni = tahun + bulan  // "2605"
-    const prefix = `AM-${bulanIni}-`
+    const tahun = String(d.getFullYear()).slice(2, 4)
+    const bulan = String(d.getMonth() + 1).padStart(2, '0')
+    const prefix = `AM-${tahun}${bulan}-`
 
-    // Find existing numbers
-    const { data: lastServis, error: lastError } = await supabaseAdmin
+    // Get count of existing records for this month to generate next number
+    const { count, error: countError } = await supabaseAdmin
       .from('servis')
-      .select('no_servis')
+      .select('*', { count: 'exact', head: true })
       .like('no_servis', `${prefix}%`)
-      .order('id', { ascending: false })
-      .limit(10)
 
-    if (lastError) {
-      console.error('Error fetching last servis:', lastError)
-      return Response.json({ error: 'Gagal mengambil data terakhir', details: lastError.message }, { status: 500 })
+    if (countError) {
+      console.error('Count error:', countError)
     }
 
-    let urutan = 1
-    if (lastServis && lastServis.length > 0) {
-      // Extract number from no_servis
-      for (const item of lastServis) {
-        const match = item.no_servis.match(/AM-\d{4}--?(\d+)/)
-        if (match) {
-          urutan = parseInt(match[1]) + 1
-          break
-        }
-      }
-    }
-
-    const noServis = `${prefix}${String(urutan).padStart(3, '0')}`
+    const nextNum = (count || 0) + 1
+    const noServis = `${prefix}${String(nextNum).padStart(3, '0')}`
 
     // Build insert data
     const insertData = {
@@ -156,11 +141,6 @@ export async function POST(request) {
       modal_sparepart: body.modal_sparepart ? parseInt(body.modal_sparepart) : 0,
       status: body.status || 'Antrean',
       garansi: body.garansi || 'Tidak Ada',
-    }
-
-    // Only add foto_hp if it has a value
-    if (body.foto_hp) {
-      insertData.foto_hp = body.foto_hp
     }
 
     // Insert data
