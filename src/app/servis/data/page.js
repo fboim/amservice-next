@@ -32,15 +32,15 @@ function DataServisContent() {
     fetchServis()
   }, [page, search, statusFilter, showTrash])
 
-  const fetchServis = useCallback(async () => {
+  const fetchServis = async () => {
     try {
       setLoading(true)
-      const params = new URLSearchParams({ page, limit: 12, search })
+      const params = new URLSearchParams({ page, limit: 12, search, t: Date.now() })
       if (statusFilter) params.set('status', statusFilter)
       if (showTrash) params.set('trash', '1')
       const res = await fetch(`/api/servis?${params}`, {
         cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache' }
+        headers: { 'Cache-Control': 'no-cache, no-transform' }
       })
       const data = await res.json()
       setServis(data.servis || [])
@@ -50,7 +50,7 @@ function DataServisContent() {
     } finally {
       setLoading(false)
     }
-  }, [page, search, statusFilter, showTrash])
+  }
 
   // Handle click outside to close dropdowns
   useEffect(() => {

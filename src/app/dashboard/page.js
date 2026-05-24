@@ -57,8 +57,8 @@ export default function Dashboard() {
   const fetchDashboard = async () => {
     try {
       const [dashRes, servisRes, lowStockRes] = await Promise.all([
-        fetch('/api/dashboard', { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
-        fetch('/api/servis?limit=10', { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } }),
+        fetch('/api/dashboard', { cache: 'no-store', headers: { 'Cache-Control': 'no-cache, no-transform' } }),
+        fetch(`/api/servis?limit=10&t=${Date.now()}`, { cache: 'no-store', headers: { 'Cache-Control': 'no-cache, no-transform' } }),
         fetch('/api/sparepart?low=true&limit=10', { cache: 'no-store' }),
       ])
 
