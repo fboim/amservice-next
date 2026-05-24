@@ -119,9 +119,13 @@ export default function Dashboard() {
     if (!confirm('Yakin hapus servis ini?')) return
     try {
       const res = await fetch(`/api/servis?id=${id}`, { method: 'DELETE' })
-      if (res.ok) fetchDashboard()
+      if (res.ok) {
+        setLoading(true)
+        setRefreshKey(k => k + 1)
+      }
     } catch (err) {
       console.error('Delete error:', err)
+      setLoading(false)
     }
   }
 
