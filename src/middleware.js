@@ -14,7 +14,7 @@ export async function middleware(request) {
     // Referrer policy
     'Referrer-Policy': 'strict-origin-when-cross-origin',
     // Content Security Policy
-    'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co",
+    'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co https://static.cloudflareinsights.com; frame-src 'none'",
     // Permissions policy
     'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
   }
