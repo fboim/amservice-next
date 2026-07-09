@@ -104,8 +104,16 @@ export default function GaransiServis() {
         if (/^\d+$/.test(raw)) return raw + ' HARI'
         return raw.toUpperCase()
       })()
+      const centerText = (text, width = 28) => {
+        const value = String(text)
+        if (value.length >= width) return value.substring(0, width)
+        const pad = width - value.length
+        const left = Math.floor(pad / 2)
+        const right = pad - left
+        return ' '.repeat(left) + value + ' '.repeat(right)
+      }
       const garansiLabel = 'MASA GARANSI : ' + masaGaransiText
-      btSend('teks', '| ' + garansiLabel.padEnd(28, ' ') + ' |\n')
+      btSend('teks', '| ' + centerText(garansiLabel) + ' |\n')
       btSend('tebal', false)
       const printWrappedLine = (text) => {
         let remaining = String(text)
