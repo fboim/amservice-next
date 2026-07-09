@@ -100,6 +100,28 @@ export default function GaransiServis() {
       btSend('tebal', true)
       btSend('teks', '|         MASA GARANSI         |\n')
       btSend('tebal', false)
+      const masaGaransiText = masaGaransi ? masaGaransi.toUpperCase() : 'TIDAK ADA'
+      const printWrappedLine = (text) => {
+        let remaining = String(text)
+        while (remaining.length > 0) {
+          if (remaining.length <= 28) {
+            const padded = remaining.padEnd(28, ' ')
+            btSend('teks', '| ' + padded + ' |\n')
+            break
+          }
+          let cut = 28
+          for (let j = 27; j >= 0; j--) {
+            if (remaining[j] === ' ') {
+              cut = j
+              break
+            }
+          }
+          const textPart = remaining.substring(0, cut).padEnd(28, ' ')
+          btSend('teks', '| ' + textPart + ' |\n')
+          remaining = remaining.substring(cut).trim()
+        }
+      }
+      printWrappedLine(masaGaransiText)
       if (snkGaransi) {
         // Split SNK into lines, word wrap at 28 chars
         const raw = snkGaransi.replace(/<br\s*\/?>/gi, '\n')
