@@ -100,7 +100,12 @@ export default function GaransiServis() {
       btSend('tebal', true)
       btSend('teks', '|         MASA GARANSI         |\n')
       btSend('tebal', false)
-      const masaGaransiText = masaGaransi ? masaGaransi.toUpperCase() : 'TIDAK ADA'
+      const masaGaransiText = (() => {
+        if (!masaGaransi || masaGaransi === 'Tidak Ada') return 'TIDAK ADA'
+        const raw = String(masaGaransi).trim()
+        if (/^\d+$/.test(raw)) return raw + ' HARI'
+        return raw.toUpperCase()
+      })()
       const printWrappedLine = (text) => {
         let remaining = String(text)
         while (remaining.length > 0) {
