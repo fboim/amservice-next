@@ -98,14 +98,15 @@ export default function GaransiServis() {
       // Garansi box - format like PHP version
       btSend('teks', '.------------------------------.\n')
       btSend('tebal', true)
-      btSend('teks', '|         MASA GARANSI         |\n')
-      btSend('tebal', false)
       const masaGaransiText = (() => {
         if (!masaGaransi || masaGaransi === 'Tidak Ada') return 'TIDAK ADA'
         const raw = String(masaGaransi).trim()
         if (/^\d+$/.test(raw)) return raw + ' HARI'
         return raw.toUpperCase()
       })()
+      const garansiLabel = 'MASA GARANSI : ' + masaGaransiText
+      btSend('teks', '| ' + garansiLabel.padEnd(28, ' ') + ' |\n')
+      btSend('tebal', false)
       const printWrappedLine = (text) => {
         let remaining = String(text)
         while (remaining.length > 0) {
@@ -126,7 +127,6 @@ export default function GaransiServis() {
           remaining = remaining.substring(cut).trim()
         }
       }
-      printWrappedLine(masaGaransiText)
       if (snkGaransi) {
         // Split SNK into lines, word wrap at 28 chars
         const raw = snkGaransi.replace(/<br\s*\/?>/gi, '\n')
@@ -357,6 +357,12 @@ export default function GaransiServis() {
   const keluhanBersih = getKeluhanBersih(servis.keluhan)
   const totalBiaya = formatRupiah(servis.estimasi_biaya)
   const masaGaransi = servis.garansi || 'Tidak Ada'
+  const masaGaransiText = (() => {
+    if (!masaGaransi || masaGaransi === 'Tidak Ada') return 'TIDAK ADA'
+    const raw = String(masaGaransi).trim()
+    if (/^\d+$/.test(raw)) return raw + ' HARI'
+    return raw.toUpperCase()
+  })()
   const snkGaransi = p.snk_garansi || ''
 
   return (
@@ -399,7 +405,7 @@ export default function GaransiServis() {
           {/* Garansi */}
           <div style={{ border: '1px dashed #000', padding: '6px 8px', marginTop: '8px', fontSize: '9px', lineHeight: 1.5 }}>
             <div className="center bold" style={{ marginBottom: '4px', fontSize: '11px' }}>
-              MASA GARANSI: {masaGaransi.toUpperCase()}
+              MASA GARANSI : {masaGaransiText}
             </div>
             {snkGaransi ? snkGaransi.split('\n').map((line, i) => (
               line.trim() ? <div key={i}>{line.trim()}</div> : null
